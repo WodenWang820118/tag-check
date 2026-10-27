@@ -13,7 +13,11 @@ import { ReportService } from '../../../shared/services/api/report/report.servic
 import { SpecService } from '../../../shared/services/api/spec/spec.service';
 import { VideosService } from '../../../shared/services/api/videos/videos.service';
 import { ReportDetailRouteContext } from '../components/report-detail.contracts';
-import { projectReportResolver, reportPageResolver } from './report.resolver';
+import {
+  projectReportResolver,
+  readRunId,
+  reportPageResolver
+} from './report.resolver';
 
 describe('project report.resolver', () => {
   const detail = JSON.parse(
@@ -47,12 +51,12 @@ describe('project report.resolver', () => {
     });
   });
 
-  const route = {
-    parent: { params: { projectSlug: 'demo' } },
-    params: { eventId: 'evt-1' }
-  } as unknown as ActivatedRouteSnapshot;
-
-  function resolvePage() {
+  function resolvePage(queryParams: Record<string, string> = {}) {
+    const route = {
+      parent: { params: { projectSlug: 'demo' } },
+      params: { eventId: 'evt-1' },
+      queryParams
+    } as unknown as ActivatedRouteSnapshot;
     return TestBed.runInInjectionContext(
       () =>
         reportPageResolver(
@@ -65,14 +69,56 @@ describe('project report.resolver', () => {
   it('loads the report, spec, recording and media for the route', async () => {
     await firstValueFrom(resolvePage());
 
-    for (const call of [
-      reportService.getReportDetails,
-      specService.getEventSpec,
-      recordingService.getRecordingDetails,
-      videoService.getVideo,
-      imageService.getImage
-    ]) {
-      expect(call).toHaveBeenCalledWith('demo', 'evt-1');
+    expect(reportService.getReportDetails).toHaveBeenCalledWith(
+      'demo',
+      'evt-1',
+      undefined
+    );
+    expect(specService.getEventSpec).toHaveBeenCalledWith('demo', 'evt-1');
+    expect(recordingService.getRecordingDetails).toHaveBeenCalledWith(
+      'demo',
+      'evt-1'
+    );
+    expect(videoService.getVideo).toHaveBeenCalledWith(
+      'demo',
+      'evt-1',
+      undefined,
+      undefined
+    );
+    expect(imageService.getImage).toHaveBeenCalledWith(
+      'demo',
+      'evt-1',
+      undefined
+    );
+  });
+
+  it('loads the run ?run= picks, with its recordings and screenshot', async () => {
+    await firstValueFrom(resolvePage({ run: '5' }));
+
+    expect(reportService.getReportDetails).toHaveBeenCalledWith(
+      'demo',
+      'evt-1',
+      5
+    );
+    expect(videoService.getVideo).toHaveBeenCalledWith(
+      'demo',
+      'evt-1',
+      undefined,
+      5
+    );
+    expect(videoService.getVideo).toHaveBeenCalledWith(
+      'demo',
+      'evt-1',
+      'tag-assistant',
+      5
+    );
+    expect(imageService.getImage).toHaveBeenCalledWith('demo', 'evt-1', 5);
+  });
+
+  it('reads only a positive whole run id', () => {
+    expect(readRunId('7')).toBe(7);
+    for (const value of [undefined, '', 'abc', '0', '-2', '1.5']) {
+      expect(readRunId(value)).toBeUndefined();
     }
   });
 
@@ -89,6 +135,9 @@ describe('project report.resolver', () => {
       historyLinkCommands: ['..', 'buckets']
     });
     expect(page.reportDetails?.eventName).toBe('add_to_cart');
+    expect(page.run?.id).toBe(detail.testEventDetails?.id);
+    expect(page.runs).toBe(detail.runs);
+    expect(page.isLatestRun).toBe(true);
   });
 
   it('projectReportResolver delegates to getProjectReports with the slug', () => {

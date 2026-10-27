@@ -1,3 +1,4 @@
+import { StepElementNotFoundError } from './action/step-failure/step-element-not-found.error';
 import { describe, it, expect, vi } from 'vitest';
 import { WebAgentUtilsService } from './web-agent-utils.service';
 import { DataLayerService } from './action/web-monitoring/data-layer/data-layer.service';
@@ -243,6 +244,16 @@ describe('WebAgentUtilsService.performTest request capture', () => {
     await expect(performTest()).rejects.toThrow(/action failed/);
 
     expect(stop).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps a step that could not find its element as it is', async () => {
+    const error = new StepElementNotFoundError('missing', ['#gone'], 15000);
+    error.stepIndex = 3;
+    const { performTest } = createServiceHarness({
+      action: { performOperation: vi.fn().mockRejectedValue(error) }
+    });
+
+    await expect(performTest()).rejects.toBe(error);
   });
 
   it('times out and stops request interception when no matching request is captured', async () => {

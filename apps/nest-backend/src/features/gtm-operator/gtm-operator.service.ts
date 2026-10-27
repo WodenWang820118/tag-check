@@ -7,6 +7,7 @@ import {
 import { Page } from 'puppeteer';
 import { EventInspectionPresetDto } from '../../shared/dto/event-inspection-preset.dto';
 import { EventInspectionPipelineService } from '../event-inspection-pipeline/event-inspection-pipeline.service';
+import { RunMedia } from '../event-inspection-pipeline/run-media';
 import { RunQueueService } from '../event-inspection-pipeline/run-queue.service';
 import { RunTrackerService } from '../event-inspection-pipeline/run-tracker.service';
 import {
@@ -16,7 +17,7 @@ import {
 import { RunRecorder } from '../web-agent/puppeteer-utils/run-recorder';
 import { InspectGtmQueryDto } from '../../shared/dto/gtm-operator';
 import { RECORDING_FILES, toClientErrorMessage } from '../../shared';
-import type { RunStatusBatch } from '@utils';
+import type { RunStatusBatch, SelectorTrialRequest } from '@utils';
 import {
   applyPresetCookies,
   preloadApplicationLocalStorage,
@@ -68,24 +69,29 @@ export class GtmOperatorService {
    * with the pipeline's result. Rejects with BadRequestException for a GTM
    * preview URL without a target site, and InternalServerErrorException for
    * any other failure, with the failure's reason in its message. `batch`
-   * places the run in its batch for the run status.
+   * places the run in its batch for the run status; `stepOverride` makes it
+   * a trial of other selectors for one step.
    */
   inspectSingleEventViaGtm(
     projectSlug: string,
     eventId: string,
     query: InspectGtmQueryDto,
     eventInspectionPresetDto: EventInspectionPresetDto,
-    batch?: RunStatusBatch
+    batch?: RunStatusBatch,
+    stepOverride?: SelectorTrialRequest
   ) {
     return this.runQueue.run((signal) =>
-      this.runTracker.track({ projectSlug, eventId, batch }, signal, () =>
-        this.inspectViaGtm(
-          projectSlug,
-          eventId,
-          query,
-          eventInspectionPresetDto,
-          signal
-        )
+      this.runTracker.track(
+        { projectSlug, eventId, batch, stepOverride },
+        signal,
+        () =>
+          this.inspectViaGtm(
+            projectSlug,
+            eventId,
+            query,
+            eventInspectionPresetDto,
+            signal
+          )
       )
     );
   }
@@ -166,18 +172,23 @@ export class GtmOperatorService {
       );
       await targetPage.goto(targetUrl);
 
+      const media = new RunMedia();
       recorder = await this.puppeteerUtilsService.startRecorder(
         targetPage,
         projectSlug,
         eventId,
-        signal
+        signal,
+        { recordingKey: media.recordingKey }
       );
+      media.site = recorder;
       tagAssistantRecorder = await this.startTagAssistantRecorder(
         page,
         projectSlug,
         eventId,
-        signal
+        signal,
+        media.recordingKey
       );
+      media.tagAssistant = tagAssistantRecorder;
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       const data =
@@ -188,7 +199,8 @@ export class GtmOperatorService {
           query.measurementId,
           { username: query.username || '', password: query.password || '' },
           query.captureRequest || 'false',
-          eventInspectionPresetDto
+          eventInspectionPresetDto,
+          media
         );
       // Lets both recordings show the tags that fired at the end of the
       // journey before they stop.
@@ -254,7 +266,8 @@ export class GtmOperatorService {
     page: Page,
     projectSlug: string,
     eventId: string,
-    signal: AbortSignal
+    signal: AbortSignal,
+    recordingKey: string
   ): Promise<RunRecorder | null> {
     try {
       return await this.puppeteerUtilsService.startRecorder(
@@ -262,7 +275,11 @@ export class GtmOperatorService {
         projectSlug,
         eventId,
         signal,
-        { file: RECORDING_FILES.tagAssistant, bringToFront: false }
+        {
+          recordingKey,
+          file: RECORDING_FILES.tagAssistant,
+          bringToFront: false
+        }
       );
     } catch (error) {
       this.logger.warn(`Tag Assistant was not recorded: ${error}`);

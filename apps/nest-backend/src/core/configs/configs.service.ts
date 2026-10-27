@@ -51,7 +51,8 @@ export class ConfigsService {
           return defaultDatabasePath;
         }
         case 'test':
-          process.env.DATABASE_PATH = join(
+          // The e2e spec points the app at a temporary database.
+          process.env.DATABASE_PATH ??= join(
             __dirname,
             '..',
             '..',
@@ -88,7 +89,7 @@ export class ConfigsService {
         case 'staging':
           return defaultProjectPath;
         case 'test':
-          process.env.ROOT_PROJECT_PATH = join(
+          process.env.ROOT_PROJECT_PATH ??= join(
             __dirname,
             '..',
             '..',

@@ -16,4 +16,7 @@ export * from './report-api.type';
 export * from './gtm-import.type';
 export * from './batch-run.type';
 export * from './schedule.type';
+export * from './ai-assist.type';
+export * from './step-failure.type';
+export * from './selector-suggestion.type';
 export * from './run-status-event.type';

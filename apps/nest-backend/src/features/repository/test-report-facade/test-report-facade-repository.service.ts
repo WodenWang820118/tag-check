@@ -1,13 +1,23 @@
 import { Injectable, Logger } from '@nestjs/common';
-import type { ReportDetailResponse } from '@utils';
+import type {
+  ReportDetailResponse,
+  RunHistoryEntry,
+  StepFailureSummary,
+  StepFallback
+} from '@utils';
 import { TestEventRepositoryService } from '../../../core/repository/test-event/test-event-repository.service';
 import { TestImageRepositoryService } from '../../../core/repository/test-event/test-image-repository.service';
 import { CreateFullTestEventDto } from '../../../shared';
 import { ProjectRepositoryService } from '../../../core/repository/project/project-repository.service';
-import { TestEventDetailRepositoryService } from '../../../core/repository/test-event/test-event-detail-repository.service';
+import {
+  type RunHistoryRow,
+  TestEventDetailRepositoryService
+} from '../../../core/repository/test-event/test-event-detail-repository.service';
 import { SpecRepositoryService } from '../../../core/repository/spec/spec-repository.service';
 import { RecordingRepositoryService } from '../../../core/repository/recording/recording-repository.service';
 import { ItemDefRepositoryService } from '../../../core/repository/item-def/item-def-repository.service';
+import { RunRecordingsService } from '../../../infrastructure/os/run-recordings/run-recordings.service';
+import { RECORDING_FILES } from '../../../shared';
 
 /**
  * Creates and reads a test together with the rows it owns (recording, spec,
@@ -15,6 +25,8 @@ import { ItemDefRepositoryService } from '../../../core/repository/item-def/item
  */
 @Injectable()
 export class TestReportFacadeRepositoryService {
+  private readonly logger = new Logger(TestReportFacadeRepositoryService.name);
+
   constructor(
     private readonly projectRepositoryService: ProjectRepositoryService,
     private readonly testEventRepositoryService: TestEventRepositoryService,
@@ -22,7 +34,8 @@ export class TestReportFacadeRepositoryService {
     private readonly specRepositoryService: SpecRepositoryService,
     private readonly testImageRepositoryService: TestImageRepositoryService,
     private readonly recordingRepositoryService: RecordingRepositoryService,
-    private readonly itemDefRepositoryService: ItemDefRepositoryService
+    private readonly itemDefRepositoryService: ItemDefRepositoryService,
+    private readonly runRecordingsService: RunRecordingsService
   ) {}
 
   /**
@@ -97,12 +110,14 @@ export class TestReportFacadeRepositoryService {
   }
 
   /**
-   * Returns a test with its latest result and a summary of its latest
-   * screenshot (no image bytes); either is null when the test has not run.
+   * Returns a test with its run `runId` (its latest run without one), a
+   * summary of that run's screenshot (no image bytes) and the test's run
+   * history; the run and screenshot are null when there is none.
    */
   async getReportDetail(
     projectSlug: string,
-    eventId: string
+    eventId: string,
+    runId?: number
   ): Promise<ReportDetailResponse> {
     const testEvent = await this.testEventRepositoryService.getBySlugAndEventId(
       projectSlug,
@@ -112,20 +127,46 @@ export class TestReportFacadeRepositoryService {
     const testEventDetails =
       await this.testEventDetailRepositoryService.getBySlugAndEventId(
         projectSlug,
-        eventId
+        eventId,
+        runId
       );
 
     // GET /projects/images serves the screenshot itself. Its bytes, encoded
     // as JSON, would add megabytes to every report and run response.
     const testImage =
-      await this.testImageRepositoryService.getSummaryBySlugAndEventId(
-        projectSlug,
-        eventId
-      );
+      runId === undefined
+        ? await this.testImageRepositoryService.getSummaryBySlugAndEventId(
+            projectSlug,
+            eventId
+          )
+        : await this.testEventDetailRepositoryService.getRunScreenshot(
+            projectSlug,
+            eventId,
+            runId
+          );
+
+    const runRows = await this.testEventDetailRepositoryService.listRunHistory(
+      projectSlug,
+      eventId
+    );
+    const shownRun = testEventDetails
+      ? runRows.find((row) => row.runId === testEventDetails.id)
+      : undefined;
 
     return {
       testEvent,
       testEventDetails: testEventDetails ?? null,
+      runs: await this.toRunHistory(projectSlug, eventId, runRows),
+      stepFailure: await this.getStepFailure(
+        projectSlug,
+        eventId,
+        shownRun?.recordingKey ?? null
+      ),
+      stepFallbacks: await this.getStepFallbacks(
+        projectSlug,
+        eventId,
+        shownRun?.recordingKey ?? null
+      ),
       testImage: testImage
         ? {
             id: testImage.id,
@@ -136,5 +177,107 @@ export class TestReportFacadeRepositoryService {
           }
         : null
     };
+  }
+
+  /**
+   * Every run of the test, newest first, and whether it kept its
+   * recordings: in its own folder, or for the latest run saved before runs
+   * kept their own, in the test's folder.
+   */
+  private async toRunHistory(
+    projectSlug: string,
+    eventId: string,
+    runs: RunHistoryRow[]
+  ): Promise<RunHistoryEntry[]> {
+    return Promise.all(
+      runs.map(async ({ recordingKey, ...run }, index) => ({
+        ...run,
+        hasRecording:
+          recordingKey !== null ||
+          (index === 0 &&
+            (await this.runRecordingsService.fileOf(
+              projectSlug,
+              eventId,
+              { recordingKey: null, latest: true },
+              RECORDING_FILES.site
+            )) !== null)
+      }))
+    );
+  }
+
+  /**
+   * The fallback selectors the steps of the run kept in `recordingKey`'s
+   * folder continued with; empty when it used none, or they cannot be read.
+   */
+  private async getStepFallbacks(
+    projectSlug: string,
+    eventId: string,
+    recordingKey: string | null
+  ): Promise<StepFallback[]> {
+    if (!recordingKey) {
+      return [];
+    }
+    try {
+      return await this.runRecordingsService.readStepFallbacks(
+        projectSlug,
+        eventId,
+        recordingKey
+      );
+    } catch (error) {
+      this.logger.warn(
+        `Could not read the fallbacks of run ${recordingKey}: ${error}`
+      );
+      return [];
+    }
+  }
+
+  /**
+   * Which step of the run kept in `recordingKey`'s folder could not find
+   * its element; null when the run kept none, or it cannot be read.
+   */
+  private async getStepFailure(
+    projectSlug: string,
+    eventId: string,
+    recordingKey: string | null
+  ): Promise<StepFailureSummary | null> {
+    if (!recordingKey) {
+      return null;
+    }
+    try {
+      const context = await this.runRecordingsService.readStepFailure(
+        projectSlug,
+        eventId,
+        recordingKey
+      );
+      return context
+        ? {
+            stepIndex: context.stepIndex,
+            stepType: context.stepType,
+            url: context.url
+          }
+        : null;
+    } catch (error) {
+      this.logger.warn(
+        `Could not read what run ${recordingKey}'s step saw: ${error}`
+      );
+      return null;
+    }
+  }
+
+  /**
+   * Deletes the project's tests with these event IDs, with their runs and
+   * screenshots, and what their runs left on disk (recordings, results).
+   */
+  async deleteTests(projectSlug: string, eventIds: string[]) {
+    const removed =
+      await this.testEventRepositoryService.deleteByProjectSlugAndEventIds(
+        projectSlug,
+        eventIds
+      );
+    const removedEventIds = (Array.isArray(removed) ? removed : [removed])
+      .map((test) => test?.eventId)
+      .filter((id): id is string => typeof id === 'string');
+    await this.runRecordingsService.removeTests(projectSlug, removedEventIds);
+    return removed;
   }
 }

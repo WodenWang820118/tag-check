@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { EvaluateChangeService } from './evaluate-change.service';
 import { PageChangeService } from './page-change.service';
 import { ChangeStrategy } from './utils';
-import { Page } from 'puppeteer';
+import type { QueryRoot } from '../../handlers/frame';
 
 /**
  * Types a value into a field or selects an option, first through the page
@@ -22,7 +22,7 @@ export class ChangeStrategyService implements ChangeStrategy {
    * neither did or `value` is empty. Never throws.
    */
   async changeElement(
-    page: Page,
+    page: QueryRoot,
     projectName: string,
     eventId: string,
     selector: string,

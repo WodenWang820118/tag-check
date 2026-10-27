@@ -1,0 +1,238 @@
+@if (routeContext(); as context) {
+  <div class="detail">
+    <header class="detail__header">
+      <button
+        mat-button
+        type="button"
+        class="back-btn"
+        (click)="goBack()"
+        data-testid="detail-back"
+      >
+        <mat-icon aria-hidden="true">arrow_back</mat-icon>
+        <span>Tests</span>
+      </button>
+      <div class="detail__title-row">
+        <div class="detail__title">
+          <h1 class="m-0 text-[2.6rem] font-medium">{{ title() }}</h1>
+          <div
+            class="flex flex-wrap items-center gap-[1.2rem] text-[1.4rem] text-[#55605d]"
+          >
+            <button
+              type="button"
+              class="detail__event"
+              (click)="copyEventName()"
+              [attr.aria-label]="'Copy the event name ' + eventName()"
+              title="Copy the event name"
+            >
+              <code>{{ eventName() }}</code>
+              <mat-icon aria-hidden="true">content_copy</mat-icon>
+            </button>
+            @if (run(); as current) {
+              <span data-testid="detail-run">
+                Run #{{ current.id }} · {{ current.createdAt | date: 'medium' }}
+              </span>
+            }
+          </div>
+        </div>
+        <div class="flex flex-wrap gap-[0.8rem]">
+          <button
+            mat-flat-button
+            color="primary"
+            type="button"
+            (click)="runAgain()"
+            [disabled]="busy()"
+            data-testid="detail-run-again"
+          >
+            <mat-icon aria-hidden="true">{{
+              running() ? 'sync' : 'play_arrow'
+            }}</mat-icon>
+            {{ running() ? 'Running…' : 'Run again' }}
+          </button>
+          <button
+            mat-stroked-button
+            type="button"
+            [matMenuTriggerFor]="exportMenu"
+            [disabled]="!run()"
+            data-testid="detail-export"
+          >
+            <mat-icon aria-hidden="true">download</mat-icon>
+            Export
+          </button>
+          <mat-menu #exportMenu="matMenu">
+            <button mat-menu-item type="button" (click)="exportSpreadsheet()">
+              <mat-icon aria-hidden="true">table_view</mat-icon>
+              <span>Spreadsheet (XLSX)</span>
+            </button>
+            <button
+              mat-menu-item
+              type="button"
+              (click)="exportRecording()"
+              [disabled]="!hasRecording()"
+            >
+              <mat-icon aria-hidden="true">movie</mat-icon>
+              <span>Site recording (WEBM)</span>
+            </button>
+            <button
+              mat-menu-item
+              type="button"
+              (click)="exportEvent()"
+              [disabled]="!hasRecording()"
+            >
+              <mat-icon aria-hidden="true">download</mat-icon>
+              <span>Both (XLSX + WEBM)</span>
+            </button>
+          </mat-menu>
+          <a
+            mat-stroked-button
+            [routerLink]="context.historyLinkCommands"
+            [queryParams]="{ event: eventName() }"
+            data-testid="detail-all-runs"
+          >
+            <mat-icon aria-hidden="true">history</mat-icon>
+            All runs
+          </a>
+        </div>
+      </div>
+    </header>
+
+    @if (!context.isLatestRun) {
+      <div class="detail__older" role="status" data-testid="detail-older-run">
+        <span>You are looking at an older run.</span>
+        <button
+          mat-button
+          type="button"
+          (click)="showLatestRun()"
+          data-testid="detail-latest-run"
+        >
+          Go to the latest run
+        </button>
+      </div>
+    }
+
+    <main class="detail__body">
+      <app-run-verdict
+        [run]="context.run"
+        [runs]="context.runs"
+        [eventName]="eventName()"
+      ></app-run-verdict>
+      @if (stepFailureLabel(); as stepLabel) {
+        <section
+          class="detail__step-failure"
+          aria-label="Step that failed"
+          data-testid="detail-step-failure"
+        >
+          <div class="flex min-w-0 flex-col gap-[0.4rem]">
+            <strong class="font-medium"
+              >{{ stepLabel }} could not find its element</strong
+            >
+            <span class="text-[1.3rem]"
+              >None of its selectors matched in time. A model on this computer
+              can suggest a replacement.</span
+            >
+          </div>
+          <button
+            mat-flat-button
+            color="primary"
+            type="button"
+            (click)="findReplacement()"
+            data-testid="detail-find-replacement"
+          >
+            <mat-icon aria-hidden="true">search</mat-icon>
+            Find a replacement
+          </button>
+        </section>
+      }
+      @for (entry of stepFallbacks(); track entry.fallback.stepIndex) {
+        <section
+          class="detail__step-fallback"
+          aria-label="Step that used a fallback selector"
+          [attr.data-testid]="
+            'detail-step-fallback-' + entry.fallback.stepIndex
+          "
+        >
+          <div class="flex min-w-0 flex-col gap-[0.4rem]">
+            <strong class="font-medium"
+              >{{ entry.label }} used a fallback selector</strong
+            >
+            <span class="text-[1.3rem]"
+              >Its recorded selectors found nothing, and {{ entry.reason }}:
+              <code class="[overflow-wrap:anywhere]">{{
+                entry.fallback.selector
+              }}</code></span
+            >
+          </div>
+          @if (entry.saved) {
+            <span
+              class="text-[1.3rem] font-medium"
+              [attr.data-testid]="
+                'detail-fallback-saved-' + entry.fallback.stepIndex
+              "
+              >Saved in the recording</span
+            >
+          } @else {
+            <button
+              mat-stroked-button
+              type="button"
+              (click)="saveFallback(entry.fallback, entry.label)"
+              [attr.data-testid]="
+                'detail-save-fallback-' + entry.fallback.stepIndex
+              "
+            >
+              Save to recording
+            </button>
+          }
+        </section>
+      }
+
+      @if (context.run) {
+        <app-run-player
+          [siteBlob]="context.videoBlob"
+          [tagAssistantBlob]="context.tagAssistantVideoBlob"
+          [imageBlob]="context.imageBlob"
+          [timeline]="context.run.mediaTimeline"
+          [steps]="context.recording?.steps ?? []"
+        ></app-run-player>
+
+        <div class="detail__pair">
+          <app-spec-comparison
+            [spec]="context.spec?.dataLayerSpec"
+            [dataLayer]="context.run.dataLayer"
+          ></app-spec-comparison>
+          <app-ga4-request
+            [rawRequest]="context.run.rawRequest"
+            [requestPassed]="context.run.requestPassed"
+            [eventName]="eventName()"
+          ></app-ga4-request>
+        </div>
+      }
+
+      <mat-accordion displayMode="flat" class="detail__more">
+        <mat-expansion-panel data-testid="detail-tag-configuration">
+          <mat-expansion-panel-header>
+            <mat-panel-title>Tag configuration</mat-panel-title>
+            <mat-panel-description
+              >From the project's GTM container</mat-panel-description
+            >
+          </mat-expansion-panel-header>
+          <app-tag-manage-tab
+            [tagSpec]="tagSpec()"
+            [variables]="variables()"
+          ></app-tag-manage-tab>
+        </mat-expansion-panel>
+        <mat-expansion-panel data-testid="detail-test-files">
+          <mat-expansion-panel-header>
+            <mat-panel-title
+              >Spec, recording and item definition</mat-panel-title
+            >
+            <mat-panel-description
+              >View or edit, and the run's raw data</mat-panel-description
+            >
+          </mat-expansion-panel-header>
+          <app-report-detail-panels
+            [context]="context"
+          ></app-report-detail-panels>
+        </mat-expansion-panel>
+      </mat-accordion>
+    </main>
+  </div>
+}

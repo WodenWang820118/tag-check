@@ -1,0 +1,60 @@
+<h2 mat-dialog-title>Save the fallback selector</h2>
+
+<mat-dialog-content
+  class="flex! flex-col gap-[1.4rem] text-[1.4rem]"
+  data-testid="fallback-dialog"
+>
+  <p class="m-0! leading-[1.5]">
+    <strong class="font-medium">{{ data.stepLabel }}</strong> found nothing with
+    its recorded selectors, so the run continued with
+    <code class="[overflow-wrap:anywhere]">{{ data.fallback.selector }}</code
+    >: {{ reason }}.
+  </p>
+
+  @if (loadError(); as message) {
+    <p class="m-0! text-[#b3261e]" role="alert" data-testid="fallback-error">
+      {{ message }}
+    </p>
+  } @else if (recording()) {
+    @if (alreadySaved()) {
+      <p class="m-0! text-[#1e6b34]" role="status" data-testid="fallback-saved">
+        The recording already waits for this selector first.
+      </p>
+    } @else {
+      <app-selector-diff
+        [changes]="changes()"
+        [selectable]="true"
+        [excluded]="excluded()"
+        (toggle)="toggleExcluded($event)"
+        data-testid="fallback-diff"
+      ></app-selector-diff>
+      @if (chosen().length === 0) {
+        <p class="m-0! text-[#b3261e]" data-testid="fallback-pick-none">
+          Tick at least one new selector to save.
+        </p>
+      }
+      <mat-checkbox
+        [checked]="keepOld()"
+        (change)="keepOld.set($event.checked)"
+        data-testid="fallback-keep-old"
+        >Keep the old selectors after the new ones</mat-checkbox
+      >
+    }
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button type="button" mat-dialog-close>Cancel</button>
+  <button
+    mat-flat-button
+    color="primary"
+    type="button"
+    (click)="save()"
+    [disabled]="
+      !recording() || alreadySaved() || saving() || chosen().length === 0
+    "
+    data-testid="fallback-save"
+  >
+    Save to recording
+  </button>
+</mat-dialog-actions>

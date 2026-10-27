@@ -5,12 +5,13 @@ import {
   HttpStatus,
   InternalServerErrorException
 } from '@nestjs/common';
-import { Page } from 'puppeteer';
+import { type Frame, Page } from 'puppeteer';
+import { resolveStepFrame } from './frame';
 import {
   ActionHandler,
-  getFirstSelector,
   preferSelector,
   STEP_SELECTOR_TIMEOUT_MS,
+  toPuppeteerSelector,
   waitForAnySelector
 } from './utils';
 import { TestEventRepositoryService } from '../../../../core/repository/test-event/test-event-repository.service';
@@ -20,6 +21,7 @@ import { FilePathService } from '../../../../infrastructure/os/path/file-path/fi
 import { FileService } from '../../../../infrastructure/os/file/file.service';
 import { OperationFile, Step } from '@utils';
 import { ActionUtilsService } from '../action-utils/action-utils.service';
+import { StepElementNotFoundError } from '../step-failure/step-element-not-found.error';
 
 /**
  * Replays a click step. Waits for any of the step's selectors to become
@@ -56,15 +58,18 @@ export class ClickHandler implements ActionHandler {
       ).stopNavigation === true;
     const offsetX = step.offsetX;
     const offsetY = step.offsetY;
-    const candidates = (step.selectors ?? []).map(getFirstSelector);
+    const candidates = (step.selectors ?? []).map(toPuppeteerSelector);
     const timeout = step.timeout ?? STEP_SELECTOR_TIMEOUT_MS;
-    const visible = await waitForAnySelector(page, candidates, { timeout });
+    const root = await resolveStepFrame(page, step.frame, timeout);
+    const visible = await waitForAnySelector(root, candidates, { timeout });
     if (!visible) {
       this.logger.warn(
         `None of ${candidates.length} selector(s) became visible within ${timeout} ms: ${candidates.join(', ')}`
       );
-      throw new InternalServerErrorException(
-        `Failed to click. None of the selectors became visible within ${timeout} ms for action ${step.target}`
+      throw new StepElementNotFoundError(
+        `Failed to click. None of the selectors became visible within ${timeout} ms for action ${step.target}`,
+        candidates,
+        timeout
       );
     }
     for (const firstSelector of preferSelector(candidates, visible)) {
@@ -73,6 +78,7 @@ export class ClickHandler implements ActionHandler {
         // timeout also bounds the click itself, so keep it at 5 s.
         const clicked = await this.clickElement(
           page,
+          root,
           projectSlug,
           eventId,
           firstSelector,
@@ -101,6 +107,7 @@ export class ClickHandler implements ActionHandler {
 
   private async clickElement(
     page: Page,
+    root: Frame,
     projectName: string,
     eventId: string,
     selector: string,
@@ -128,18 +135,18 @@ export class ClickHandler implements ActionHandler {
     }
     const domain = new URL(stepUrl).hostname;
 
-    // Wait for the selector to be visible
-    await page.waitForSelector(selector, { timeout, visible: true });
+    // Wait for the selector to be visible in the step's frame.
+    await root.waitForSelector(selector, { timeout, visible: true });
 
     const cleanupKey = preventNavigation
-      ? await this.preventNavigationForClick(page)
+      ? await this.preventNavigationForClick(root)
       : undefined;
 
     try {
       // Chrome Recorder stores where inside the element the user clicked;
       // the replay clicks the same point.
       if (offsetX !== undefined && offsetY !== undefined) {
-        const elementHandle = await page.$(selector);
+        const elementHandle = await root.$(selector);
         if (!elementHandle) {
           throw new InternalServerErrorException(
             `Element not found for selector ${selector}`
@@ -174,7 +181,7 @@ export class ClickHandler implements ActionHandler {
         );
       }
       return await this.clickStrategyService.clickElement(
-        page,
+        root,
         projectName,
         eventId,
         selector,
@@ -186,7 +193,7 @@ export class ClickHandler implements ActionHandler {
       if (cleanupKey) {
         // A scripted redirect can replace the document and its listeners.
         // Cleanup must never hide the original click error.
-        await page
+        await root
           .evaluate(`(() => {
           const key = ${JSON.stringify(cleanupKey)};
           if (typeof window[key] === "function") window[key]();
@@ -200,12 +207,14 @@ export class ClickHandler implements ActionHandler {
     }
   }
 
-  private async preventNavigationForClick(page: Page): Promise<string> {
+  private async preventNavigationForClick(root: Frame): Promise<string> {
     const cleanupKey = `__tagCheckNavigation_${randomUUID()}`;
     // The next click may use CSS, text, aria or XPath selectors.
     // Do not stop propagation: site/GTM listeners must still see the click.
-    // A source string avoids missing SWC helpers in the ES5 backend bundle.
-    await page.evaluate(`(() => {
+    // The listener sits on the step's document, which is the frame's when
+    // the click is inside an iframe. A source string avoids missing SWC
+    // helpers in the ES5 backend bundle.
+    await root.evaluate(`(() => {
       const key = ${JSON.stringify(cleanupKey)};
       const preventDefault = (event) => event.preventDefault();
       document.addEventListener("click", preventDefault, { capture: true, once: true });

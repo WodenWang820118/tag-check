@@ -5,6 +5,8 @@ import { join } from 'path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ProjectVideoService } from './project-video.service';
 
+const KEY = '0f0e6b2a-7c1d-4e5f-8a9b-1c2d3e4f5a6b';
+
 describe('ProjectVideoService', () => {
   let dir: string;
 
@@ -16,33 +18,78 @@ describe('ProjectVideoService', () => {
     rmSync(dir, { recursive: true, force: true });
   });
 
-  function build(folder: string) {
-    const folderPathService = {
-      getInspectionEventFolderPath: vi.fn().mockResolvedValue(folder)
+  /** Two runs, newest first; fileOf answers with `file` or null. */
+  function build(file: string | null) {
+    const testEventDetailRepositoryService = {
+      listRunHistory: vi.fn().mockResolvedValue([
+        { runId: 9, recordingKey: KEY },
+        { runId: 7, recordingKey: null }
+      ])
     };
-    return new ProjectVideoService(folderPathService as never);
+    const runRecordingsService = { fileOf: vi.fn().mockResolvedValue(file) };
+    const service = new ProjectVideoService(
+      testEventDetailRepositoryService as never,
+      runRecordingsService as never
+    );
+    return { service, runRecordingsService };
   }
 
-  it('returns a StreamableFile backed by the recording.webm file when it exists', async () => {
-    const recording = join(dir, 'recording.webm');
-    writeFileSync(recording, Buffer.from([0x1a, 0x45, 0xdf, 0xa3]));
-    const service = build(dir);
-    const result = await service.getVideos('demo', 'evt');
-    expect(result).toBeInstanceOf(StreamableFile);
-    // Fully consume the underlying read stream before the temp directory
-    // teardown so a lazy open() can't race with rmSync and surface an
-    // unhandled ENOENT during the test run.
+  /** Reads the whole stream, also so the temp folder can be removed after. */
+  async function read(result: StreamableFile): Promise<string> {
     const stream = result.getStream() as NodeJS.ReadableStream;
+    let content = '';
     await new Promise<void>((resolve, reject) => {
-      stream.on('data', () => undefined);
+      stream.on('data', (chunk) => (content += chunk.toString()));
       stream.on('end', () => resolve());
       stream.on('error', reject);
     });
+    return content;
+  }
+
+  it("streams the latest run's recording by default", async () => {
+    const recording = join(dir, 'recording.webm');
+    writeFileSync(recording, 'latest run');
+    const { service, runRecordingsService } = build(recording);
+
+    const result = await service.getVideos('demo', 'evt');
+
+    expect(runRecordingsService.fileOf).toHaveBeenCalledWith(
+      'demo',
+      'evt',
+      { recordingKey: KEY, latest: true },
+      'recording.webm'
+    );
+    expect(await read(result)).toBe('latest run');
   });
 
-  it('returns an empty StreamableFile when the recording does not exist', async () => {
-    const service = build(dir);
-    const result = await service.getVideos('demo', 'missing');
-    expect(result).toBeInstanceOf(StreamableFile);
+  it("streams the chosen run's recording", async () => {
+    const recording = join(dir, 'recording-tag-assistant.webm');
+    writeFileSync(recording, 'older run');
+    const { service, runRecordingsService } = build(recording);
+
+    const result = await service.getVideos(
+      'demo',
+      'evt',
+      'recording-tag-assistant.webm',
+      7
+    );
+
+    expect(runRecordingsService.fileOf).toHaveBeenCalledWith(
+      'demo',
+      'evt',
+      { recordingKey: null, latest: false },
+      'recording-tag-assistant.webm'
+    );
+    expect(await read(result)).toBe('older run');
+  });
+
+  it('returns an empty file when the run kept no recording, or is not a run of the test', async () => {
+    const { service, runRecordingsService } = build(null);
+
+    expect(await read(await service.getVideos('demo', 'evt'))).toBe('');
+    expect(
+      await read(await service.getVideos('demo', 'evt', 'recording.webm', 404))
+    ).toBe('');
+    expect(runRecordingsService.fileOf).toHaveBeenCalledTimes(1);
   });
 });

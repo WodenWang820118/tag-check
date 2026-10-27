@@ -1,0 +1,134 @@
+<section
+  aria-labelledby="ga4-request-title"
+  class="flex flex-col gap-[1.2rem] rounded-[1.2rem] bg-white p-[2rem]"
+  data-testid="ga4-request"
+>
+  <div class="flex flex-wrap items-center justify-between gap-[1rem]">
+    <h2 id="ga4-request-title" class="m-0 text-[2rem] font-medium">
+      GA4 request
+    </h2>
+    @if (rawRequest(); as raw) {
+      <button
+        type="button"
+        class="request-copy"
+        [cdkCopyToClipboard]="raw"
+        (cdkCopyToClipboardCopied)="onCopied($event)"
+        data-testid="ga4-request-copy"
+      >
+        {{ copied() ? 'Copied' : 'Copy raw URL' }}
+      </button>
+    }
+  </div>
+
+  @if (summary(); as request) {
+    <dl class="request-list" data-testid="ga4-request-event">
+      <dt>Event</dt>
+      <dd>
+        <code>{{ request.eventName ?? '—' }}</code>
+      </dd>
+      <dt>Measurement ID</dt>
+      <dd>
+        <code>{{ request.measurementId ?? '—' }}</code>
+        @if (request.debug) {
+          <span class="request-badge">debug mode</span>
+        }
+      </dd>
+    </dl>
+
+    @if (request.parameters.length > 0) {
+      <h3 class="request-heading">Event parameters</h3>
+      <dl class="request-list" data-testid="ga4-request-parameters">
+        @for (parameter of request.parameters; track $index) {
+          <dt>
+            <code>{{ parameter.name }}</code>
+          </dt>
+          <dd>
+            <code>{{ parameter.value }}</code>
+            <span class="request-hint">{{
+              ' ' + (parameter.numeric ? 'number' : 'text')
+            }}</span>
+          </dd>
+        }
+      </dl>
+    }
+
+    @if (request.items.length > 0) {
+      <h3 class="request-heading">Items</h3>
+      <div class="overflow-x-auto">
+        <table class="request-items" data-testid="ga4-request-items">
+          <thead>
+            <tr>
+              @for (column of itemColumns(); track column) {
+                <th scope="col">
+                  <code>{{ column }}</code>
+                </th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of request.items; track $index) {
+              <tr>
+                @for (column of itemColumns(); track column) {
+                  <td>{{ item[column] ?? '' }}</td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    @if (request.page.length > 0) {
+      <h3 class="request-heading">Page</h3>
+      <dl class="request-list">
+        @for (field of request.page; track field.name) {
+          <dt>
+            <code>{{ field.name }}</code>
+          </dt>
+          <dd>{{ field.value }}</dd>
+        }
+      </dl>
+    }
+
+    @if (request.other.length > 0) {
+      <details class="request-other">
+        <summary>Other request fields ({{ request.other.length }})</summary>
+        <dl class="request-list">
+          @for (field of request.other; track $index) {
+            <dt>
+              <code>{{ field.key }}</code>
+            </dt>
+            <dd>
+              <code>{{ field.value }}</code>
+            </dd>
+          }
+        </dl>
+      </details>
+    }
+  } @else {
+    <div class="request-missing" data-testid="ga4-request-missing">
+      <p class="m-0 font-medium">No matching request was captured</p>
+      <p class="m-0 text-[1.4rem] text-[#55605d]">
+        TagCheck looks for a GA4 <code>/g/collect</code> request for
+        <code>{{ eventName() }}</code> sent to the project's measurement ID.
+      </p>
+    </div>
+    @if (!requestPassed()) {
+      <h3 class="request-heading">Where to look</h3>
+      <ol class="request-hints">
+        <li>
+          Did the GA4 event tag fire? Run in accompanied mode and watch Tag
+          Assistant next to the site.
+        </li>
+        <li>
+          Does the tag send to the project's measurement ID? Open the tag
+          configuration below.
+        </li>
+        <li>
+          Was the request sent after the run ended? Run again to rule out
+          timing.
+        </li>
+      </ol>
+    }
+  }
+</section>

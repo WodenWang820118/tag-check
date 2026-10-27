@@ -4,17 +4,21 @@ import {
   Header,
   NotFoundException,
   Param,
+  ParseIntPipe,
+  Query,
   StreamableFile
 } from '@nestjs/common';
 import { TestImageRepositoryService } from '../../core/repository/test-event/test-image-repository.service';
+import { TestEventDetailRepositoryService } from '../../core/repository/test-event/test-event-detail-repository.service';
 import { ProjectRepositoryService } from '../../core/repository/project/project-repository.service';
 import { ProjectGtmContainerService } from '../../features/project-agent/project-gtm-container/project-gtm-container.service';
 
-/** Serves a project, its tests' latest screenshots and its GTM container. */
+/** Serves a project, its tests' run screenshots and its GTM container. */
 @Controller('projects')
 export class ProjectDataRetrievalController {
   constructor(
     private readonly testImageRepositoryService: TestImageRepositoryService,
+    private readonly testEventDetailRepositoryService: TestEventDetailRepositoryService,
     private readonly projectRepositoryService: ProjectRepositoryService,
     private readonly projectGtmContainerService: ProjectGtmContainerService
   ) {}
@@ -24,12 +28,22 @@ export class ProjectDataRetrievalController {
   @Header('Cache-Control', 'no-cache')
   async readImage(
     @Param('projectSlug') projectSlug: string,
-    @Param('eventId') eventId: string
+    @Param('eventId') eventId: string,
+    // `?run=<runId>` picks the run; the test's latest screenshot by default.
+    @Query('run', new ParseIntPipe({ optional: true })) run?: number
   ) {
-    const image = await this.testImageRepositoryService.getBySlugAndEventId(
-      projectSlug,
-      eventId
-    );
+    const image =
+      run === undefined
+        ? await this.testImageRepositoryService.getBySlugAndEventId(
+            projectSlug,
+            eventId
+          )
+        : await this.testEventDetailRepositoryService.getRunScreenshot(
+            projectSlug,
+            eventId,
+            run,
+            true
+          );
     // A test that has not run yet has no screenshot: answer with an empty
     // body, which the report shows as "No media available".
     if (!image?.imageData) {

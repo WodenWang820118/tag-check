@@ -1,20 +1,23 @@
 import {
+  HttpStatus,
   Injectable,
   Logger,
   NotFoundException,
   InternalServerErrorException
 } from '@nestjs/common';
 import { Page } from 'puppeteer';
+import { resolveStepFrame, type QueryRoot } from './frame';
 import {
   ActionHandler,
-  getFirstSelector,
   preferSelector,
   STEP_SELECTOR_TIMEOUT_MS,
+  toPuppeteerSelector,
   waitForAnySelector
 } from './utils';
 import { ChangeStrategyService } from '../strategies/change-strategies/change-strategy.service';
 import { ActionUtilsService } from './../action-utils/action-utils.service';
 import { Step } from '@utils';
+import { StepElementNotFoundError } from '../step-failure/step-element-not-found.error';
 
 /**
  * Replays a change step: types the step's value into a field or selects it
@@ -28,9 +31,10 @@ export class ChangeHandler implements ActionHandler {
     private readonly actionUtilsService: ActionUtilsService
   ) {}
 
-  // TODO: may need to follow the click handler logic
-  // to switch between page service and evaluate service under different domains
-
+  // Unlike ClickHandler, this needs no GTM Preview switch: typing and
+  // selecting reach the site's tab while Tag Assistant's tab is in front
+  // (checked headless and headful), and ChangeStrategyService already falls
+  // back from page.type() to an element handle.
   async handle(
     page: Page,
     projectName: string,
@@ -39,7 +43,7 @@ export class ChangeHandler implements ActionHandler {
     _isLastClick?: boolean,
     timeout = 3000
   ): Promise<void> {
-    const candidates = (step.selectors ?? []).map(getFirstSelector);
+    const candidates = (step.selectors ?? []).map(toPuppeteerSelector);
     if (candidates.length === 0) {
       return;
     }
@@ -47,13 +51,17 @@ export class ChangeHandler implements ActionHandler {
     // Give slow pages time to render the field. Typing does not need it to be
     // visible (page.type fills hidden fields too), only present.
     const waitTimeout = step.timeout ?? STEP_SELECTOR_TIMEOUT_MS;
-    const present = await waitForAnySelector(page, candidates, {
+    const root = await resolveStepFrame(page, step.frame, waitTimeout);
+    const present = await waitForAnySelector(root, candidates, {
       timeout: waitTimeout,
       visible: false
     });
     if (!present) {
-      throw new NotFoundException(
-        `None of the selectors appeared within ${waitTimeout} ms: ${candidates.join(', ')}`
+      throw new StepElementNotFoundError(
+        `None of the selectors appeared within ${waitTimeout} ms: ${candidates.join(', ')}`,
+        candidates,
+        waitTimeout,
+        HttpStatus.NOT_FOUND
       );
     }
 
@@ -63,7 +71,7 @@ export class ChangeHandler implements ActionHandler {
       try {
         if (
           await this.changeElement(
-            page,
+            root,
             projectName,
             eventId,
             selector,
@@ -87,7 +95,7 @@ export class ChangeHandler implements ActionHandler {
   }
 
   async changeElement(
-    page: Page,
+    page: QueryRoot,
     projectName: string,
     eventId: string,
     selector: string,

@@ -1,4 +1,6 @@
-import { describe, expect, it } from 'vitest';
+import { LOCALE_ID, PLATFORM_ID } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { describe, expect, it, vi } from 'vitest';
 import { LangSelectComponent } from './lang-select.component';
 
 describe('LangSelectComponent', () => {
@@ -11,6 +13,36 @@ describe('LangSelectComponent', () => {
 
     expect(component.selectedLocale).toBe('zh-Hant');
     expect(component.selectedLangLabel).toBe('Traditional Chinese');
+  });
+
+  it('renders a native select with the build locale chosen', async () => {
+    await TestBed.configureTestingModule({
+      imports: [LangSelectComponent],
+      providers: [
+        { provide: LOCALE_ID, useValue: 'ja' },
+        { provide: PLATFORM_ID, useValue: serverPlatformId }
+      ]
+    }).compileComponents();
+    const fixture = TestBed.createComponent(LangSelectComponent);
+    fixture.detectChanges();
+    const select = fixture.nativeElement.querySelector(
+      '[data-testid="lang-select"]'
+    ) as HTMLSelectElement;
+    const changeLocale = vi
+      .spyOn(fixture.componentInstance, 'changeLocale')
+      .mockImplementation(() => undefined);
+
+    expect(select.value).toBe('ja');
+    select.value = 'zh-Hant';
+    select.dispatchEvent(new Event('change'));
+
+    expect(changeLocale).toHaveBeenCalledWith('zh-Hant');
+
+    changeLocale.mockClear();
+    fixture.componentInstance.onSelect({
+      target: { value: 'xx' }
+    } as unknown as Event);
+    expect(changeLocale).not.toHaveBeenCalled();
   });
 
   it('redirects to the same logical route when changing locales in the browser', () => {

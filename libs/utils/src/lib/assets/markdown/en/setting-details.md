@@ -34,6 +34,16 @@ A **Username** and **Password** for sites behind HTTP authentication. TagCheck s
 - **Hide the browser?**: runs Chrome without a window. Accompanied Mode always shows the window.
 - **Add browser setting**: adds a Chrome command-line argument for runs, such as `--window-size=1280,800`.
 
+## AI Assist
+
+These settings apply to every project on this computer. When a step cannot find its element, a model on this computer suggests replacement selectors. The model runs in [Ollama](https://ollama.com), so page data does not leave the computer. A suggestion changes a recording only when you save it, and a test still passes only on its own checks.
+
+- **Suggest replacements when a step cannot find its element**: off by default.
+- **Ollama address**: where Ollama listens, on this computer only (`localhost`, `127.0.0.1` or `[::1]`). The default is `http://127.0.0.1:11434`.
+- **Model**: the Ollama model to ask, such as `qwen3.5:9b`. The list offers the models Ollama has.
+
+Below the form, the page says whether Ollama answered with the model. TagCheck never installs Ollama or downloads a model: when Ollama is not running, start it; when the model is missing, the page shows the `ollama pull` command to run in a terminal. Then select **Check again**.
+
 ## Export or Delete
 
 - **Export**: downloads the project, with its tests, specs, recordings and results, as a ZIP file. Import it on another computer with **Already got the project?** on the New Project page.

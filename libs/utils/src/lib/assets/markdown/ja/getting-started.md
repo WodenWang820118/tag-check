@@ -34,9 +34,9 @@ TagCheck からエクスポートしたプロジェクトの作業を続ける�
 
 1. Chrome で DevTools と **Recorder** パネルを開き、サイト上でジャーニーを記録します。たとえば、商品ページを開いて **Add to cart** を選択します。
 2. 記録を JSON ファイルとしてエクスポートします。
-3. テストを開いて **Latest result** に移動します。**Chrome Recording** パネルで編集ボタンを選択し、ファイルを **Upload** するか内容を貼り付けて、**Save** を選択します。
+3. テストを開いて **Spec, recording and item definition** を展開します。**Chrome Recording** パネルで編集ボタンを選択し、ファイルを **Upload** するか内容を貼り付けて、**Save** を選択します。
 
-TagCheck は、`setViewport`、`navigate`、`click`、`hover`、`change`、`keyDown`、`keyUp`、`waitForElement` の各ステップを、CSS、ID、ARIA、テキスト、XPath、pierce の各セレクターで再生します。`data-testid` 属性のような安定したセレクターを使うと、デザインが変わっても記録が動作し続けます。
+TagCheck は、`setViewport`、`navigate`、`click`、`hover`、`change`、`keyDown`、`keyUp`、`waitForElement` の各ステップを、CSS、ID、ARIA、テキスト、XPath、pierce の各セレクターで再生します。シャドウルートへのセレクターチェーンをたどり、iframe 内のステップも実行し、記録でページ遷移があるとされたステップでは遷移先のページを待ちます。記録する前に、Recorder の **Selector attribute** を `data-testid`（またはサイトで使っているテスト用属性）にし、すべてのセレクタータイプを選択したままにしてください。安定したセレクターを使うと、デザインが変わっても記録が動作し続けます。ステップのどのセレクターも一致しない場合、TagCheck は記録されたテスト用フック、id、または名前を持つ要素がちょうど 1 つあればそれを使って続行し、そのことを結果に記載します（「レポート管理」を参照）。
 
 ## 5. テストを実行する
 

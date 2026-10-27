@@ -18,18 +18,34 @@ describe('ProjectDataRetrievalController', () => {
       read: vi.fn().mockResolvedValue({ containerVersion: {} }),
       ...overrides
     };
+    const testEventDetailRepositoryService = {
+      getRunScreenshot: vi
+        .fn()
+        .mockResolvedValue({ imageData: Buffer.from('run-img') })
+    };
     const controller = new ProjectDataRetrievalController(
       testImageRepositoryService as never,
+      testEventDetailRepositoryService as never,
       projectRepositoryService as never,
       projectGtmContainerService as never
     );
     return {
       controller,
       testImageRepositoryService,
+      testEventDetailRepositoryService,
       projectRepositoryService,
       projectGtmContainerService
     };
   }
+
+  it("readImage serves the run's own screenshot for ?run=", async () => {
+    const { controller, testEventDetailRepositoryService } = build();
+    const result = await controller.readImage('proj-1', 'evt-1', 7);
+    expect(
+      testEventDetailRepositoryService.getRunScreenshot
+    ).toHaveBeenCalledWith('proj-1', 'evt-1', 7, true);
+    expect(result).toBeInstanceOf(StreamableFile);
+  });
 
   it('readImage returns a StreamableFile constructed from the image data', async () => {
     const { controller, testImageRepositoryService } = build();

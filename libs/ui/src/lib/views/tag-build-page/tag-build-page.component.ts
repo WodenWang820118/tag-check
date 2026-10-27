@@ -8,6 +8,7 @@ import { EditorTypeEnum, StrictDataLayerEvent } from '@utils';
 import { JsonPipe } from '@angular/common';
 import { MatTabsModule } from '@angular/material/tabs';
 import { TagBuildModeService, TagBuildMode } from '@data-access';
+import { TagExtractComponent } from '../../components/tag-extract/tag-extract.component';
 
 /**
  * tag-build's main view: the Tag Build and Tag Extract tabs with the input
@@ -21,7 +22,8 @@ import { TagBuildModeService, TagBuildMode } from '@data-access';
     FunctionalCardComponent,
     EditorComponent,
     MatTabsModule,
-    UploadActionComponent
+    UploadActionComponent,
+    TagExtractComponent
   ],
   templateUrl: './tag-build-page.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush

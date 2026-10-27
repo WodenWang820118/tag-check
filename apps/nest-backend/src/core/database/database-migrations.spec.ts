@@ -162,7 +162,9 @@ describe('migrateDatabase', () => {
   it('upgrades a database at the initial schema and keeps its rows', async () => {
     const database = await openDatabase();
     await database.runMigrations({ transaction: 'each' });
-    await database.undoLastMigration();
+    for (let undone = 1; undone < DATABASE_MIGRATIONS.length; undone++) {
+      await database.undoLastMigration();
+    }
     expect(await appliedMigrations(database)).toEqual([
       'InitialSchema1792540800000'
     ]);
@@ -181,10 +183,56 @@ describe('migrateDatabase', () => {
     ).toEqual([{ project_slug: 'shop' }]);
   });
 
+  it('adds the run media columns to a 3.3.0 database and keeps its runs', async () => {
+    const database = await openDatabase();
+    await database.runMigrations({ transaction: 'each' });
+    await database.undoLastMigration();
+    await database.query(
+      `INSERT INTO "test_event_detail" ("passed", "request_passed", "destination_url", "message") VALUES (1, 0, 'https://shop.example/cart', 'Valid')`
+    );
+
+    await migrateDatabase(database);
+
+    expect(await pendingSchemaChanges(database)).toEqual([]);
+    expect(
+      await database.query(
+        'SELECT "message", "request_message", "recording_key", "media_timeline" FROM "test_event_detail"'
+      )
+    ).toEqual([
+      {
+        message: 'Valid',
+        request_message: null,
+        recording_key: null,
+        media_timeline: null
+      }
+    ]);
+  });
+
+  it('undoes the run media columns, keeping the runs', async () => {
+    const database = await openDatabase();
+    await migrateDatabase(database);
+
+    await database.undoLastMigration();
+
+    expect(await appliedMigrations(database)).toEqual([
+      'InitialSchema1792540800000',
+      'BatchRunsAndSchedules1792886400000'
+    ]);
+    const columns: { name: string }[] = await database.query(
+      `PRAGMA table_info("test_event_detail")`
+    );
+    expect(columns.map((column) => column.name)).not.toEqual(
+      expect.arrayContaining(['request_message'])
+    );
+    expect(columns.map((column) => column.name)).not.toContain('recording_key');
+    expect(columns.map((column) => column.name)).toContain('message');
+  });
+
   it('undoes the batch runs and schedules, leaving the initial schema', async () => {
     const database = await openDatabase();
     await migrateDatabase(database);
 
+    await database.undoLastMigration();
     await database.undoLastMigration();
 
     expect(await appliedMigrations(database)).toEqual([

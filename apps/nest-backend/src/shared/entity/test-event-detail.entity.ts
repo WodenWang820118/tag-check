@@ -1,5 +1,6 @@
 import type {
   BaseDataLayerEvent,
+  RunMediaTimeline,
   StrictDataLayerEvent,
   TestEventDetailSchema
 } from '@utils';
@@ -65,6 +66,29 @@ export class TestEventDetailEntity
   /** The run's validation message; null for runs saved before it was kept. */
   @Column({ name: 'message', type: 'text', nullable: true })
   message?: string | null;
+
+  /** The GA4 request check's message; null when the run did not check it. */
+  @Column({ name: 'request_message', type: 'text', nullable: true })
+  requestMessage?: string | null;
+
+  /**
+   * Names the folder of the run's screen recordings
+   * (`inspection_results/<eventId>/runs/<key>`), chosen when the run starts:
+   * the row's id does not exist yet then, and changes when a project is
+   * imported. Null once the run is past RUN_RECORDINGS_KEPT, and for runs
+   * saved before runs kept their own recordings.
+   */
+  @Column({
+    name: 'recording_key',
+    type: 'varchar',
+    length: 36,
+    nullable: true
+  })
+  recordingKey?: string | null;
+
+  /** When the run's steps acted on its recording; see RunMediaTimeline. */
+  @Column('json', { name: 'media_timeline', nullable: true })
+  mediaTimeline?: RunMediaTimeline | null;
 
   /**
    * The screenshot taken at the end of the run, so deleting a run deletes

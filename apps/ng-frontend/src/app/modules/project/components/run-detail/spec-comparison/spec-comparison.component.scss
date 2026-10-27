@@ -1,0 +1,77 @@
+section {
+  border: 1px solid #dde3e1;
+}
+
+.comparison-table {
+  border-collapse: collapse;
+  font-size: 1.4rem;
+  table-layout: fixed;
+  width: 100%;
+
+  th:nth-child(1) {
+    width: 28%;
+  }
+
+  th:nth-child(4) {
+    width: 8.5rem;
+  }
+
+  th {
+    border-bottom: 1px solid #dde3e1;
+    color: #55605d;
+    font-weight: 500;
+    padding: 0.8rem;
+    text-align: left;
+  }
+
+  td {
+    border-bottom: 1px solid #eef2f0;
+    overflow-wrap: anywhere;
+    padding: 1rem 0.8rem;
+    vertical-align: top;
+  }
+}
+
+.comparison-hint {
+  color: #55605d;
+  display: block;
+  font-size: 1.2rem;
+}
+
+.comparison-passed,
+.comparison-failed {
+  white-space: nowrap;
+}
+
+.comparison-passed {
+  color: #17663f;
+  font-weight: 500;
+}
+
+.comparison-failed {
+  color: #a4231b;
+  font-weight: 500;
+}
+
+.comparison-extras {
+  border: 1px solid #dde3e1;
+  border-radius: 0.8rem;
+  font-size: 1.4rem;
+  padding: 1rem 1.2rem;
+
+  summary {
+    cursor: pointer;
+  }
+
+  dl {
+    display: grid;
+    gap: 0.4rem 1.2rem;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    margin: 1rem 0 0;
+  }
+
+  dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+}

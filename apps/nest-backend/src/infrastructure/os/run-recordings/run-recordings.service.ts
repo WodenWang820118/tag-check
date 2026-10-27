@@ -1,0 +1,311 @@
+import { Injectable, Logger } from '@nestjs/common';
+import { existsSync } from 'fs';
+import { mkdir, readFile, rm, writeFile } from 'fs/promises';
+import { join } from 'path';
+import {
+  RUN_RECORDINGS_KEPT,
+  type StepFailureContext,
+  type StepFallback
+} from '@utils';
+import { RECORDING_FILES, type RecordingFile } from '../../../shared';
+import { TestEventDetailRepositoryService } from '../../../core/repository/test-event/test-event-detail-repository.service';
+import { FolderPathService } from '../path/folder-path/folder-path.service';
+
+/** The folder name of a run's recordings: a UUID chosen when it starts. */
+const RECORDING_KEY =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+const RUNS_FOLDER = 'runs';
+
+/** The file in a run's folder that says what its failed step saw. */
+export const STEP_FAILURE_FILE = 'step-failure.json';
+
+/** The file in a run's folder that lists the fallback selectors it used. */
+export const STEP_FALLBACKS_FILE = 'step-fallbacks.json';
+
+/** Where a run's recordings are looked up: see RunRecordingsService.fileOf. */
+export type RunRecordingRef = {
+  recordingKey: string | null;
+  /** Whether the run is the test's latest. */
+  latest: boolean;
+};
+
+/**
+ * The screen recordings of a test's runs. Each run records into a folder of
+ * its own, `inspection_results/<eventId>/runs/<recordingKey>/`, and the
+ * latest RUN_RECORDINGS_KEPT runs of a test keep theirs; older runs keep
+ * only their screenshot. Runs saved before runs kept their own recordings
+ * left the latest of them in `inspection_results/<eventId>/` itself.
+ *
+ * A run whose step could not find its element also keeps what the step saw
+ * there (STEP_FAILURE_FILE), for as long as it keeps its recordings.
+ */
+@Injectable()
+export class RunRecordingsService {
+  private readonly logger = new Logger(RunRecordingsService.name);
+
+  constructor(
+    private readonly folderPathService: FolderPathService,
+    private readonly testEventDetailRepositoryService: TestEventDetailRepositoryService
+  ) {}
+
+  /**
+   * The folder of a run's recordings, which may not exist yet.
+   *
+   * @throws Error when `recordingKey` is not a run's key.
+   */
+  async folderOf(
+    projectSlug: string,
+    eventId: string,
+    recordingKey: string
+  ): Promise<string> {
+    if (!RECORDING_KEY.test(recordingKey)) {
+      throw new Error(`Not a recording key: ${recordingKey}`);
+    }
+    const eventFolder =
+      await this.folderPathService.getInspectionEventFolderPath(
+        projectSlug,
+        eventId
+      );
+    return join(eventFolder, RUNS_FOLDER, recordingKey);
+  }
+
+  /**
+   * The path of a run's recording `file`, or null when the run kept none:
+   * its own folder's file, or for the test's latest run without one, the
+   * file runs saved before keeping their own left in the test's folder.
+   */
+  async fileOf(
+    projectSlug: string,
+    eventId: string,
+    run: RunRecordingRef,
+    file: RecordingFile
+  ): Promise<string | null> {
+    let path: string | null = null;
+    if (run.recordingKey) {
+      path = join(
+        await this.folderOf(projectSlug, eventId, run.recordingKey),
+        file
+      );
+    } else if (run.latest) {
+      path = join(
+        await this.folderPathService.getInspectionEventFolderPath(
+          projectSlug,
+          eventId
+        ),
+        file
+      );
+    }
+    return path && existsSync(path) ? path : null;
+  }
+
+  /**
+   * Saves what the run's failed step saw in the run's folder. Never throws:
+   * the run is saved without it, and false says so.
+   */
+  async saveStepFailure(
+    projectSlug: string,
+    eventId: string,
+    recordingKey: string,
+    context: StepFailureContext
+  ): Promise<boolean> {
+    return this.saveRunFile(
+      projectSlug,
+      eventId,
+      recordingKey,
+      STEP_FAILURE_FILE,
+      context
+    );
+  }
+
+  /**
+   * What the run's failed step saw, or null when the run kept none (no step
+   * failed that way, or its folder was pruned).
+   *
+   * @throws Error when `recordingKey` is not a run's key.
+   */
+  async readStepFailure(
+    projectSlug: string,
+    eventId: string,
+    recordingKey: string
+  ): Promise<StepFailureContext | null> {
+    return this.readRunFile<StepFailureContext>(
+      projectSlug,
+      eventId,
+      recordingKey,
+      STEP_FAILURE_FILE
+    );
+  }
+
+  /**
+   * Saves the fallback selectors the run's steps continued with in the
+   * run's folder. Never throws: the run is saved without them, and false
+   * says so.
+   */
+  async saveStepFallbacks(
+    projectSlug: string,
+    eventId: string,
+    recordingKey: string,
+    fallbacks: readonly StepFallback[]
+  ): Promise<boolean> {
+    return this.saveRunFile(
+      projectSlug,
+      eventId,
+      recordingKey,
+      STEP_FALLBACKS_FILE,
+      fallbacks
+    );
+  }
+
+  /**
+   * The fallback selectors the run's steps continued with; empty when it
+   * used none, or its folder was pruned.
+   *
+   * @throws Error when `recordingKey` is not a run's key.
+   */
+  async readStepFallbacks(
+    projectSlug: string,
+    eventId: string,
+    recordingKey: string
+  ): Promise<StepFallback[]> {
+    return (
+      (await this.readRunFile<StepFallback[]>(
+        projectSlug,
+        eventId,
+        recordingKey,
+        STEP_FALLBACKS_FILE
+      )) ?? []
+    );
+  }
+
+  private async saveRunFile(
+    projectSlug: string,
+    eventId: string,
+    recordingKey: string,
+    file: string,
+    content: unknown
+  ): Promise<boolean> {
+    try {
+      const folder = await this.folderOf(projectSlug, eventId, recordingKey);
+      await mkdir(folder, { recursive: true });
+      await writeFile(join(folder, file), JSON.stringify(content), 'utf8');
+      return true;
+    } catch (error) {
+      this.logger.warn(
+        `Could not save ${file} of run ${recordingKey}: ${error}`
+      );
+      return false;
+    }
+  }
+
+  private async readRunFile<T>(
+    projectSlug: string,
+    eventId: string,
+    recordingKey: string,
+    file: string
+  ): Promise<T | null> {
+    const path = join(
+      await this.folderOf(projectSlug, eventId, recordingKey),
+      file
+    );
+    if (!existsSync(path)) {
+      return null;
+    }
+    return JSON.parse(await readFile(path, 'utf8')) as T;
+  }
+
+  /**
+   * Keeps the recordings of the test's latest RUN_RECORDINGS_KEPT runs and
+   * removes the older runs' folders. Never throws: a folder that cannot be
+   * removed is logged and tried again after the next run.
+   */
+  async prune(
+    projectSlug: string,
+    eventId: string,
+    testEventId: number
+  ): Promise<void> {
+    try {
+      const runs =
+        await this.testEventDetailRepositoryService.listRecordingKeys(
+          testEventId
+        );
+      const expired = runs.slice(RUN_RECORDINGS_KEPT);
+      const removed: number[] = [];
+      for (const run of expired) {
+        if (await this.removeFolder(projectSlug, eventId, run.recordingKey)) {
+          removed.push(run.id);
+        }
+      }
+      await this.testEventDetailRepositoryService.clearRecordingKeys(removed);
+    } catch (error) {
+      this.logger.warn(
+        `Could not prune the recordings of ${eventId}: ${error}`
+      );
+    }
+  }
+
+  /**
+   * A test's first run that keeps its own recordings removes the ones runs
+   * saved before left in the test's folder, which belong to an older run.
+   */
+  async removeLegacy(projectSlug: string, eventId: string): Promise<void> {
+    const folder = await this.folderPathService.getInspectionEventFolderPath(
+      projectSlug,
+      eventId
+    );
+    await Promise.all(
+      Object.values(RECORDING_FILES).map((file) =>
+        rm(join(folder, file), { force: true })
+      )
+    );
+  }
+
+  /** Removes the recordings of deleted runs. Never throws. */
+  async removeRuns(
+    projectSlug: string,
+    runs: { eventId: string; recordingKey: string }[]
+  ): Promise<void> {
+    for (const run of runs) {
+      await this.removeFolder(projectSlug, run.eventId, run.recordingKey);
+    }
+  }
+
+  /**
+   * Removes everything the deleted tests' runs left on disk: recordings,
+   * results and caches (`inspection_results/<eventId>`). Never throws.
+   */
+  async removeTests(projectSlug: string, eventIds: string[]): Promise<void> {
+    for (const eventId of eventIds) {
+      try {
+        const folder =
+          await this.folderPathService.getInspectionEventFolderPath(
+            projectSlug,
+            eventId
+          );
+        await rm(folder, { recursive: true, force: true });
+      } catch (error) {
+        this.logger.warn(
+          `Could not remove the results of ${eventId}: ${error}`
+        );
+      }
+    }
+  }
+
+  private async removeFolder(
+    projectSlug: string,
+    eventId: string,
+    recordingKey: string
+  ): Promise<boolean> {
+    try {
+      await rm(await this.folderOf(projectSlug, eventId, recordingKey), {
+        recursive: true,
+        force: true
+      });
+      return true;
+    } catch (error) {
+      this.logger.warn(
+        `Could not remove the recordings of run ${recordingKey}: ${error}`
+      );
+      return false;
+    }
+  }
+}

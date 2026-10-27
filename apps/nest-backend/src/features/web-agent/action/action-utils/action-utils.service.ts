@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { SelectorSymbol, SelectorType } from '../action-utils';
-import { Page, ElementHandle, JSHandle } from 'puppeteer';
+import { ElementHandle, type Frame, JSHandle } from 'puppeteer';
+import { targetFrame, type QueryRoot } from '../handlers/frame';
 
 /** Classifies recorded selectors and resolves them to element handles. */
 @Injectable()
@@ -10,10 +11,17 @@ export class ActionUtilsService {
   /**
    * Returns the type of a Chrome Recorder selector from its prefix: a query
    * handler (`xpath/`, `pierce/`, `text/`, `aria/`), a raw XPath, or CSS.
+   * A shadow chain (` >>>> `, ` >>> ` or a `::-p-` pseudo) is CSS, so
+   * `getElement` resolves it with `page.$` and Puppeteer's selector engine.
+   * That check comes first: `::-p-xpath(…)` and a chain whose first part
+   * looks like a path must not be read as XPath, text or aria.
    * Returns undefined only when `selector` is not a string.
    */
   getSelectorType(selector: string) {
     try {
+      if (this.isShadowChain(selector)) {
+        return SelectorType.CLASS;
+      }
       if (this.isXPathSelector(selector)) {
         return SelectorType.XPATH;
       } else if (selector.startsWith(SelectorSymbol.CSSID)) {
@@ -40,27 +48,28 @@ export class ActionUtilsService {
    * the handle and disposes it.
    */
   async getElement(
-    page: Page,
+    page: QueryRoot,
     selectorType: string,
     selector: string
   ): Promise<ElementHandle<Element> | null> {
+    const frame = targetFrame(page);
     try {
       switch (selectorType) {
         case 'css':
         case 'id':
-          return await page.$(selector);
+          return await frame.$(selector);
 
         case 'aria':
-          return await this.getElementByAria(page, selector);
+          return await this.getElementByAria(frame, selector);
 
         case 'text':
-          return await page.$(this.withQueryPrefix(selector, 'text'));
+          return await frame.$(this.withQueryPrefix(selector, 'text'));
 
         case 'xpath':
-          return await page.$(this.withQueryPrefix(selector, 'xpath'));
+          return await frame.$(this.withQueryPrefix(selector, 'xpath'));
 
         case 'pierce':
-          return await this.getElementByShadowDom(page, selector);
+          return await this.getElementByShadowDom(frame, selector);
 
         default:
           throw new Error(`Unknown selector type: ${selectorType}`);
@@ -72,7 +81,7 @@ export class ActionUtilsService {
   }
 
   private async getElementByAria(
-    page: Page,
+    page: Frame,
     selector: string
   ): Promise<ElementHandle<Element> | null> {
     const legacyAttributeSelector = /^aria\/(aria-\w+)\/(.+)$/.exec(selector);
@@ -90,6 +99,19 @@ export class ActionUtilsService {
       : `${prefix}/${selector}`;
   }
 
+  /**
+   * A selector produced for a shadow chain. `page.$` understands the
+   * combinators and the `::-p-` pseudos; the prefix tests below would
+   * misread `::-p-xpath` and `::-p-text`.
+   */
+  private isShadowChain(selector: string): boolean {
+    return (
+      selector.startsWith('::-p-') ||
+      selector.includes(' >>>> ') ||
+      selector.includes(' >>> ')
+    );
+  }
+
   private isXPathSelector(selector: string): boolean {
     return (
       selector.startsWith(SelectorSymbol.XPATH) ||
@@ -103,7 +125,7 @@ export class ActionUtilsService {
    * root; any other pierce selector goes to Puppeteer's pierce handler.
    */
   private async getElementByShadowDom(
-    page: Page,
+    page: Frame,
     selector: string
   ): Promise<ElementHandle<Element> | null> {
     const body = selector.startsWith('pierce/')
@@ -121,15 +143,16 @@ export class ActionUtilsService {
       throw new Error(`Invalid shadow DOM selector: ${selector}`);
     }
 
-    // Helper-free on purpose: swc compiles this function to ES5 for the
-    // page, which has none of the bundle's helpers (see AGENTS.md).
+    // A source string: swc would compile a function to ES5 for the page,
+    // which has none of the bundle's helpers (see AGENTS.md).
     const jsHandle = await page.evaluateHandle(
-      (host, shadow) => {
-        const shadowRoot = document.querySelector(host)?.shadowRoot;
-        return shadowRoot?.querySelector(shadow) || null;
-      },
-      shadowHostSelector,
-      shadowDomSelector
+      `(() => {
+        const host = ${JSON.stringify(shadowHostSelector)};
+        const shadow = ${JSON.stringify(shadowDomSelector)};
+        const root = document.querySelector(host);
+        const shadowRoot = root ? root.shadowRoot : null;
+        return shadowRoot ? shadowRoot.querySelector(shadow) : null;
+      })()`
     );
 
     return this.convertJSHandleToElementHandle(jsHandle);

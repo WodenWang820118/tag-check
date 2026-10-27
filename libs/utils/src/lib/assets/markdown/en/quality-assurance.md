@@ -38,7 +38,7 @@ For example:
 
 The number `1` does not match the string `"1"`. Write numbers as numbers when the site pushes numbers.
 
-Tests imported from a GTM container start with a spec built from the tag: each parameter that reads a Data Layer Variable becomes a key holding the variable reference, such as `"value": "{{DLV - ecommerce.value}}"`, so the key must exist. Replace references with values or patterns where you want stricter checks. To edit a spec, open the test, go to **Latest result**, and use the edit button of the **Data Layer Spec** panel.
+Tests imported from a GTM container start with a spec built from the tag: each parameter that reads a Data Layer Variable becomes a key holding the variable reference, such as `"value": "{{DLV - ecommerce.value}}"`, so the key must exist. Replace references with values or patterns where you want stricter checks. To edit a spec, open the test, expand **Spec, recording and item definition**, and use the edit button of the **Data Layer Spec** panel.
 
 ## Ecommerce events
 
@@ -56,7 +56,7 @@ A test can also have an **Item Definition**: one GA4 item, such as:
 }
 ```
 
-For an ecommerce event, a run then expects this item as the entry of `ecommerce.items`, in place of the items in the spec. Edit it in the **Item Definition** panel of the test's **Latest result**.
+For an ecommerce event, a run then expects this item as the entry of `ecommerce.items`, in place of the items in the spec. Edit it in the **Item Definition** panel, under **Spec, recording and item definition** on the test's page.
 
 ## The request check
 

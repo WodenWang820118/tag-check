@@ -1,27 +1,45 @@
-@use '@angular/material' as mat;
-
-.mat-mdc-form-field {
+// The outlined white-on-primary look the toolbar had with mat-select.
+.lang-select {
+  align-items: center;
+  border: 1px solid white;
   border-radius: 5px;
-  border-color: white;
-  width: 150px;
-  flex-direction: row;
-  @include mat.form-field-density(-4);
-  @include mat.select-density(-4);
-}
-
-.language-icon {
-  vertical-align: middle;
-  margin-right: 8px;
   color: white;
+  cursor: pointer;
+  display: inline-flex;
+  gap: 0.8rem;
+  height: 4rem;
+  padding: 0 0.4rem 0 1.2rem;
+  position: relative;
+  width: 150px;
 }
 
-:host {
-  .mat-mdc-form-field.mat-mdc-form-field-type-mat-select {
-    --mdc-outlined-text-field-outline-color: white;
-    --mdc-outlined-text-field-hover-outline-color: white;
-    --mdc-outlined-text-field-focus-outline-color: white;
-    --mdc-outlined-text-field-focus-label-text-color: white;
-    --mat-select-enabled-trigger-text-color: white;
-    --mat-select-enabled-arrow-color: white;
-  }
+.lang-select:focus-within {
+  outline: 2px solid white;
+  outline-offset: 1px;
+}
+
+.lang-select__control {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  flex: 1;
+  font: inherit;
+  font-size: 1.6rem;
+  min-width: 0;
+  outline: none;
+  // Room for the arrow icon drawn over the control's right edge.
+  padding-right: 2.4rem;
+}
+
+// The open list uses the platform's colors; keep its text readable.
+.lang-select__control option {
+  color: rgba(0, 0, 0, 0.87);
+}
+
+.lang-select__arrow {
+  pointer-events: none;
+  position: absolute;
+  right: 0.4rem;
 }

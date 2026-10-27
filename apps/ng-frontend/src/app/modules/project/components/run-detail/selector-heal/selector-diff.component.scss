@@ -1,0 +1,18 @@
+:host {
+  display: block;
+}
+
+.diff {
+  border: 1px solid #d5dedc;
+  font-family: 'Roboto Mono', monospace;
+}
+
+.diff__line--add {
+  background: #e6f4ea;
+  color: #1e4f2c;
+}
+
+.diff__line--remove {
+  background: #fdecea;
+  color: #8c1d18;
+}

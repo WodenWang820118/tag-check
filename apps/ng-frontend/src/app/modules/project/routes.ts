@@ -118,6 +118,14 @@ export const PROJECT_ROUTES: Routes = [
         }
       },
       {
+        path: 'settings/ai-assist',
+        title: 'AI Assist',
+        loadComponent: () =>
+          import('../../shared/components/ai-assist-form/ai-assist-form.component').then(
+            (m) => m.AiAssistFormComponent
+          )
+      },
+      {
         path: 'settings/project-io',
         title: 'Export or delete project',
         loadComponent: () =>
@@ -132,6 +140,8 @@ export const PROJECT_ROUTES: Routes = [
           import('./views/detail-view/detail-view.component').then(
             (m) => m.DetailViewComponent
           ),
+        // `?run=<runId>` picks the run the page shows.
+        runGuardsAndResolvers: 'paramsOrQueryParamsChange',
         resolve: {
           page: reportPageResolver
         }

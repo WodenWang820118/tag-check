@@ -66,7 +66,7 @@ describe('ChangeHandler', () => {
   describe('handle', () => {
     /** A page where only the listed selectors exist. */
     function pageWith(...present: string[]) {
-      return {
+      const page = {
         waitForSelector: vi.fn(
           async (selector: string, _options?: WaitForSelectorOptions) => {
             if (present.includes(selector)) return { dispose: vi.fn() };
@@ -74,8 +74,12 @@ describe('ChangeHandler', () => {
               name: 'TimeoutError'
             });
           }
-        )
+        ),
+        mainFrame() {
+          return page;
+        }
       };
+      return page;
     }
 
     it('iterates selectors and stops on first successful change', async () => {
@@ -137,7 +141,7 @@ describe('ChangeHandler', () => {
       ).rejects.toBeInstanceOf(NotFoundException);
     });
 
-    it('fails with NotFoundException when no selector appears in time', async () => {
+    it('fails with StepElementNotFoundError (404) when no selector appears in time', async () => {
       const { svc, changeStrategyService } = build();
       const step: Step = {
         selectors: [['#a'], ['#b']],
@@ -148,7 +152,47 @@ describe('ChangeHandler', () => {
       await expect(
         svc.handle(pageWith() as never, 'p', 'e', step, false)
       ).rejects.toThrow(/None of the selectors appeared within 50 ms/);
+      await expect(
+        svc.handle(pageWith() as never, 'p', 'e', step, false)
+      ).rejects.toMatchObject({
+        selectors: ['#a', '#b'],
+        timeoutMs: 50,
+        status: 404
+      });
       expect(changeStrategyService.changeElement).not.toHaveBeenCalled();
+    });
+
+    it('types through a shadow chain in the recorded frame', async () => {
+      const { svc, changeStrategyService } = build({ changeResult: true });
+      const child = {
+        waitForSelector: vi.fn(async (selector: string) => {
+          if (selector === 'my-widget >>>> #field') {
+            return { dispose: vi.fn() };
+          }
+          throw Object.assign(new Error(`Waiting for ${selector} failed`), {
+            name: 'TimeoutError'
+          });
+        }),
+        childFrames: () => []
+      };
+      const page = {
+        mainFrame: () => ({ childFrames: () => [child] })
+      };
+      const step: Step = {
+        selectors: [['my-widget', '#field']],
+        value: 'v',
+        frame: [0]
+      } as unknown as Step;
+
+      await svc.handle(page as never, 'p', 'e', step, false);
+
+      expect(child.waitForSelector).toHaveBeenCalled();
+      expect(
+        vi.mocked(changeStrategyService.changeElement).mock.calls[0][0]
+      ).toBe(child);
+      expect(
+        vi.mocked(changeStrategyService.changeElement).mock.calls[0][3]
+      ).toBe('my-widget >>>> #field');
     });
   });
 });

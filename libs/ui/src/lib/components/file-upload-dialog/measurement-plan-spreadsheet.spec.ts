@@ -4,6 +4,7 @@ import {
   parseMeasurementPlanRows
 } from '@utils';
 import {
+  buildExtractedMeasurementPlanCsv,
   buildMeasurementPlanTemplateCsv,
   parseCsvToTable,
   readMeasurementPlanFile
@@ -20,6 +21,37 @@ describe('measurement-plan-spreadsheet', () => {
     ]);
     expect(parseMeasurementPlanRows(table)).toEqual({
       rows: getGa4MeasurementPlanTemplateRows(),
+      issues: []
+    });
+  });
+
+  it('writes an extracted plan with notes that the plan upload reads back', () => {
+    const csv = buildExtractedMeasurementPlanCsv([
+      {
+        eventName: 'add_to_cart',
+        eventParameters: ['value', 'currency'],
+        itemParameters: ['item_id', 'item_name'],
+        notes: ['Item parameters are not in the container; add the others.']
+      }
+    ]);
+    const table = parseCsvToTable(csv);
+    expect(table).toEqual([
+      ['event_name', 'event_parameters', 'item_parameters', 'notes'],
+      [
+        'add_to_cart',
+        'value, currency',
+        'item_id, item_name',
+        'Item parameters are not in the container; add the others.'
+      ]
+    ]);
+    expect(parseMeasurementPlanRows(table)).toEqual({
+      rows: [
+        {
+          eventName: 'add_to_cart',
+          eventParameters: ['value', 'currency'],
+          itemParameters: ['item_id', 'item_name']
+        }
+      ],
       issues: []
     });
   });

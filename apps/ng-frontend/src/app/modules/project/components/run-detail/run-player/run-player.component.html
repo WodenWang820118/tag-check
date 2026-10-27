@@ -1,0 +1,158 @@
+<section
+  aria-labelledby="run-player-title"
+  class="flex flex-col gap-[1.6rem] rounded-[1.2rem] bg-white p-[2rem]"
+  data-testid="run-player"
+>
+  <div class="flex flex-wrap items-center justify-between gap-[1.2rem]">
+    <h2 id="run-player-title" class="m-0 text-[2rem] font-medium">
+      What happened
+    </h2>
+    @if (siteUrl() && tagAssistantUrl()) {
+      <span class="text-[1.4rem] text-[#55605d]">
+        Both recordings play together on one timeline
+      </span>
+    }
+  </div>
+
+  @if (siteUrl(); as site) {
+    <div
+      #views
+      class="player-views"
+      [class.player-views--two]="tagAssistantUrl()"
+    >
+      <figure class="m-0 flex flex-col gap-[0.8rem]">
+        <video
+          #siteVideo
+          class="player-video"
+          [src]="site"
+          muted
+          playsinline
+          preload="metadata"
+          (loadedmetadata)="onMetadata()"
+          (timeupdate)="onTimeUpdate()"
+          (play)="onPlayState(true)"
+          (pause)="onPlayState(false)"
+          data-testid="run-player-site"
+        ></video>
+        <figcaption class="text-[1.4rem] text-[#55605d]">
+          1 · Website
+        </figcaption>
+      </figure>
+      @if (tagAssistantUrl(); as tagAssistant) {
+        <figure class="m-0 flex flex-col gap-[0.8rem]">
+          <video
+            #tagAssistantVideo
+            class="player-video"
+            [src]="tagAssistant"
+            muted
+            playsinline
+            preload="metadata"
+            data-testid="run-player-tag-assistant"
+          ></video>
+          <figcaption class="text-[1.4rem] text-[#55605d]">
+            2 · GTM Tag Assistant
+          </figcaption>
+        </figure>
+      }
+    </div>
+
+    <div class="flex items-center gap-[1.6rem]">
+      <button
+        type="button"
+        class="player-play"
+        (click)="togglePlay()"
+        [attr.aria-label]="playing() ? 'Pause' : 'Play'"
+        data-testid="run-player-play"
+      >
+        <mat-icon aria-hidden="true">{{
+          playing() ? 'pause' : 'play_arrow'
+        }}</mat-icon>
+      </button>
+      <div class="player-track">
+        <input
+          type="range"
+          class="player-scrubber"
+          min="0"
+          [max]="duration()"
+          step="0.1"
+          [value]="currentTime()"
+          (input)="onScrub($event)"
+          aria-label="Position in the recordings"
+          data-testid="run-player-scrubber"
+        />
+        @for (marker of markers(); track marker.index) {
+          <button
+            type="button"
+            class="player-marker"
+            [style.left]="marker.left"
+            (click)="playStep(marker)"
+            [attr.aria-label]="'Go to step ' + (marker.index + 1)"
+            [title]="'Step ' + (marker.index + 1) + ' · ' + marker.label"
+          >
+            {{ marker.index + 1 }}
+          </button>
+        }
+      </div>
+      <span class="text-[1.3rem] tabular-nums text-[#55605d]">{{
+        clock()
+      }}</span>
+      <button
+        type="button"
+        class="player-fullscreen"
+        (click)="fullScreen()"
+        aria-label="Full screen"
+        title="Full screen"
+      >
+        <mat-icon aria-hidden="true">fullscreen</mat-icon>
+      </button>
+    </div>
+  } @else if (imageUrl(); as image) {
+    <img
+      class="player-video"
+      [src]="image"
+      alt="The page at the end of the run"
+      data-testid="run-player-screenshot"
+    />
+    <p class="m-0 text-[1.4rem] text-[#55605d]">
+      Each run keeps its screenshot. The screen recordings are kept for the
+      latest {{ keptRuns }} runs of a test.
+    </p>
+  } @else {
+    <p class="m-0 text-[1.4rem] text-[#55605d]">
+      This run kept no recording or screenshot.
+    </p>
+  }
+
+  @if (playerSteps().length > 0) {
+    <ol
+      class="player-steps"
+      aria-label="Recorded steps"
+      data-testid="run-player-steps"
+    >
+      @for (step of playerSteps(); track step.index) {
+        <li>
+          @if (siteUrl() && step.atSeconds !== null) {
+            <button
+              type="button"
+              class="player-step"
+              (click)="playStep(step)"
+              [attr.data-testid]="'run-player-step-' + (step.index + 1)"
+            >
+              <span class="text-[1.2rem] text-[#55605d]"
+                >Step {{ step.index + 1 }} · {{ step.label }}</span
+              >
+              <code class="player-step__detail">{{ step.detail }}</code>
+            </button>
+          } @else {
+            <div class="player-step">
+              <span class="text-[1.2rem] text-[#55605d]"
+                >Step {{ step.index + 1 }} · {{ step.label }}</span
+              >
+              <code class="player-step__detail">{{ step.detail }}</code>
+            </div>
+          }
+        </li>
+      }
+    </ol>
+  }
+</section>

@@ -1,0 +1,32 @@
+<ul
+  class="diff m-0! list-none overflow-hidden rounded-[0.8rem] p-0! text-[1.25rem] leading-[1.7]"
+>
+  @for (line of changes(); track line.selector) {
+    <li
+      class="flex items-center gap-[0.8rem] px-[1rem]"
+      [class.diff__line--add]="line.change === 'add' && !excludedAdd(line)"
+      [class.diff__line--remove]="line.change === 'remove'"
+      [class.diff__line--keep]="line.change === 'keep'"
+      [class.line-through]="excludedAdd(line)"
+    >
+      @if (selectable() && line.change === 'add') {
+        <mat-checkbox
+          class="shrink-0"
+          [checked]="!excluded().includes(line.selector)"
+          (change)="toggle.emit(line.selector)"
+          [aria-label]="'Save ' + line.selector"
+          [attr.data-testid]="'selector-diff-pick-' + $index"
+        ></mat-checkbox>
+      }
+      <span aria-hidden="true" [class.line-through]="excludedAdd(line)">{{
+        line.change === 'add' ? '+' : line.change === 'remove' ? '−' : ' '
+      }}</span>
+      <span class="cdk-visually-hidden">{{ prefix(line) }}</span>
+      <code
+        class="[overflow-wrap:anywhere]"
+        [class.line-through]="excludedAdd(line)"
+        >{{ line.selector }}</code
+      >
+    </li>
+  }
+</ul>

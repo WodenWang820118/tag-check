@@ -1,6 +1,10 @@
 import { describe, it, expect, vi } from 'vitest';
-import { NotFoundException } from '@nestjs/common';
-import { StepExecutorUtilsService } from './step-executor-utils.service';
+import { Logger } from '@nestjs/common';
+import { StepElementNotFoundError } from '../step-failure/step-element-not-found.error';
+import {
+  ASSERTED_NAVIGATION_TIMEOUT_MS,
+  StepExecutorUtilsService
+} from './step-executor-utils.service';
 import { DataLayerService } from '../../action/web-monitoring/data-layer/data-layer.service';
 import { ConfigsService } from '../../../../core/configs/configs.service';
 import type { Step } from '@utils';
@@ -70,37 +74,114 @@ describe('StepExecutorUtilsService', () => {
     });
   });
 
+  describe('waitForAssertedNavigation', () => {
+    it('warns and continues when the navigation times out', async () => {
+      const warn = vi
+        .spyOn(Logger.prototype, 'warn')
+        .mockImplementation(() => undefined);
+      try {
+        const { svc } = build();
+        const page = {
+          waitForNavigation: vi
+            .fn()
+            .mockRejectedValue(new Error('Navigation timeout'))
+        };
+        await expect(
+          svc.waitForAssertedNavigation(page as never)
+        ).resolves.toBeUndefined();
+        expect(page.waitForNavigation).toHaveBeenCalledWith({
+          timeout: ASSERTED_NAVIGATION_TIMEOUT_MS
+        });
+        expect(warn).toHaveBeenCalledWith(
+          expect.stringContaining('Asserted navigation did not happen')
+        );
+      } finally {
+        warn.mockRestore();
+      }
+    });
+  });
+
   describe('handleWaitForElement', () => {
-    it('returns once the first selector resolves', async () => {
-      const { svc } = build();
+    function elementPage(waitForSelector: ReturnType<typeof vi.fn>) {
       const page = {
         waitForNavigation: vi
           .fn()
           .mockReturnValue(new Promise(() => undefined)),
-        waitForSelector: vi.fn().mockResolvedValue({}),
-        close: vi.fn()
-      } as never;
+        waitForSelector,
+        close: vi.fn(),
+        mainFrame() {
+          return page;
+        }
+      };
+      return page;
+    }
+
+    it('returns once the first selector resolves', async () => {
+      const { svc } = build();
+      const page = elementPage(vi.fn().mockResolvedValue({}));
       const step: Step = { selectors: [['#a']] } as unknown as Step;
-      await svc.handleWaitForElement(page, step, 100);
-      expect(
-        (page as { close: ReturnType<typeof vi.fn> }).close
-      ).not.toHaveBeenCalled();
+      await svc.handleWaitForElement(page as never, step, 100);
+      expect(page.close).not.toHaveBeenCalled();
     });
 
-    it('throws NotFoundException and leaves the page open when no selector resolves', async () => {
+    it('throws StepElementNotFoundError (404) and leaves the page open when no selector resolves', async () => {
       // The pipeline screenshots the page to save the failed run.
       const { svc } = build();
-      const close = vi.fn();
-      const page = {
-        waitForNavigation: vi.fn().mockRejectedValue(new Error('no nav')),
-        waitForSelector: vi.fn().mockRejectedValue(new Error('no sel')),
-        close
-      } as never;
+      const page = elementPage(vi.fn().mockRejectedValue(new Error('no sel')));
+      page.waitForNavigation.mockRejectedValue(new Error('no nav'));
       const step: Step = { selectors: [['#a']] } as unknown as Step;
+      const error = await svc
+        .handleWaitForElement(page as never, step, 10)
+        .catch((e: unknown) => e);
+      expect(error).toBeInstanceOf(StepElementNotFoundError);
+      expect(error).toMatchObject({ selectors: ['#a'], timeoutMs: 10 });
+      expect((error as StepElementNotFoundError).getStatus()).toBe(404);
+      expect(page.close).not.toHaveBeenCalled();
+    });
+
+    it('waits in the recorded frame for a shadow chain', async () => {
+      const { svc } = build();
+      const child = {
+        waitForSelector: vi.fn().mockResolvedValue({}),
+        childFrames: () => []
+      };
+      const page = {
+        waitForNavigation: vi
+          .fn()
+          .mockReturnValue(new Promise(() => undefined)),
+        waitForSelector: vi.fn(),
+        mainFrame: () => ({ childFrames: () => [child] })
+      };
+      const step: Step = {
+        selectors: [['my-widget', 'button.buy']],
+        frame: [0]
+      } as unknown as Step;
+
+      await svc.handleWaitForElement(page as never, step, 100);
+
+      expect(page.waitForSelector).not.toHaveBeenCalled();
+      expect(child.waitForSelector).toHaveBeenCalledWith(
+        'my-widget >>>> button.buy',
+        { visible: false, timeout: 100 }
+      );
+    });
+
+    it('names a frame that never appears, instead of the selectors', async () => {
+      const { svc } = build();
+      const page = {
+        waitForNavigation: vi.fn(),
+        waitForSelector: vi.fn(),
+        mainFrame: () => ({ childFrames: () => [] })
+      };
+      const step: Step = {
+        selectors: [['#a']],
+        frame: [0]
+      } as unknown as Step;
+
       await expect(
-        svc.handleWaitForElement(page, step, 10)
-      ).rejects.toBeInstanceOf(NotFoundException);
-      expect(close).not.toHaveBeenCalled();
+        svc.handleWaitForElement(page as never, step, 20)
+      ).rejects.toThrow(/Frame \[0\] did not appear within 20 ms/);
+      expect(page.waitForSelector).not.toHaveBeenCalled();
     });
   });
 

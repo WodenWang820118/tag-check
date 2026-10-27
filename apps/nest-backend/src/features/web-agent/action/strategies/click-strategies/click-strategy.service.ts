@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Page } from 'puppeteer';
+import type { QueryRoot } from '../../handlers/frame';
 import { PageClickService } from './page-click.service';
 import { EvaluateClickService } from './evaluate-click.service';
 import { ClickOperation } from './utils';
@@ -23,7 +23,7 @@ export class ClickStrategyService {
    * neither did. Never throws.
    */
   async clickElement(
-    page: Page,
+    page: QueryRoot,
     projectName: string,
     eventId: string,
     selector: string,

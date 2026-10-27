@@ -8,7 +8,9 @@ import {
   Logger,
   Delete,
   Req,
-  Res
+  Res,
+  ParseIntPipe,
+  Query
 } from '@nestjs/common';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { IReportDetails } from '@utils';
@@ -75,12 +77,13 @@ export class ReportController {
     return reports;
   }
 
+  /** Deletes tests with their runs, screenshots and recordings. */
   @Delete(':projectSlug')
   async deleteProjectEventReports(
     @Param('projectSlug') projectSlug: string,
     @Body() eventIds: string[]
   ) {
-    return await this.testEventRepositoryService.deleteByProjectSlugAndEventIds(
+    return await this.testReportFacadeRepositoryService.deleteTests(
       projectSlug,
       eventIds
     );
@@ -145,14 +148,17 @@ export class ReportController {
     );
   }
 
+  /** The test with its run `?run=<runId>`, its latest run by default. */
   @Get(':projectSlug/:eventId')
   async getReportDetails(
     @Param('projectSlug') projectSlug: string,
-    @Param('eventId') eventId: string
+    @Param('eventId') eventId: string,
+    @Query('run', new ParseIntPipe({ optional: true })) run?: number
   ) {
     return await this.testReportFacadeRepositoryService.getReportDetail(
       projectSlug,
-      eventId
+      eventId,
+      run
     );
   }
 

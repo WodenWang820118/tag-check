@@ -14,7 +14,8 @@ describe('VideosController', () => {
     expect(projectVideoService.getVideos).toHaveBeenCalledWith(
       'proj-1',
       'evt-1',
-      'recording.webm'
+      'recording.webm',
+      undefined
     );
     expect(result).toBe('video-stream');
   });
@@ -25,16 +26,17 @@ describe('VideosController', () => {
     };
     const controller = new VideosController(projectVideoService as never);
 
-    await controller.getVideos('proj-1', 'evt-1', 'tag-assistant');
+    await controller.getVideos('proj-1', 'evt-1', 'tag-assistant', 7);
 
     expect(projectVideoService.getVideos).toHaveBeenCalledWith(
       'proj-1',
       'evt-1',
-      'recording-tag-assistant.webm'
+      'recording-tag-assistant.webm',
+      7
     );
   });
 
-  it('makes the browser revalidate the recording, which each run overwrites', () => {
+  it('makes the browser revalidate the recording, which the next run replaces as the latest', () => {
     const headers: { name: string; value: string }[] = Reflect.getMetadata(
       HEADERS_METADATA,
       VideosController.prototype.getVideos

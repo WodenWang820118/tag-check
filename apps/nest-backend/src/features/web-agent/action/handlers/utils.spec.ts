@@ -1,6 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { Page } from 'puppeteer';
-import { preferSelector, waitForAnySelector } from './utils';
+import {
+  preferSelector,
+  toPuppeteerSelector,
+  waitForAnySelector
+} from './utils';
 
 const named = (name: string, message: string) =>
   Object.assign(new Error(message), { name });
@@ -120,6 +124,76 @@ describe('waitForAnySelector', () => {
       waitForAnySelector(page, [], { timeout: 20 })
     ).resolves.toBeNull();
     expect(waitForSelector).not.toHaveBeenCalled();
+  });
+});
+
+describe('toPuppeteerSelector', () => {
+  it('leaves a single selector exactly as recorded', () => {
+    expect(toPuppeteerSelector('aria/Buy')).toBe('aria/Buy');
+    expect(toPuppeteerSelector(['aria/Buy'])).toBe('aria/Buy');
+    expect(toPuppeteerSelector('text/Buy')).toBe('text/Buy');
+    expect(toPuppeteerSelector('xpath//div')).toBe('xpath//div');
+    expect(toPuppeteerSelector('pierce/div')).toBe('pierce/div');
+    expect(toPuppeteerSelector('#buy')).toBe('#buy');
+    expect(toPuppeteerSelector('aria/aria-label/Checkout')).toBe(
+      'aria/aria-label/Checkout'
+    );
+    expect(toPuppeteerSelector([])).toBe('');
+  });
+
+  it('joins a shadow chain with the deep child combinator', () => {
+    expect(toPuppeteerSelector(['my-widget', 'button.buy'])).toBe(
+      'my-widget >>>> button.buy'
+    );
+    expect(toPuppeteerSelector(['a', 'b', 'c'])).toBe('a >>>> b >>>> c');
+  });
+
+  it('turns each prefixed part into a P-selector', () => {
+    expect(toPuppeteerSelector(['my-widget', 'aria/Buy the item'])).toBe(
+      'my-widget >>>> ::-p-aria(Buy the item)'
+    );
+    expect(toPuppeteerSelector(['aria/Name', 'button'])).toBe(
+      '::-p-aria(Name) >>>> button'
+    );
+    expect(toPuppeteerSelector(['host', 'text/Hello'])).toBe(
+      'host >>>> ::-p-text(Hello)'
+    );
+    expect(toPuppeteerSelector(['host', 'xpath//div'])).toBe(
+      'host >>>> ::-p-xpath(/div)'
+    );
+  });
+
+  it('quotes arguments the P-selector grammar would split', () => {
+    expect(toPuppeteerSelector(['host', 'text/a (b)'])).toBe(
+      'host >>>> ::-p-text("a (b)")'
+    );
+    expect(toPuppeteerSelector(['host', 'text/say "hi"'])).toBe(
+      'host >>>> ::-p-text("say \\"hi\\"")'
+    );
+    expect(toPuppeteerSelector(['host', 'text/a, b'])).toBe(
+      'host >>>> ::-p-text("a, b")'
+    );
+    expect(toPuppeteerSelector(['host', 'text/a\\b'])).toBe(
+      'host >>>> ::-p-text("a\\\\b")'
+    );
+    expect(toPuppeteerSelector(['host', 'xpath///*[@id="x"]'])).toBe(
+      'host >>>> ::-p-xpath("//*[@id=\\"x\\"]")'
+    );
+  });
+
+  it('writes a pierce part as a deep descendant of the current node', () => {
+    expect(toPuppeteerSelector(['my-widget', 'pierce/button'])).toBe(
+      'my-widget >>>> :scope >>> button'
+    );
+    expect(toPuppeteerSelector(['pierce/my-widget', 'button.buy'])).toBe(
+      ':scope >>> my-widget >>>> button.buy'
+    );
+    expect(toPuppeteerSelector(['pierce/a', 'pierce/b'])).toBe(
+      ':scope >>> a >>>> :scope >>> b'
+    );
+    expect(toPuppeteerSelector(['pierce/my-widget', 'aria/Buy'])).toBe(
+      ':scope >>> my-widget >>>> ::-p-aria(Buy)'
+    );
   });
 });
 

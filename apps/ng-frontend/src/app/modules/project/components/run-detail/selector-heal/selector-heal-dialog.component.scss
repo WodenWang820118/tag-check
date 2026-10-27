@@ -1,0 +1,43 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.heal {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  height: 100%;
+  font-size: 1.4rem;
+  color: #1f2a28;
+
+  // The dialog's own title and content spacing assume a centred dialog.
+  &__title {
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 1.8rem !important;
+  }
+
+  &__body {
+    padding: 1.6rem 2rem !important;
+    max-height: none !important;
+  }
+
+  &__label {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: #55605d;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  &__selectors li {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.8rem;
+  }
+
+  &__suggestion {
+    border: 1px dashed rgb(0 121 107 / 0.5);
+    background: rgb(0 121 107 / 0.04);
+  }
+}

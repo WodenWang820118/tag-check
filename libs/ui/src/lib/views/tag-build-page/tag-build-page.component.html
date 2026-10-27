@@ -8,10 +8,13 @@
       [(selectedIndex)]="selectedIndex"
     >
       <mat-tab label="Tag Build"> </mat-tab>
+      <mat-tab label="Tag Extract"> </mat-tab>
     </mat-tab-group>
   </header>
 
+  <!-- Hidden, not removed, in Tag Extract: the editors keep their content. -->
   <section
+    [style.display]="selectedIndex === TagBuildMode.TagBuild ? null : 'none'"
     class="main-page__board grid gap-6 lg:gap-8 mb-12 w-full grid-cols-1 xl:[grid-template-columns:minmax(0,1fr)_clamp(18rem,22%,24rem)_minmax(0,1fr)] xl:[grid-template-areas:'input_actions_output']"
     aria-label="Tag Build workspace"
   >
@@ -21,33 +24,16 @@
       aria-label="Input JSON editor"
     >
       <div
-        class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-700 dark:text-gray-200"
+        class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-[1.4rem] font-medium text-gray-700 dark:text-gray-200"
       >
         Input JSON
       </div>
       <div class="p-2">
-        <!-- If using Tag Extract (selectedIndex === TagBuildMode.TagExtract) input should be blank -->
-        @if (selectedIndex === TagBuildMode.TagBuild) {
-          @if (specs().length > 0) {
-            <lib-editor
-              data-testid="tagbuild-input"
-              [content]="specs() | json"
-              [editorExtension]="inputExtension"
-            >
-            </lib-editor>
-          } @else {
-            <lib-editor
-              data-testid="tagbuild-input"
-              [content]="[] | json"
-              [editorExtension]="inputExtension"
-            ></lib-editor>
-          }
-        } @else {
-          <lib-editor
-            [content]="[] | json"
-            [editorExtension]="inputExtension"
-          ></lib-editor>
-        }
+        <lib-editor
+          data-testid="tagbuild-input"
+          [content]="specs() | json"
+          [editorExtension]="inputExtension"
+        ></lib-editor>
       </div>
     </div>
 
@@ -67,7 +53,7 @@
       aria-label="Output JSON editor"
     >
       <div
-        class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-700 dark:text-gray-200"
+        class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-[1.4rem] font-medium text-gray-700 dark:text-gray-200"
       >
         Output JSON
       </div>
@@ -76,4 +62,16 @@
       </div>
     </div>
   </section>
+
+  <!-- Loaded on first use; kept afterwards so its result survives tab switches. -->
+  @defer (when selectedIndex === TagBuildMode.TagExtract) {
+    <div
+      [style.display]="
+        selectedIndex === TagBuildMode.TagExtract ? null : 'none'
+      "
+      class="mb-12 w-full"
+    >
+      <lib-tag-extract></lib-tag-extract>
+    </div>
+  }
 </main>

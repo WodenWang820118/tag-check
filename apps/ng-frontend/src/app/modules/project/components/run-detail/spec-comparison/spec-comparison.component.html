@@ -1,0 +1,69 @@
+<section
+  aria-labelledby="spec-comparison-title"
+  class="flex flex-col gap-[1.2rem] rounded-[1.2rem] bg-white p-[2rem]"
+  data-testid="spec-comparison"
+>
+  <h2 id="spec-comparison-title" class="m-0 text-[2rem] font-medium">
+    Expected vs captured
+  </h2>
+  @if (comparison(); as result) {
+    @if (!result.captured) {
+      <p class="m-0 text-[1.4rem] text-[#55605d]">
+        The run captured no push for this event, so every key is missing.
+      </p>
+    }
+    <div class="overflow-x-auto">
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th scope="col">Key</th>
+            <th scope="col">Spec</th>
+            <th scope="col">Captured</th>
+            <th scope="col">Result</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (line of result.lines; track line.path) {
+            <tr [attr.data-testid]="'spec-row-' + line.path">
+              <td>
+                <code>{{ line.path }}</code>
+              </td>
+              <td>
+                <span class="comparison-hint">{{ line.requirement }}</span>
+                <code>{{ line.expected }}</code>
+              </td>
+              <td>
+                <code>{{ line.actual }}</code>
+              </td>
+              <td
+                [class.comparison-passed]="line.passed"
+                [class.comparison-failed]="!line.passed"
+              >
+                {{ line.result }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    @if (result.extras.length > 0) {
+      <details class="comparison-extras" data-testid="spec-extras">
+        <summary>
+          Captured, not in the spec ({{ result.extras.length }})
+        </summary>
+        <dl>
+          @for (extra of result.extras; track extra.path) {
+            <dt>
+              <code>{{ extra.path }}</code>
+            </dt>
+            <dd>
+              <code>{{ extra.value }}</code>
+            </dd>
+          }
+        </dl>
+      </details>
+    }
+  } @else {
+    <p class="m-0 text-[1.4rem] text-[#55605d]">This test has no spec yet.</p>
+  }
+</section>

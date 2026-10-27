@@ -31,6 +31,11 @@ function createContext(
       title: `${eventName} recording`,
       steps: []
     },
+    run: null,
+    runs: [],
+    isLatestRun: true,
+    stepFailure: null,
+    stepFallbacks: [],
     reportDetails: {
       position: 0,
       event: eventName,

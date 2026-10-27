@@ -1,9 +1,12 @@
-import { Page } from 'puppeteer';
+import type { QueryRoot } from '../../handlers/frame';
 
-/** Changes an element by trying each change method in turn. */
+/**
+ * Changes an element by trying each change method in turn. `page` is the
+ * step's frame when the change was recorded inside one.
+ */
 export interface ChangeStrategy {
   changeElement(
-    page: Page,
+    page: QueryRoot,
     projectName: string,
     title: string,
     selector: string,
@@ -19,7 +22,7 @@ export interface ChangeStrategy {
  */
 export interface ChangeOperation {
   operate: (
-    page: Page,
+    page: QueryRoot,
     projectName: string,
     title: string,
     selector: string,

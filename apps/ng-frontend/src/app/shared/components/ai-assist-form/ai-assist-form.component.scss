@@ -1,0 +1,56 @@
+.ai-assist {
+  display: flex;
+  flex-direction: column;
+  gap: 1.6rem;
+  padding-top: 1.2rem;
+  font-size: 1.4rem;
+
+  &__intro {
+    margin: 0;
+    max-width: 72rem;
+    line-height: 1.5;
+    color: #55605d;
+  }
+
+  &__error {
+    margin: 0;
+    color: #b3261e;
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.6rem;
+  }
+
+  &__fields {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(28rem, 1fr));
+    gap: 1.6rem;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  &__status {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    max-width: 72rem;
+  }
+
+  &__ready {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1.2rem;
+    color: #1e6b34;
+  }
+
+  &__hint {
+    margin: 0;
+    color: #55605d;
+  }
+}

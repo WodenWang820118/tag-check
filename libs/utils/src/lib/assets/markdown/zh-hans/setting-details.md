@@ -34,6 +34,16 @@ TagCheck 在每次运行前设置的值，使网站以测试所需的状态启�
 - **Hide the browser?**：在不显示窗口的情况下运行 Chrome。伴随模式始终会显示窗口。
 - **Add browser setting**：为运行添加一个 Chrome 命令行参数，例如 `--window-size=1280,800`。
 
+## AI Assist
+
+这些设置适用于这台电脑上的每个项目。当某个步骤找不到其元素时，这台电脑上的模型会建议替代的选择器。模型在 [Ollama](https://ollama.com) 中运行，因此页面数据不会离开这台电脑。建议只有在您保存后才会更改录制，而测试仍只依据其自身的检查判定通过。
+
+- **Suggest replacements when a step cannot find its element**：默认关闭。
+- **Ollama address**：Ollama 的地址，只能是这台电脑（`localhost`、`127.0.0.1` 或 `[::1]`）。默认为 `http://127.0.0.1:11434`。
+- **Model**：要使用的 Ollama 模型，例如 `qwen3.5:9b`。列表会列出 Ollama 已有的模型。
+
+表单下方会显示 Ollama 是否响应，以及是否已有该模型。TagCheck 不会安装 Ollama，也不会下载模型：Ollama 未运行时，请启动它；缺少模型时，页面会显示需要在终端中运行的 `ollama pull` 命令。完成后选择 **Check again**。
+
 ## Export or Delete
 
 - **Export**：将项目及其测试、规格、录制和结果下载为 ZIP 文件。在另一台计算机上，可通过 New Project 页面上的 **Already got the project?** 导入它。

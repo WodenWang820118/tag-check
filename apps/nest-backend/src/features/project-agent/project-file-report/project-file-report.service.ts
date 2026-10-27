@@ -1,12 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import type { DeleteRunsResponse } from '@utils';
-import { rm } from 'node:fs/promises';
-import { FolderPathService } from '../../../infrastructure/os/path/folder-path/folder-path.service';
-import { join } from 'path';
+import { RunRecordingsService } from '../../../infrastructure/os/run-recordings/run-recordings.service';
 import { XlsxReportService } from '../../../infrastructure/os/xlsx-report/xlsx-report.service';
 import { TestEventRepositoryService } from '../../../core/repository/test-event/test-event-repository.service';
 import { TestEventDetailRepositoryService } from '../../../core/repository/test-event/test-event-detail-repository.service';
-import { RECORDING_FILES } from '../../../shared';
 
 /**
  * The Reports page's data: the project's runs, deleting runs, and the
@@ -16,7 +13,7 @@ import { RECORDING_FILES } from '../../../shared';
 export class ProjectFileReportService {
   private readonly logger = new Logger(ProjectFileReportService.name);
   constructor(
-    private readonly folderPathService: FolderPathService,
+    private readonly runRecordingsService: RunRecordingsService,
     private readonly xlsxReportService: XlsxReportService,
     private readonly testEventRepositoryService: TestEventRepositoryService,
     private readonly testEventDetailRepositoryService: TestEventDetailRepositoryService
@@ -28,33 +25,25 @@ export class ProjectFileReportService {
   }
 
   /**
-   * Deletes the project's runs with these ids and the screenshots they saved;
-   * the tests stay. Every run replaces the test's screen recordings (the
-   * site's and, in accompanied mode, Tag Assistant's), so a test whose latest
-   * run is deleted loses both.
+   * Deletes the project's runs with these ids, the screenshots and the
+   * screen recordings they saved; the tests stay. A test whose latest run
+   * is deleted also loses the recordings runs saved before keeping their own
+   * left in its folder, which were that run's.
    */
   async deleteRuns(
     projectSlug: string,
     runIds: number[]
   ): Promise<DeleteRunsResponse> {
-    const { deletedRunIds, latestRunDeletedEventIds } =
+    const { deletedRunIds, latestRunDeletedEventIds, deletedRecordings } =
       await this.testEventDetailRepositoryService.deleteRuns(
         projectSlug,
         runIds
       );
+    await this.runRecordingsService.removeRuns(projectSlug, deletedRecordings);
     await Promise.all(
-      latestRunDeletedEventIds.map(async (eventId) => {
-        const folder =
-          await this.folderPathService.getInspectionEventFolderPath(
-            projectSlug,
-            eventId
-          );
-        await Promise.all(
-          Object.values(RECORDING_FILES).map((file) =>
-            rm(join(folder, file), { force: true })
-          )
-        );
-      })
+      latestRunDeletedEventIds.map((eventId) =>
+        this.runRecordingsService.removeLegacy(projectSlug, eventId)
+      )
     );
     this.logger.log(`Deleted ${deletedRunIds.length} run(s) of ${projectSlug}`);
     return { deletedRunIds };

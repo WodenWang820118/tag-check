@@ -1,6 +1,10 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { Credentials } from 'puppeteer';
-import type { EventInspectionPresetDto, RunStatusBatch } from '@utils';
+import type {
+  EventInspectionPresetDto,
+  RunStatusBatch,
+  SelectorTrialRequest
+} from '@utils';
 import { EventInspectionPipelineService } from '../../features/event-inspection-pipeline/event-inspection-pipeline.service';
 import {
   isHeadless,
@@ -8,6 +12,7 @@ import {
 } from '../../features/web-agent/puppeteer-utils/puppeteer-utils.service';
 import { RunRecorder } from '../../features/web-agent/puppeteer-utils/run-recorder';
 import { applyPresetCookies } from '../web-agent/browser-state-preload.util';
+import { RunMedia } from '../event-inspection-pipeline/run-media';
 import { RunQueueService } from '../event-inspection-pipeline/run-queue.service';
 import { RunTrackerService } from '../event-inspection-pipeline/run-tracker.service';
 import { toClientErrorMessage } from '../../shared/client-error-message';
@@ -46,17 +51,21 @@ export class SingleEventInspectionService {
   /**
    * Runs the test once every run requested before it has finished. Resolves
    * with the pipeline's result; rejects with an HttpException (500) when the
-   * run fails. `batch` places the run in its batch for the run status.
+   * run fails. `batch` places the run in its batch for the run status;
+   * `stepOverride` makes it a trial of other selectors for one step.
    */
   inspectSingleEvent(
     projectSlug: string,
     eventId: string,
     options: InspectSingleEventOptions,
-    batch?: RunStatusBatch
+    batch?: RunStatusBatch,
+    stepOverride?: SelectorTrialRequest
   ) {
     return this.runQueue.run((signal) =>
-      this.runTracker.track({ projectSlug, eventId, batch }, signal, () =>
-        this.inspect(projectSlug, eventId, options, signal)
+      this.runTracker.track(
+        { projectSlug, eventId, batch, stepOverride },
+        signal,
+        () => this.inspect(projectSlug, eventId, options, signal)
       )
     );
   }
@@ -97,12 +106,15 @@ export class SingleEventInspectionService {
         projectSlug,
         eventId
       );
+      const media = new RunMedia();
       recorder = await this.puppeteerUtilsService.startRecorder(
         page,
         projectSlug,
         eventId,
-        signal
+        signal,
+        { recordingKey: media.recordingKey }
       );
+      media.site = recorder;
       // Gives the recording a moment of the page before the replay starts.
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
@@ -114,7 +126,8 @@ export class SingleEventInspectionService {
           measurementId,
           credentials,
           captureRequest,
-          eventInspectionPresetDto
+          eventInspectionPresetDto,
+          media
         );
 
       await this.puppeteerUtilsService.stopRecorder(recorder);
