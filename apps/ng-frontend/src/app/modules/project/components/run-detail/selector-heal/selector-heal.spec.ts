@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import type { Recording } from '@utils';
 import {
+  chosenSelectors,
   selectorChanges,
   selectorGroupText,
+  withoutExcludedSelectors,
   withStepSelectors
 } from './selector-heal';
 
@@ -21,6 +23,38 @@ const recording: Recording = {
     }
   ]
 };
+
+describe('chosenSelectors', () => {
+  it('keeps the order and drops the ones the user unticked', () => {
+    expect(
+      chosenSelectors(
+        ['[data-testid="add-to-cart"]', 'body > button', 'aria/Add to cart'],
+        ['body > button', 'not-in-the-list']
+      )
+    ).toEqual(['[data-testid="add-to-cart"]', 'aria/Add to cart']);
+  });
+
+  it('keeps every selector when none are unticked', () => {
+    expect(chosenSelectors(['#a', '#b'], [])).toEqual(['#a', '#b']);
+  });
+});
+
+describe('withoutExcludedSelectors', () => {
+  it('drops an unticked selector the old list would keep', () => {
+    const changed = withoutExcludedSelectors(
+      withStepSelectors(recording, 1, ['#new'], true),
+      1,
+      ['aria/Add to cart']
+    );
+
+    expect(changed.steps[1].selectors).toEqual([
+      ['#new'],
+      ['#shadow-host', '#add'],
+      ['[data-testid="add-to-bag"]']
+    ]);
+    expect(recording.steps[1].selectors).toHaveLength(3);
+  });
+});
 
 describe('selectorChanges', () => {
   it('adds the new selectors, then removes the old ones', () => {

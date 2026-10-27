@@ -33,7 +33,12 @@ import { AiAssistService } from '../../../../../shared/services/api/ai-assist/ai
 import { apiErrorMessage } from '../../../../../shared/services/api/http-error.utils';
 import { RecordingService } from '../../../../../shared/services/api/recording/recording.service';
 import { SelectorDiffComponent } from './selector-diff.component';
-import { selectorChanges, withStepSelectors } from './selector-heal';
+import {
+  chosenSelectors,
+  selectorChanges,
+  withoutExcludedSelectors,
+  withStepSelectors
+} from './selector-heal';
 
 /** The run whose failed step the drawer finds a replacement for. */
 export type SelectorHealDialogData = {
@@ -102,6 +107,8 @@ export class SelectorHealDialogComponent implements OnInit {
   private readonly dismissed = signal<number[]>([]);
   readonly trial = signal<Trial | null>(null);
   readonly keepOld = signal(false);
+  /** New selectors the user unticked, left out of the save. */
+  readonly excluded = signal<string[]>([]);
   readonly saving = signal(false);
 
   private asked?: Subscription;
@@ -115,6 +122,14 @@ export class SelectorHealDialogComponent implements OnInit {
   readonly suggestions = computed(() =>
     (this.answer()?.suggestions ?? []).filter(
       (suggestion) => !this.dismissed().includes(suggestion.candidate.index)
+    )
+  );
+
+  /** The suggestion's selectors the user left ticked, in that order. */
+  readonly chosen = computed(() =>
+    chosenSelectors(
+      this.trial()?.suggestion.candidate.selectors ?? [],
+      this.excluded()
     )
   );
 
@@ -246,6 +261,7 @@ export class SelectorHealDialogComponent implements OnInit {
     const context = this.context();
     if (!context) return;
     this.keepOld.set(false);
+    this.excluded.set([]);
     this.trial.set({ suggestion, status: 'running' });
     this.aiAssist
       .trial(this.data.projectSlug, this.data.eventId, {
@@ -269,13 +285,24 @@ export class SelectorHealDialogComponent implements OnInit {
 
   backToSuggestions(): void {
     this.trial.set(null);
+    this.excluded.set([]);
+  }
+
+  /** Ticks or unticks one new selector for the save. */
+  toggleExcluded(selector: string): void {
+    this.excluded.update((current) =>
+      current.includes(selector)
+        ? current.filter((item) => item !== selector)
+        : [...current, selector]
+    );
   }
 
   /** Writes the suggestion's selectors into the step of the recording. */
   async save(): Promise<void> {
     const trial = this.trial();
     const context = this.context();
-    if (!trial || !context) return;
+    const selectors = this.chosen();
+    if (!trial || !context || selectors.length === 0) return;
     this.saving.set(true);
     try {
       const recording = await firstValueFrom(
@@ -288,11 +315,15 @@ export class SelectorHealDialogComponent implements OnInit {
         this.recordings.updateRecording(
           this.data.projectSlug,
           this.data.eventId,
-          withStepSelectors(
-            recording,
+          withoutExcludedSelectors(
+            withStepSelectors(
+              recording,
+              context.stepIndex,
+              selectors,
+              this.keepOld()
+            ),
             context.stepIndex,
-            trial.suggestion.candidate.selectors,
-            this.keepOld()
+            this.excluded()
           )
         )
       );

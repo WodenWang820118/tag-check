@@ -26,8 +26,10 @@ import { apiErrorMessage } from '../../../../../shared/services/api/http-error.u
 import { RecordingService } from '../../../../../shared/services/api/recording/recording.service';
 import { SelectorDiffComponent } from './selector-diff.component';
 import {
+  chosenSelectors,
   selectorChanges,
   selectorGroupText,
+  withoutExcludedSelectors,
   withStepSelectors
 } from './selector-heal';
 
@@ -73,6 +75,8 @@ export class SaveFallbackDialogComponent implements OnInit {
   readonly recording = signal<Recording | null>(null);
   readonly loadError = signal<string | null>(null);
   readonly keepOld = signal(false);
+  /** New selectors the user unticked, left out of the save. */
+  readonly excluded = signal<string[]>([]);
   readonly saving = signal(false);
 
   readonly reason = describeFallbackMatch(this.data.fallback);
@@ -84,10 +88,19 @@ export class SaveFallbackDialogComponent implements OnInit {
     ).map(selectorGroupText)
   );
 
-  /** Whether the step already waits for the fallback first. */
-  readonly alreadySaved = computed(
-    () => this.recorded()[0] === this.data.fallback.selectors[0]
+  /** The fallback selectors the user left ticked, in the fallback's order. */
+  readonly chosen = computed(() =>
+    chosenSelectors(this.data.fallback.selectors, this.excluded())
   );
+
+  /**
+   * Whether the step already waits for the first chosen selector. With
+   * nothing unticked, that is the fallback's first selector.
+   */
+  readonly alreadySaved = computed(() => {
+    const first = this.chosen()[0];
+    return first !== undefined && first === this.recorded()[0];
+  });
 
   readonly changes = computed(() =>
     selectorChanges(
@@ -110,10 +123,20 @@ export class SaveFallbackDialogComponent implements OnInit {
       });
   }
 
+  /** Ticks or unticks one new selector for the save. */
+  toggleExcluded(selector: string): void {
+    this.excluded.update((current) =>
+      current.includes(selector)
+        ? current.filter((item) => item !== selector)
+        : [...current, selector]
+    );
+  }
+
   /** Writes the fallback's selectors into the step of the recording. */
   async save(): Promise<void> {
     const recording = this.recording();
-    if (!recording) return;
+    const selectors = this.chosen();
+    if (!recording || selectors.length === 0) return;
     const { fallback } = this.data;
     this.saving.set(true);
     try {
@@ -121,11 +144,15 @@ export class SaveFallbackDialogComponent implements OnInit {
         this.recordings.updateRecording(
           this.data.projectSlug,
           this.data.eventId,
-          withStepSelectors(
-            recording,
+          withoutExcludedSelectors(
+            withStepSelectors(
+              recording,
+              fallback.stepIndex,
+              selectors,
+              this.keepOld()
+            ),
             fallback.stepIndex,
-            fallback.selectors,
-            this.keepOld()
+            this.excluded()
           )
         )
       );
