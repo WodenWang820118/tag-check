@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { NotFoundException } from '@nestjs/common';
+import { StepElementNotFoundError } from '../step-failure/step-element-not-found.error';
 import { StepExecutorUtilsService } from './step-executor-utils.service';
 import { DataLayerService } from '../../action/web-monitoring/data-layer/data-layer.service';
 import { ConfigsService } from '../../../../core/configs/configs.service';
@@ -87,7 +87,7 @@ describe('StepExecutorUtilsService', () => {
       ).not.toHaveBeenCalled();
     });
 
-    it('throws NotFoundException and leaves the page open when no selector resolves', async () => {
+    it('throws StepElementNotFoundError (404) and leaves the page open when no selector resolves', async () => {
       // The pipeline screenshots the page to save the failed run.
       const { svc } = build();
       const close = vi.fn();
@@ -97,9 +97,12 @@ describe('StepExecutorUtilsService', () => {
         close
       } as never;
       const step: Step = { selectors: [['#a']] } as unknown as Step;
-      await expect(
-        svc.handleWaitForElement(page, step, 10)
-      ).rejects.toBeInstanceOf(NotFoundException);
+      const error = await svc
+        .handleWaitForElement(page, step, 10)
+        .catch((e: unknown) => e);
+      expect(error).toBeInstanceOf(StepElementNotFoundError);
+      expect(error).toMatchObject({ selectors: ['#a'], timeoutMs: 10 });
+      expect((error as StepElementNotFoundError).getStatus()).toBe(404);
       expect(close).not.toHaveBeenCalled();
     });
   });

@@ -3,7 +3,10 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { RUN_RECORDINGS_KEPT } from '@utils';
-import { RunRecordingsService } from './run-recordings.service';
+import {
+  RunRecordingsService,
+  STEP_FAILURE_FILE
+} from './run-recordings.service';
 
 /** A run's recording key: a UUID, the n-th one for a test. */
 const key = (n: number) =>
@@ -157,5 +160,51 @@ describe('RunRecordingsService', () => {
 
     expect(existsSync(join(root, 'cart'))).toBe(false);
     expect(existsSync(join(root, 'purchase'))).toBe(true);
+  });
+  describe('step failures', () => {
+    const context = {
+      stepIndex: 3,
+      stepType: 'click',
+      selectors: [{ selector: '#gone', matches: 0 }],
+      timeoutMs: 15000,
+      offset: null,
+      url: 'https://example.test/',
+      title: 'Example',
+      viewport: { width: 1280, height: 800 },
+      candidates: [],
+      candidatesFound: 0,
+      capturedAt: '2026-10-27T10:00:00.000Z'
+    };
+
+    it("keeps what a run's step saw in the run's folder", async () => {
+      await expect(
+        service.saveStepFailure('demo', 'e1', key(1), context)
+      ).resolves.toBe(true);
+
+      expect(
+        existsSync(join(root, 'e1', 'runs', key(1), STEP_FAILURE_FILE))
+      ).toBe(true);
+      await expect(
+        service.readStepFailure('demo', 'e1', key(1))
+      ).resolves.toEqual(context);
+    });
+
+    it('reads null for a run that kept none', async () => {
+      await expect(
+        service.readStepFailure('demo', 'e1', key(2))
+      ).resolves.toBeNull();
+    });
+
+    it('reports a failed save without throwing', async () => {
+      await expect(
+        service.saveStepFailure('demo', 'e1', 'not-a-key', context)
+      ).resolves.toBe(false);
+    });
+
+    it('rejects a key that is not a run key', async () => {
+      await expect(
+        service.readStepFailure('demo', 'e1', '../../etc')
+      ).rejects.toThrow('Not a recording key');
+    });
   });
 });

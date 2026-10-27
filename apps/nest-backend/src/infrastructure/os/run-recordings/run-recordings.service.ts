@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { existsSync } from 'fs';
-import { rm } from 'fs/promises';
+import { mkdir, readFile, rm, writeFile } from 'fs/promises';
 import { join } from 'path';
-import { RUN_RECORDINGS_KEPT } from '@utils';
+import { RUN_RECORDINGS_KEPT, type StepFailureContext } from '@utils';
 import { RECORDING_FILES, type RecordingFile } from '../../../shared';
 import { TestEventDetailRepositoryService } from '../../../core/repository/test-event/test-event-detail-repository.service';
 import { FolderPathService } from '../path/folder-path/folder-path.service';
@@ -11,6 +11,9 @@ import { FolderPathService } from '../path/folder-path/folder-path.service';
 const RECORDING_KEY =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const RUNS_FOLDER = 'runs';
+
+/** The file in a run's folder that says what its failed step saw. */
+export const STEP_FAILURE_FILE = 'step-failure.json';
 
 /** Where a run's recordings are looked up: see RunRecordingsService.fileOf. */
 export type RunRecordingRef = {
@@ -25,6 +28,9 @@ export type RunRecordingRef = {
  * latest RUN_RECORDINGS_KEPT runs of a test keep theirs; older runs keep
  * only their screenshot. Runs saved before runs kept their own recordings
  * left the latest of them in `inspection_results/<eventId>/` itself.
+ *
+ * A run whose step could not find its element also keeps what the step saw
+ * there (STEP_FAILURE_FILE), for as long as it keeps its recordings.
  */
 @Injectable()
 export class RunRecordingsService {
@@ -83,6 +89,54 @@ export class RunRecordingsService {
       );
     }
     return path && existsSync(path) ? path : null;
+  }
+
+  /**
+   * Saves what the run's failed step saw in the run's folder. Never throws:
+   * the run is saved without it, and false says so.
+   */
+  async saveStepFailure(
+    projectSlug: string,
+    eventId: string,
+    recordingKey: string,
+    context: StepFailureContext
+  ): Promise<boolean> {
+    try {
+      const folder = await this.folderOf(projectSlug, eventId, recordingKey);
+      await mkdir(folder, { recursive: true });
+      await writeFile(
+        join(folder, STEP_FAILURE_FILE),
+        JSON.stringify(context),
+        'utf8'
+      );
+      return true;
+    } catch (error) {
+      this.logger.warn(
+        `Could not save what run ${recordingKey}'s step saw: ${error}`
+      );
+      return false;
+    }
+  }
+
+  /**
+   * What the run's failed step saw, or null when the run kept none (no step
+   * failed that way, or its folder was pruned).
+   *
+   * @throws Error when `recordingKey` is not a run's key.
+   */
+  async readStepFailure(
+    projectSlug: string,
+    eventId: string,
+    recordingKey: string
+  ): Promise<StepFailureContext | null> {
+    const path = join(
+      await this.folderOf(projectSlug, eventId, recordingKey),
+      STEP_FAILURE_FILE
+    );
+    if (!existsSync(path)) {
+      return null;
+    }
+    return JSON.parse(await readFile(path, 'utf8')) as StepFailureContext;
   }
 
   /**

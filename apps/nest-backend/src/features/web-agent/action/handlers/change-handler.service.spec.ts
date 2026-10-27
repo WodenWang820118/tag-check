@@ -137,7 +137,7 @@ describe('ChangeHandler', () => {
       ).rejects.toBeInstanceOf(NotFoundException);
     });
 
-    it('fails with NotFoundException when no selector appears in time', async () => {
+    it('fails with StepElementNotFoundError (404) when no selector appears in time', async () => {
       const { svc, changeStrategyService } = build();
       const step: Step = {
         selectors: [['#a'], ['#b']],
@@ -148,6 +148,13 @@ describe('ChangeHandler', () => {
       await expect(
         svc.handle(pageWith() as never, 'p', 'e', step, false)
       ).rejects.toThrow(/None of the selectors appeared within 50 ms/);
+      await expect(
+        svc.handle(pageWith() as never, 'p', 'e', step, false)
+      ).rejects.toMatchObject({
+        selectors: ['#a', '#b'],
+        timeoutMs: 50,
+        status: 404
+      });
       expect(changeStrategyService.changeElement).not.toHaveBeenCalled();
     });
   });

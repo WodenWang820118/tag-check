@@ -1,11 +1,12 @@
 import { Page } from 'puppeteer';
 import { getFirstSelector } from '../handlers/utils';
 import { EventInspectionPresetDto } from '../../../../shared/dto/event-inspection-preset.dto';
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { DataLayerService } from '../../action/web-monitoring/data-layer/data-layer.service';
 import { ConfigsService } from '../../../../core/configs/configs.service';
 import { Step } from '@utils';
 import { preloadApplicationLocalStorage } from '../../browser-state-preload.util';
+import { StepElementNotFoundError } from '../step-failure/step-element-not-found.error';
 
 /** Replay state shared across the steps of one recording. */
 export interface StepReplayState {
@@ -109,7 +110,7 @@ export class StepExecutorUtilsService {
   /**
    * Resolves once one of the step's selectors appears, or the page
    * navigates, each selector waited for up to `timeout` in turn. Throws
-   * NotFoundException when none does.
+   * StepElementNotFoundError (404) when none does.
    */
   async handleWaitForElement(page: Page, step: Step, timeout: number) {
     for (const selector of step.selectors ?? []) {
@@ -134,8 +135,11 @@ export class StepExecutorUtilsService {
     }
     // The page stays open: the pipeline still takes the failed run's
     // screenshot, and the caller decides whether the browser closes.
-    throw new NotFoundException(
-      'Failed to find any of the specified selectors'
+    throw new StepElementNotFoundError(
+      'Failed to find any of the specified selectors',
+      (step.selectors ?? []).map(getFirstSelector),
+      timeout,
+      HttpStatus.NOT_FOUND
     );
   }
 
