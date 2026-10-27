@@ -29,6 +29,7 @@ export class FunctionalCardComponent {
   accordionContainer =
     viewChild.required<AdvancedExpansionPanelComponent>('accordionContainer');
   color = input<string>('primary');
+  projectSlug = input<string>();
   readonly isConvertDisabled$ = this.facade.isConvertDisabled$;
   readonly importReadiness = this.facade.importReadiness;
   readonly importReadinessLabel = this.facade.importReadinessLabel;
@@ -42,6 +43,6 @@ export class FunctionalCardComponent {
   }
 
   convertCode() {
-    this.facade.convertCode(this.accordionContainer);
+    this.facade.convertCode(this.accordionContainer, this.projectSlug());
   }
 }

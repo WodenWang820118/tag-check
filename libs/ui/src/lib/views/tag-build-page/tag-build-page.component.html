@@ -39,7 +39,7 @@
 
     <!-- Middle: Actions Panel -->
     <div class="main-page__board__item min-w-0 w-full xl:[grid-area:actions]">
-      <lib-functional-card class="h-full w-full">
+      <lib-functional-card class="h-full w-full" [projectSlug]="projectSlug()">
         <lib-upload-action
           class="functional-card__actions__item"
           (uploadClick)="onUpload()"

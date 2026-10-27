@@ -1,4 +1,9 @@
-import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  computed,
+  Inject,
+  ChangeDetectionStrategy
+} from '@angular/core';
 import {
   MAT_DIALOG_DATA,
   MatDialog,
@@ -7,6 +12,12 @@ import {
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { GTMConfiguration } from '@utils';
+import { EditorFacadeService } from '@data-access';
+
+export interface ConversionSuccessDialogData {
+  configuration: GTMConfiguration;
+  projectSlug?: string;
+}
 
 /**
  * Events pushed to the tag-build site's dataLayer when a container is exported.
@@ -34,6 +45,7 @@ export type ContainerExportEvent = 'container_download' | 'container_copy';
         <button
           mat-stroked-button
           data-testid="tagbuild-download"
+          [disabled]="!canExport()"
           (click)="onDownload()"
         >
           <mat-icon>cloud_download</mat-icon>Download
@@ -43,6 +55,7 @@ export type ContainerExportEvent = 'container_download' | 'container_copy';
         <button
           mat-stroked-button
           data-testid="tagbuild-copy"
+          [disabled]="!canExport()"
           (click)="onClipBoard()"
         >
           <mat-icon>file_copy</mat-icon>Copy to clipboard
@@ -65,20 +78,41 @@ export type ContainerExportEvent = 'container_download' | 'container_copy';
   ]
 })
 export class ConversionSuccessDialogComponent {
+  readonly canExport = computed(
+    () =>
+      this.editorFacadeService.outputJsonContent() ===
+      JSON.stringify(this.configuration, null, 2)
+  );
+
   constructor(
-    @Inject(MAT_DIALOG_DATA) public configuration: GTMConfiguration,
+    @Inject(MAT_DIALOG_DATA) private readonly data: ConversionSuccessDialogData,
+    private readonly editorFacadeService: EditorFacadeService,
     private readonly dialog: MatDialog
   ) {}
 
+  get configuration(): GTMConfiguration {
+    return this.data.configuration;
+  }
+
   onDownload() {
-    const json = JSON.stringify(this.configuration, null, 2);
+    if (!this.canExport()) return;
+    const json = this.editorFacadeService.outputJsonContent();
     // Create a Blob from the JSON string
     const blob = new Blob([json], { type: 'application/json' }),
       url = URL.createObjectURL(blob);
     // Create a link and programmatically click it
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'data.json'; // or any other name you want
+    const prefix = this.data.projectSlug ? `${this.data.projectSlug}-` : '';
+    // The user's own calendar date: toISOString would give UTC's, which is
+    // a day off in the early morning east of UTC.
+    const now = new Date();
+    const date = [
+      now.getFullYear(),
+      String(now.getMonth() + 1).padStart(2, '0'),
+      String(now.getDate()).padStart(2, '0')
+    ].join('-');
+    a.download = `${prefix}gtm-container-${date}.json`;
     a.click(); // this will start download
     // Clean up after the download to avoid memory leaks
     URL.revokeObjectURL(url);
@@ -87,7 +121,8 @@ export class ConversionSuccessDialogComponent {
   }
 
   onClipBoard() {
-    const json = JSON.stringify(this.configuration, null, 2);
+    if (!this.canExport()) return;
+    const json = this.editorFacadeService.outputJsonContent();
     navigator.clipboard.writeText(json).then(
       () => {
         this.trackExport('container_copy');

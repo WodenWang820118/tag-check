@@ -1,4 +1,10 @@
-import { computed, ElementRef, Injectable, signal } from '@angular/core';
+import {
+  computed,
+  ElementRef,
+  Injectable,
+  signal,
+  untracked
+} from '@angular/core';
 import { EditorView } from 'codemirror';
 import { placeholder } from '@codemirror/view';
 import { jsonLightEditorExtensions } from './editor-extensions';
@@ -22,10 +28,10 @@ export class EditorService {
     outputJson: jsonLightEditorExtensions
   };
 
-  // Shown as the editor placeholder until the editor has content.
+  // Mirror document text; the empty output uses a placeholder.
   private readonly contents = {
     inputJson: signal('[]'),
-    outputJson: signal('Convert the input to see the GTM container here.')
+    outputJson: signal('')
   };
 
   contents$ = {
@@ -132,7 +138,9 @@ export class EditorService {
           ...this.editorExtensions[extension],
           this.syncContentOnDocChange(extension),
           EditorView.theme(editorStyles),
-          placeholder(content || this.contents[extension]())
+          placeholder(
+            content || 'Convert the input to see the GTM container here.'
+          )
         ],
         parent: host
       });
@@ -150,14 +158,22 @@ export class EditorService {
   private syncContentOnDocChange(extension: EditorTypeEnum): Extension {
     return EditorView.updateListener.of((update) => {
       if (update.docChanged) {
-        this.contents[extension].set(update.state.doc.toString());
+        this.updateContent(extension, update.state.doc.toString());
       }
     });
   }
 
+  private updateContent(extension: EditorTypeEnum, content: string) {
+    this.contents[extension].set(content);
+    if (extension === EditorTypeEnum.INPUT_JSON) {
+      // Replacements and hand edits invalidate the previous conversion.
+      untracked(() => this.setContent(EditorTypeEnum.OUTPUT_JSON, ''));
+    }
+  }
+
   setContent(extension: EditorTypeEnum, content: string) {
     // set content in contents
-    this.contents[extension].set(content);
+    this.updateContent(extension, content);
     console.debug('setContent', content);
     // dispatch content to editorView
     const view = this.editors[extension]();

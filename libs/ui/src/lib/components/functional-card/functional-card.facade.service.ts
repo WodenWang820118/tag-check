@@ -12,7 +12,10 @@ import {
 import { containerName, gtmId, tagManagerUrl } from './test-data';
 import { ErrorDialogComponent } from '../error-dialog/error-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
-import { ConversionSuccessDialogComponent } from '../conversion-success-dialog/conversion-success-dialog.component';
+import {
+  ConversionSuccessDialogComponent,
+  type ConversionSuccessDialogData
+} from '../conversion-success-dialog/conversion-success-dialog.component';
 import {
   GTMContainerConfig,
   GTMConfiguration,
@@ -99,14 +102,18 @@ export class FunctionalCardFacade {
    * Converts the input editor's specs into a GTM container in Tag Build
    * mode. Tag Extract mode has no conversion yet, so it does nothing.
    */
-  convertCode(accordionContainer?: () => AdvancedExpansionPanelComponent) {
+  convertCode(
+    accordionContainer?: () => AdvancedExpansionPanelComponent,
+    projectSlug?: string
+  ) {
     if (this.tagBuildModeService.mode === TagBuildMode.TagBuild) {
-      this.convertTagBuild(accordionContainer);
+      this.convertTagBuild(accordionContainer, projectSlug);
     }
   }
 
   private convertTagBuild(
-    accordionContainer?: () => AdvancedExpansionPanelComponent
+    accordionContainer?: () => AdvancedExpansionPanelComponent,
+    projectSlug?: string
   ) {
     try {
       if (accordionContainer) {
@@ -116,8 +123,6 @@ export class FunctionalCardFacade {
           // ignore if accordion not ready
         }
       }
-      this.scrollToBottom();
-
       const inputJsonEditor = this.editorFacadeService.editorView.inputJson;
       const googleTagName = this.setupConstructorService.googleTagName$();
       const measurementId = this.setupConstructorService.measurementId$();
@@ -163,7 +168,8 @@ export class FunctionalCardFacade {
           googleTagName,
           measurementId,
           isSendingEcommerceData === true ? 'true' : 'false',
-          esvContent || []
+          esvContent || [],
+          projectSlug
         );
       } catch (error) {
         const data = {
@@ -182,29 +188,13 @@ export class FunctionalCardFacade {
     }
   }
 
-  private scrollToBottom() {
-    try {
-      const element = document.querySelector('.mat-drawer-content');
-      if (element) {
-        if (element.scrollHeight === element.clientHeight) {
-          return;
-        }
-        element.scrollTo({
-          top: element.scrollHeight - element.clientHeight,
-          behavior: 'smooth'
-        });
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
   private performConversion(
     json: StrictDataLayerEvent[],
     googleTagName: string,
     measurementId: string,
     isSendingEcommerceData: 'true' | 'false',
-    esvContent: { name: string; parameters: { [x: string]: string }[] }[]
+    esvContent: { name: string; parameters: { [x: string]: string }[] }[],
+    projectSlug?: string
   ) {
     // set input content for downstream presenters
     this.editorFacadeService.inputJsonContent = json;
@@ -227,17 +217,17 @@ export class FunctionalCardFacade {
       isSendingEcommerceData,
       esvContent: esvContent
     });
-    this.postConversion(result);
+    this.postConversion(result, projectSlug);
   }
 
-  private postConversion(result: GTMConfiguration) {
+  private postConversion(result: GTMConfiguration, projectSlug?: string) {
     const readiness = validateGTMImportReadiness(result);
 
     this.editorFacadeService.outputJsonContent = result;
     this._importReadiness.set(readiness);
 
     if (readiness.canImport) {
-      this.openSuccessConversionDialog(result);
+      this.openSuccessConversionDialog(result, projectSlug);
     } else {
       this.openDialog({
         message: [
@@ -258,9 +248,11 @@ export class FunctionalCardFacade {
     });
   }
 
-  openSuccessConversionDialog(configuration: GTMConfiguration): void {
-    this.dialog.open(ConversionSuccessDialogComponent, {
-      data: configuration
-    });
+  openSuccessConversionDialog(
+    configuration: GTMConfiguration,
+    projectSlug?: string
+  ): void {
+    const data: ConversionSuccessDialogData = { configuration, projectSlug };
+    this.dialog.open(ConversionSuccessDialogComponent, { data });
   }
 }

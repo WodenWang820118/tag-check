@@ -1,11 +1,14 @@
+import { ElementRef } from '@angular/core';
 import { TestBed, type ComponentFixture } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   EditorFacadeService,
+  EditorService,
   TagBuildMode,
   TagBuildModeService
 } from '@data-access';
+import { EditorTypeEnum } from '@utils';
 import { TagExtractComponent } from './tag-extract.component';
 
 // A container export as Tag Manager writes it, trimmed to what extraction
@@ -78,23 +81,24 @@ type Globals = { dataLayer?: Array<Record<string, unknown>> };
 describe('TagExtractComponent', () => {
   let fixture: ComponentFixture<TagExtractComponent>;
   let element: HTMLElement;
-  const editorFacade = { inputJsonContent: undefined as unknown };
+  let editorFacade: EditorFacadeService;
+  let editor: EditorService;
 
   beforeEach(async () => {
-    editorFacade.inputJsonContent = undefined;
     await TestBed.configureTestingModule({
       imports: [TagExtractComponent],
-      providers: [
-        provideNoopAnimations(),
-        { provide: EditorFacadeService, useValue: editorFacade }
-      ]
+      providers: [provideNoopAnimations()]
     }).compileComponents();
+    editorFacade = TestBed.inject(EditorFacadeService);
+    editor = TestBed.inject(EditorService);
     fixture = TestBed.createComponent(TagExtractComponent);
     element = fixture.nativeElement;
     fixture.detectChanges();
   });
 
   afterEach(() => {
+    editor.editor$.inputJson().destroy();
+    editor.editor$.outputJson().destroy();
     delete (globalThis as Globals).dataLayer;
     vi.restoreAllMocks();
   });
@@ -175,7 +179,7 @@ describe('TagExtractComponent', () => {
 
     byTestId('tagextract-open-in-build')?.click();
 
-    expect(editorFacade.inputJsonContent).toEqual([
+    expect(JSON.parse(editorFacade.inputJsonContent())).toEqual([
       {
         event: 'add_to_cart',
         ecommerce: {
@@ -185,5 +189,19 @@ describe('TagExtractComponent', () => {
       }
     ]);
     expect(mode.mode).toBe(TagBuildMode.TagBuild);
+  });
+
+  it('clears the previous container when opening the extracted plan in Tag Build', async () => {
+    editor.initEditorView(
+      EditorTypeEnum.OUTPUT_JSON,
+      new ElementRef(document.createElement('div'))
+    );
+    editorFacade.outputJsonContent = { exportTime: 'previous conversion' };
+    await upload(containerExport);
+
+    byTestId('tagextract-open-in-build')?.click();
+
+    expect(editor.contents$.outputJson()).toBe('');
+    expect(editor.editor$.outputJson().state.doc.toString()).toBe('');
   });
 });

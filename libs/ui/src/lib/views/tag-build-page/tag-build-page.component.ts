@@ -30,6 +30,7 @@ import { TagExtractComponent } from '../../components/tag-extract/tag-extract.co
 })
 export class TagBuildPageComponent {
   specs = input.required<StrictDataLayerEvent[]>();
+  projectSlug = input<string>();
   inputExtension = EditorTypeEnum.INPUT_JSON;
   outputExtension = EditorTypeEnum.OUTPUT_JSON;
 

@@ -59,6 +59,11 @@ export class EditorFacadeService {
     );
   }
 
+  /** The current output text, empty when the input has changed. */
+  get outputJsonContent(): Signal<string> {
+    return this.editorService.contents$.outputJson;
+  }
+
   get editorView() {
     return this.editorService.editor$;
   }

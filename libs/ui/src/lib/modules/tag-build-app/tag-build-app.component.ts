@@ -1,4 +1,5 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import { TagBuildMode, TagBuildModeService } from '@data-access';
 import { ArticleComponent } from '../../components/article/article.component';
 import type { StrictDataLayerEvent } from '@utils';
 import { TagBuildPageComponent } from '../../views/tag-build-page/tag-build-page.component';
@@ -16,4 +17,6 @@ import { TagBuildPageComponent } from '../../views/tag-build-page/tag-build-page
 })
 export class TagBuildAppComponent {
   exampleInputJson: StrictDataLayerEvent[] = [];
+  readonly mode = inject(TagBuildModeService).modeSignal;
+  readonly TagBuildMode = TagBuildMode;
 }

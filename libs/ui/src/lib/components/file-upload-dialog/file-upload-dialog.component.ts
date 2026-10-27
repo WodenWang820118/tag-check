@@ -162,7 +162,7 @@ export class FileUploadDialogComponent {
     } catch (err) {
       this.dialog.open(ErrorDialogComponent, {
         data: {
-          message: `Failed to read spreadsheet file: ${String(err)}`
+          message: `Failed to read spreadsheet file: ${err instanceof Error ? err.message : String(err)}`
         }
       });
     }

@@ -25,12 +25,15 @@ import { SpecService } from '../../../shared/services/api/spec/spec.service';
       @if (projectSpecSignal$().length > 0) {
         <ng-container
           [ngComponentOutlet]="tagBuildPageComponent"
-          [ngComponentOutletInputs]="{ specs: projectSpecSignal$() }"
+          [ngComponentOutletInputs]="{
+            specs: projectSpecSignal$(),
+            projectSlug: projectSlug
+          }"
         ></ng-container>
       } @else {
         <ng-container
           [ngComponentOutlet]="tagBuildPageComponent"
-          [ngComponentOutletInputs]="{ specs: [] }"
+          [ngComponentOutletInputs]="{ specs: [], projectSlug: projectSlug }"
         ></ng-container>
       }
     }
@@ -43,6 +46,7 @@ export class TagBuildViewComponent implements OnInit, OnDestroy {
   projectSpecSignal = signal([] as StrictDataLayerEvent[]);
   projectSpecSignal$ = computed(() => this.projectSpecSignal());
   destroy$ = new Subject<void>();
+  projectSlug?: string;
 
   constructor(
     private readonly specService: SpecService,
@@ -50,11 +54,13 @@ export class TagBuildViewComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    const projectSlug =
+    const projectSlug: unknown =
       this.route.parent?.parent?.snapshot.params['projectSlug'];
-    if (!projectSlug) return;
+    this.projectSlug =
+      typeof projectSlug === 'string' ? projectSlug : undefined;
+    if (!this.projectSlug) return;
     this.specService
-      .getProjectSpec(projectSlug)
+      .getProjectSpec(this.projectSlug)
       .pipe(
         takeUntil(this.destroy$),
         tap((data) => {
