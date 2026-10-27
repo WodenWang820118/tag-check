@@ -21,6 +21,46 @@ describe('EditorService', () => {
     expect(service).toBeTruthy();
   });
 
+  it('clears the output document and restores its placeholder when input is replaced', () => {
+    const host = document.createElement('div');
+    service.initEditorView(EditorTypeEnum.OUTPUT_JSON, new ElementRef(host));
+    service.setContent(EditorTypeEnum.OUTPUT_JSON, '{"exportTime":"old"}');
+
+    service.setContent(EditorTypeEnum.INPUT_JSON, '[{"event":"purchase"}]');
+
+    expect(service.contents$.outputJson()).toBe('');
+    expect(service.editor$.outputJson().state.doc.toString()).toBe('');
+    expect(host.querySelector('.cm-placeholder')?.textContent).toBe(
+      'Convert the input to see the GTM container here.'
+    );
+  });
+
+  it('clears output even when a programmatic replacement has the same input text', () => {
+    service.setContent(EditorTypeEnum.INPUT_JSON, '[{"event":"purchase"}]');
+    service.setContent(EditorTypeEnum.OUTPUT_JSON, '{"exportTime":"old"}');
+
+    service.setContent(EditorTypeEnum.INPUT_JSON, '[{"event":"purchase"}]');
+
+    expect(service.contents$.outputJson()).toBe('');
+  });
+
+  it('clears output when the user edits the input document', () => {
+    service.initEditorView(
+      EditorTypeEnum.INPUT_JSON,
+      new ElementRef(document.createElement('div')),
+      '[]'
+    );
+    service.setContent(EditorTypeEnum.OUTPUT_JSON, '{"exportTime":"old"}');
+    const editor = service.editor$.inputJson();
+
+    editor.dispatch({
+      changes: { from: 0, to: editor.state.doc.length, insert: '[{}]' }
+    });
+
+    expect(service.contents$.outputJson()).toBe('');
+    expect(service.editor$.outputJson().state.doc.toString()).toBe('');
+  });
+
   it('syncs input JSON content when the editor document changes', () => {
     const host = document.createElement('div');
 

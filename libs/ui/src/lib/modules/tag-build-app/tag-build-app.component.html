@@ -1,10 +1,12 @@
 <div class="main-page">
   <lib-tag-build-page [specs]="exampleInputJson"></lib-tag-build-page>
-  @defer (on viewport) {
-    <div class="main-page__article">
-      <lib-article />
-    </div>
-  } @placeholder {
-    <div></div>
+  @if (mode() === TagBuildMode.TagBuild) {
+    @defer (on viewport) {
+      <div class="main-page__article">
+        <lib-article />
+      </div>
+    } @placeholder {
+      <div></div>
+    }
   }
 </div>
