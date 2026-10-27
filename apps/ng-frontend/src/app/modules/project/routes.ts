@@ -118,6 +118,14 @@ export const PROJECT_ROUTES: Routes = [
         }
       },
       {
+        path: 'settings/ai-assist',
+        title: 'AI Assist',
+        loadComponent: () =>
+          import('../../shared/components/ai-assist-form/ai-assist-form.component').then(
+            (m) => m.AiAssistFormComponent
+          )
+      },
+      {
         path: 'settings/project-io',
         title: 'Export or delete project',
         loadComponent: () =>

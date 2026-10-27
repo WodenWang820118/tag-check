@@ -10,6 +10,7 @@ import { ProjectDataExportModule } from '../infrastructure/data-export/project-d
 import { TestReportFacadeModule } from '../features/repository/test-report-facade/test-report-facade.module';
 import { EventsGatewayModule } from '../core/events-gateway/events-gateway.module';
 import { BatchQueueModule } from '../features/batch-queue/batch-queue.module';
+import { AiAssistModule } from '../features/ai-assist/ai-assist.module';
 
 // controllers
 import { ProjectWorkFlowController } from './project/project-workflow.controller';
@@ -29,6 +30,7 @@ import { StartupReadinessController } from './startup/startup-readiness.controll
 import { EventsController } from './events/events.controller';
 import { BatchRunsController } from './batch-runs/batch-runs.controller';
 import { SchedulesController } from './schedules/schedules.controller';
+import { AiAssistController } from './ai-assist/ai-assist.controller';
 
 // services
 import { EventInspectionControllerService } from './data-layer/event-inspection-controller.service';
@@ -52,7 +54,8 @@ const services = [
     TestReportFacadeModule,
     ProjectDataExportModule,
     EventsGatewayModule,
-    BatchQueueModule
+    BatchQueueModule,
+    AiAssistModule
   ],
   controllers: [
     ProjectWorkFlowController,
@@ -71,7 +74,8 @@ const services = [
     StartupReadinessController,
     EventsController,
     BatchRunsController,
-    SchedulesController
+    SchedulesController,
+    AiAssistController
   ],
   providers: [...services]
 })

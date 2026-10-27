@@ -1,0 +1,43 @@
+.ai-notice {
+  border: 1px solid #f1c27d;
+  background: #fff8eb;
+  color: #5b3d0a;
+  border-radius: 0.8rem;
+  padding: 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  font-size: 1.4rem;
+
+  &__title {
+    font-weight: 500;
+  }
+
+  &__text {
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  &__command {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8rem;
+    background: #fff;
+    border: 1px solid #f1c27d;
+    border-radius: 0.6rem;
+    padding: 0.6rem 0.6rem 0.6rem 1rem;
+
+    code {
+      user-select: all;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1.2rem;
+  }
+}

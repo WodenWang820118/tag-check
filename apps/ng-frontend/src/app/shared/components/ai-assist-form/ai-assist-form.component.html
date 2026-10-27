@@ -1,0 +1,108 @@
+<div class="settings">
+  <mat-card appearance="outlined" data-testid="ai-assist-settings">
+    <mat-card-header>
+      <mat-card-title>AI Assist</mat-card-title>
+      <mat-card-subtitle>For every project on this computer</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content class="ai-assist">
+      <p class="ai-assist__intro">
+        When a step cannot find its element, a model on this computer suggests
+        replacement selectors. It runs in Ollama, so page data does not leave
+        the computer. A suggestion changes a recording only when you save it,
+        and a test passes only on its own checks.
+      </p>
+      @if (loadError(); as message) {
+        <p class="ai-assist__error" role="alert" data-testid="ai-assist-error">
+          {{ message }}
+        </p>
+      }
+      <form class="ai-assist__form" [formGroup]="form" (ngSubmit)="save()">
+        <mat-slide-toggle
+          formControlName="enabled"
+          data-testid="ai-assist-enabled"
+          >Suggest replacements when a step cannot find its
+          element</mat-slide-toggle
+        >
+        <div class="ai-assist__fields">
+          <mat-form-field appearance="outline">
+            <mat-label>Ollama address</mat-label>
+            <input
+              matInput
+              formControlName="ollamaUrl"
+              autocomplete="off"
+              spellcheck="false"
+              data-testid="ai-assist-url"
+            />
+            <mat-hint>On this computer: localhost or 127.0.0.1</mat-hint>
+            <mat-error
+              >Use an http(s) address on this computer, such as
+              http://127.0.0.1:11434</mat-error
+            >
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Model</mat-label>
+            <input
+              matInput
+              formControlName="model"
+              autocomplete="off"
+              spellcheck="false"
+              [matAutocomplete]="models"
+              data-testid="ai-assist-model"
+            />
+            <mat-autocomplete #models="matAutocomplete">
+              @for (model of modelOptions(); track model) {
+                <mat-option [value]="model">{{ model }}</mat-option>
+              }
+            </mat-autocomplete>
+            <mat-hint>An Ollama model, such as qwen3.5:9b</mat-hint>
+            <mat-error>Use an Ollama model name, such as qwen3.5:9b</mat-error>
+          </mat-form-field>
+        </div>
+        <div class="ai-assist__actions">
+          <button
+            mat-flat-button
+            color="primary"
+            type="submit"
+            [disabled]="saving()"
+            data-testid="ai-assist-save"
+          >
+            Save
+          </button>
+        </div>
+      </form>
+
+      @if (state(); as current) {
+        <section class="ai-assist__status" aria-label="Status">
+          @if (current.readiness.kind === 'ready') {
+            <div class="ai-assist__ready">
+              <span role="status" data-testid="ai-assist-status"
+                >Connected · Ollama {{ current.readiness.version }} ·
+                {{ current.settings.model }} is downloaded</span
+              >
+              <button
+                mat-stroked-button
+                type="button"
+                [disabled]="checking()"
+                (click)="check()"
+                data-testid="ai-assist-check"
+              >
+                Check again
+              </button>
+            </div>
+          }
+          <app-ai-model-notice
+            [readiness]="current.readiness"
+            [model]="current.settings.model"
+            [checking]="checking()"
+            (recheck)="check()"
+          ></app-ai-model-notice>
+          @if (form.dirty) {
+            <p class="ai-assist__hint">
+              The status is for the saved settings. Save to check your changes.
+            </p>
+          }
+        </section>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

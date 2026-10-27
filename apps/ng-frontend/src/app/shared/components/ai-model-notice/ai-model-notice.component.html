@@ -1,0 +1,46 @@
+@if (readiness(); as state) {
+  @if (state.kind !== 'ready') {
+    <section
+      class="ai-notice"
+      role="status"
+      data-testid="ai-notice"
+      [attr.data-readiness]="state.kind"
+    >
+      @if (state.kind === 'runtimeUnavailable') {
+        <strong class="ai-notice__title">Ollama is not running</strong>
+        <p class="ai-notice__text">
+          AI assist needs Ollama on this computer. Install it from
+          ollama.com/download or start it, then check again.
+        </p>
+      } @else {
+        <strong class="ai-notice__title"
+          >{{ model() }} is not downloaded</strong
+        >
+        <p class="ai-notice__text">Run this in a terminal, then check again.</p>
+        <div class="ai-notice__command">
+          <code data-testid="ai-notice-command">{{ state.command }}</code>
+          <button
+            mat-stroked-button
+            type="button"
+            [cdkCopyToClipboard]="state.command"
+            (cdkCopyToClipboardCopied)="onCopied($event)"
+            data-testid="ai-notice-copy"
+          >
+            {{ copied() ? 'Copied' : 'Copy' }}
+          </button>
+        </div>
+      }
+      <div class="ai-notice__actions">
+        <button
+          mat-stroked-button
+          type="button"
+          [disabled]="checking()"
+          (click)="recheck.emit()"
+          data-testid="ai-notice-recheck"
+        >
+          Check again
+        </button>
+      </div>
+    </section>
+  }
+}
