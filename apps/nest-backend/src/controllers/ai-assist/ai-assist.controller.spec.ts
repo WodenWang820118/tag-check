@@ -14,16 +14,30 @@ describe('AiAssistController', () => {
 
   it('reads the state', async () => {
     const service = { getState: vi.fn().mockResolvedValue(state) };
-    const controller = new AiAssistController(service as never);
+    const controller = new AiAssistController(service as never, {} as never);
 
     await expect(controller.get()).resolves.toBe(state);
   });
 
   it('passes the body to the update', async () => {
     const service = { updateSettings: vi.fn().mockResolvedValue(state) };
-    const controller = new AiAssistController(service as never);
+    const controller = new AiAssistController(service as never, {} as never);
 
     await expect(controller.update({ enabled: true })).resolves.toBe(state);
     expect(service.updateSettings).toHaveBeenCalledWith({ enabled: true });
+  });
+
+  it('reads what a run saw when a step failed', async () => {
+    const context = { stepIndex: 3 };
+    const stepFailures = { get: vi.fn().mockResolvedValue(context) };
+    const controller = new AiAssistController(
+      {} as never,
+      stepFailures as never
+    );
+
+    await expect(controller.getStepFailure('demo', 'e1', 5)).resolves.toBe(
+      context
+    );
+    expect(stepFailures.get).toHaveBeenCalledWith('demo', 'e1', 5);
   });
 });

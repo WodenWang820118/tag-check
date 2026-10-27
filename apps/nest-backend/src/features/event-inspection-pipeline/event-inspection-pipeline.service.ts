@@ -12,7 +12,12 @@ import { TestEventDetailRepositoryService } from '../../core/repository/test-eve
 import { TestEventRepositoryService } from '../../core/repository/test-event/test-event-repository.service';
 import { RunTimelineService } from '../../core/events-gateway/run-timeline.service';
 import { RunRecordingsService } from '../../infrastructure/os/run-recordings/run-recordings.service';
-import { ValidationResult } from '@utils';
+import {
+  describeStepFailure,
+  type StepFailureContext,
+  ValidationResult
+} from '@utils';
+import { StepElementNotFoundError } from '../web-agent/action/step-failure/step-element-not-found.error';
 import { buildMediaTimeline, type RunMedia } from './run-media';
 
 /**
@@ -95,8 +100,9 @@ export class EventInspectionPipelineService {
           projectSlug,
           eventId,
           testEvent,
-          this.buildFallbackTestEventDetail(),
-          media
+          this.buildFallbackTestEventDetail(error),
+          media,
+          error instanceof StepElementNotFoundError ? error.context : null
         );
       } catch (saveError) {
         // The run's own error says more than the failure to save it.
@@ -142,7 +148,8 @@ export class EventInspectionPipelineService {
 
   /**
    * Saves the run's screenshot, then its result linked to it and to its
-   * recordings, and points the test at both as its latest. Older runs past
+   * recordings, and points the test at both as its latest. What a failed
+   * step saw (`stepFailure`) goes beside the recordings. Older runs past
    * RUN_RECORDINGS_KEPT then lose their recordings.
    */
   private async saveResult(
@@ -151,7 +158,8 @@ export class EventInspectionPipelineService {
     eventId: string,
     testEvent: TestEventEntity,
     detail: CreateTestEventDetailDto,
-    media: RunMedia | null
+    media: RunMedia | null,
+    stepFailure: StepFailureContext | null = null
   ): Promise<void> {
     const screenshot = await page.screenshot({ fullPage: true });
     const testImage = await this.testImageRepositoryService.create(
@@ -189,6 +197,14 @@ export class EventInspectionPipelineService {
     this.logger.debug('Updated info:', JSON.stringify(updatedInfo, null, 2));
     this.logger.debug('Updated event:', JSON.stringify(updatedEvent, null, 2));
     if (recorded) {
+      if (stepFailure) {
+        await this.runRecordingsService.saveStepFailure(
+          projectSlug,
+          eventId,
+          recorded.recordingKey,
+          stepFailure
+        );
+      }
       await this.runRecordingsService.prune(projectSlug, eventId, testEvent.id);
     }
   }
@@ -212,14 +228,29 @@ export class EventInspectionPipelineService {
   }
 
   /** The result row of a run that stopped before its checks finished. */
-  private buildFallbackTestEventDetail(): CreateTestEventDetailDto {
+  /**
+   * The result row of a run that stopped before its checks finished. A step
+   * that could not find its element is named in the message.
+   */
+  private buildFallbackTestEventDetail(
+    error: unknown
+  ): CreateTestEventDetailDto {
+    const message =
+      error instanceof StepElementNotFoundError && error.stepIndex !== null
+        ? describeStepFailure({
+            stepIndex: error.stepIndex,
+            stepType: error.context?.stepType ?? null,
+            selectorCount: error.selectors.length,
+            timeoutMs: error.timeoutMs
+          })
+        : 'The run stopped with an error before its checks finished.';
     return {
       passed: false,
       requestPassed: false,
       rawRequest: '',
       destinationUrl: '',
       dataLayer: [],
-      message: 'The run stopped with an error before its checks finished.'
+      message
     };
   }
 }

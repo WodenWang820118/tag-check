@@ -7,6 +7,7 @@ import { FilePathService } from '../../../../infrastructure/os/path/file-path/fi
 import { ClickStrategyService } from '../strategies/click-strategies/click-strategy.service';
 import { ActionUtilsService } from '../action-utils/action-utils.service';
 import type { Step } from '@utils';
+import { StepElementNotFoundError } from '../step-failure/step-element-not-found.error';
 
 function build(opts?: {
   stopNavigation?: boolean;
@@ -173,6 +174,9 @@ describe('ClickHandler', () => {
     await expect(
       handler.handle(page as never, 'p', 'e', step, false)
     ).rejects.toThrow(/None of the selectors became visible within 50 ms/);
+    await expect(
+      handler.handle(page as never, 'p', 'e', step, false)
+    ).rejects.toBeInstanceOf(StepElementNotFoundError);
     expect(clickStrategyService.clickElement).not.toHaveBeenCalled();
   });
 

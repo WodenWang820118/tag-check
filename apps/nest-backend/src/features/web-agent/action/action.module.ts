@@ -5,10 +5,16 @@ import { EventsGatewayModule } from '../../../core/events-gateway/events-gateway
 import { StepExecutorModule } from './step-executor/step-executor.module';
 import { RequestInterceptorService } from './request-interceptor/request-interceptor.service';
 import { Ga4RequestMatcher } from './request-interceptor/ga4-request-matcher.service';
+import { StepFailureCollectorService } from './step-failure/step-failure-collector.service';
 
 const modules = [DataLayerModule, EventsGatewayModule, StepExecutorModule];
 
-const services = [ActionService, RequestInterceptorService, Ga4RequestMatcher];
+const services = [
+  ActionService,
+  RequestInterceptorService,
+  Ga4RequestMatcher,
+  StepFailureCollectorService
+];
 
 /** Provides the recording replay and GA4 request capture. */
 @Module({

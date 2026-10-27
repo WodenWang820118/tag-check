@@ -20,6 +20,7 @@ import { FilePathService } from '../../../../infrastructure/os/path/file-path/fi
 import { FileService } from '../../../../infrastructure/os/file/file.service';
 import { OperationFile, Step } from '@utils';
 import { ActionUtilsService } from '../action-utils/action-utils.service';
+import { StepElementNotFoundError } from '../step-failure/step-element-not-found.error';
 
 /**
  * Replays a click step. Waits for any of the step's selectors to become
@@ -63,8 +64,10 @@ export class ClickHandler implements ActionHandler {
       this.logger.warn(
         `None of ${candidates.length} selector(s) became visible within ${timeout} ms: ${candidates.join(', ')}`
       );
-      throw new InternalServerErrorException(
-        `Failed to click. None of the selectors became visible within ${timeout} ms for action ${step.target}`
+      throw new StepElementNotFoundError(
+        `Failed to click. None of the selectors became visible within ${timeout} ms for action ${step.target}`,
+        candidates,
+        timeout
       );
     }
     for (const firstSelector of preferSelector(candidates, visible)) {

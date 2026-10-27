@@ -21,6 +21,7 @@ import {
   TimeoutError
 } from 'rxjs';
 import { TestEventRepositoryService } from '../../core/repository/test-event/test-event-repository.service';
+import { StepElementNotFoundError } from './action/step-failure/step-element-not-found.error';
 
 /**
  * Parameters required to execute a single test run via {@link WebAgentUtilsService.performTest}.
@@ -153,6 +154,10 @@ export class WebAgentUtilsService {
       };
     } catch (error) {
       this.logger.error(`Failed to perform test: ${error}`);
+      // Kept as it is: the run saves which step failed and what it saw.
+      if (error instanceof StepElementNotFoundError) {
+        throw error;
+      }
       throw new HttpException(
         error instanceof Error ? error.message : String(error),
         HttpStatus.INTERNAL_SERVER_ERROR

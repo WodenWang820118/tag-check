@@ -1,4 +1,5 @@
 import {
+  HttpStatus,
   Injectable,
   Logger,
   NotFoundException,
@@ -15,6 +16,7 @@ import {
 import { ChangeStrategyService } from '../strategies/change-strategies/change-strategy.service';
 import { ActionUtilsService } from './../action-utils/action-utils.service';
 import { Step } from '@utils';
+import { StepElementNotFoundError } from '../step-failure/step-element-not-found.error';
 
 /**
  * Replays a change step: types the step's value into a field or selects it
@@ -53,8 +55,11 @@ export class ChangeHandler implements ActionHandler {
       visible: false
     });
     if (!present) {
-      throw new NotFoundException(
-        `None of the selectors appeared within ${waitTimeout} ms: ${candidates.join(', ')}`
+      throw new StepElementNotFoundError(
+        `None of the selectors appeared within ${waitTimeout} ms: ${candidates.join(', ')}`,
+        candidates,
+        waitTimeout,
+        HttpStatus.NOT_FOUND
       );
     }
 

@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { ActionService } from './action.service';
 import { BrowserAction } from './action-utils';
+import { StepElementNotFoundError } from './step-failure/step-element-not-found.error';
 
 describe('ActionService', () => {
   it('keeps first-navigation state across operation steps', async () => {
@@ -37,7 +38,8 @@ describe('ActionService', () => {
         })
       } as never,
       runStatus as never,
-      runTimeline as never
+      runTimeline as never,
+      { collect: vi.fn() } as never
     );
 
     await service.performOperation({} as never, 'project', 'event', {
@@ -88,7 +90,8 @@ describe('ActionService', () => {
           getRecordingDetails: vi.fn().mockResolvedValue({ steps })
         } as never,
         { step: vi.fn() } as never,
-        { markStep: vi.fn() } as never
+        { markStep: vi.fn() } as never,
+        { collect: vi.fn() } as never
       );
       await service.performOperation({} as never, 'project', 'event', {
         localStorage: { data: [] },
@@ -138,6 +141,60 @@ describe('ActionService', () => {
           isLastClick: false
         }
       ]);
+    });
+  });
+  describe('a step that cannot find its element', () => {
+    function build(error: Error) {
+      const steps = [
+        { type: BrowserAction.NAVIGATE, url: 'https://example.test' },
+        { type: BrowserAction.CLICK, selectors: [['#gone']] }
+      ];
+      const context = { stepIndex: 1 };
+      const collector = { collect: vi.fn().mockResolvedValue(context) };
+      const stepExecutor = {
+        executeStep: vi
+          .fn()
+          .mockResolvedValueOnce(undefined)
+          .mockRejectedValueOnce(error)
+      };
+      const service = new ActionService(
+        { sendEventCompleted: vi.fn() } as never,
+        stepExecutor as never,
+        { getRecordingDetails: vi.fn().mockResolvedValue({ steps }) } as never,
+        { step: vi.fn() } as never,
+        { markStep: vi.fn() } as never,
+        collector as never
+      );
+      const run = service.performOperation(
+        { url: () => 'page' } as never,
+        'project',
+        'event',
+        { localStorage: { data: [] }, cookie: { data: [] } }
+      );
+      return { run, collector, steps, context };
+    }
+
+    it('rejects with its index and what the page showed', async () => {
+      const error = new StepElementNotFoundError('missing', ['#gone'], 15000);
+      const { run, collector, steps, context } = build(error);
+
+      await expect(run).rejects.toBe(error);
+      expect(error.stepIndex).toBe(1);
+      expect(error.context).toBe(context);
+      expect(collector.collect).toHaveBeenCalledWith(
+        expect.anything(),
+        steps[1],
+        1,
+        15000
+      );
+    });
+
+    it('rejects with any other error as it is', async () => {
+      const error = new Error('page crashed');
+      const { run, collector } = build(error);
+
+      await expect(run).rejects.toBe(error);
+      expect(collector.collect).not.toHaveBeenCalled();
     });
   });
 });

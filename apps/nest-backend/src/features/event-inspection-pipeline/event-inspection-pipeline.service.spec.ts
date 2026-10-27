@@ -5,6 +5,7 @@ import { TestImageRepositoryService } from '../../core/repository/test-event/tes
 import { TestEventDetailRepositoryService } from '../../core/repository/test-event/test-event-detail-repository.service';
 import { TestEventRepositoryService } from '../../core/repository/test-event/test-event-repository.service';
 import { RunMedia } from './run-media';
+import { StepElementNotFoundError } from '../web-agent/action/step-failure/step-element-not-found.error';
 
 describe('EventInspectionPipelineService', () => {
   function build(opts?: { inspectError?: Error; inspectResult?: unknown }) {
@@ -37,7 +38,10 @@ describe('EventInspectionPipelineService', () => {
     const runTimeline = {
       steps: vi.fn().mockReturnValue([10_000, undefined, 19_000])
     };
-    const runRecordings = { prune: vi.fn().mockResolvedValue(undefined) };
+    const runRecordings = {
+      prune: vi.fn().mockResolvedValue(undefined),
+      saveStepFailure: vi.fn().mockResolvedValue(true)
+    };
     return {
       svc: new EventInspectionPipelineService(
         inspector,
@@ -180,6 +184,74 @@ describe('EventInspectionPipelineService', () => {
     expect(dto.passed).toBe(false);
     expect(dto.requestPassed).toBe(false);
     expect(dto.dataLayer).toEqual([]);
+  });
+
+  describe('a step that could not find its element', () => {
+    function failure(withContext: boolean) {
+      const error = new StepElementNotFoundError(
+        'Failed to click',
+        ['aria/Add to cart', '#add'],
+        15000
+      );
+      error.stepIndex = 3;
+      error.context = withContext
+        ? ({ stepIndex: 3, stepType: 'click' } as never)
+        : null;
+      return error;
+    }
+
+    async function run(error: Error, media: RunMedia | null) {
+      const built = build({ inspectError: error });
+      const page = {
+        screenshot: vi.fn().mockResolvedValue(Buffer.from('img'))
+      } as never;
+      await built.svc.singleEventInspectionRecipe(
+        page,
+        'p',
+        'e',
+        'M',
+        { username: '', password: '' },
+        'false',
+        { application: undefined } as never,
+        media
+      );
+      const dto = vi.mocked(built.testEventDetailRepository.create).mock
+        .calls[0][1];
+      return { ...built, dto };
+    }
+
+    it('names the step and keeps what it saw beside the recordings', async () => {
+      const error = failure(true);
+      const media = new RunMedia();
+      media.site = { firstFrameAt: 8_000 } as never;
+
+      const { dto, runRecordings } = await run(error, media);
+
+      expect(dto.message).toBe(
+        'Step 4 (click) could not find its element: none of its 2 selectors appeared within 15 s.'
+      );
+      expect(runRecordings.saveStepFailure).toHaveBeenCalledWith(
+        'p',
+        'e',
+        media.recordingKey,
+        error.context
+      );
+    });
+
+    it('names the step without its type when the page could not be read', async () => {
+      const { dto, runRecordings } = await run(failure(false), null);
+
+      expect(dto.message).toBe(
+        'Step 4 could not find its element: none of its 2 selectors appeared within 15 s.'
+      );
+      expect(runRecordings.saveStepFailure).not.toHaveBeenCalled();
+    });
+
+    it('keeps nothing for a run without recordings', async () => {
+      const { runRecordings } = await run(failure(true), new RunMedia());
+
+      expect(runRecordings.saveStepFailure).not.toHaveBeenCalled();
+    });
   });
 
   it('saves one result when saving a finished run fails, and rejects', async () => {

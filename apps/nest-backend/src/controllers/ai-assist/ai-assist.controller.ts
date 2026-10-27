@@ -1,15 +1,27 @@
-import { Body, Controller, Get, Put } from '@nestjs/common';
-import { ApiOperation } from '@nestjs/swagger';
-import type { AiAssistResponse } from '@utils';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Put,
+  Query
+} from '@nestjs/common';
+import { ApiOperation, ApiParam, ApiQuery } from '@nestjs/swagger';
+import type { AiAssistResponse, StepFailureContext } from '@utils';
 import { AiAssistService } from '../../features/ai-assist/ai-assist.service';
+import { StepFailureService } from '../../features/ai-assist/step-failure.service';
 
 /**
- * AI assist's settings, for every project on this computer, and whether
- * Ollama can serve the chosen model.
+ * AI assist's settings, for every project on this computer, whether Ollama
+ * can serve the chosen model, and what failed steps saw.
  */
 @Controller('ai-assist')
 export class AiAssistController {
-  constructor(private readonly aiAssist: AiAssistService) {}
+  constructor(
+    private readonly aiAssist: AiAssistService,
+    private readonly stepFailures: StepFailureService
+  ) {}
 
   @ApiOperation({
     summary: 'Reads the settings and whether the model can be asked',
@@ -29,5 +41,26 @@ export class AiAssistController {
   @Put()
   async update(@Body() body: unknown): Promise<AiAssistResponse> {
     return await this.aiAssist.updateSettings(body);
+  }
+
+  @ApiOperation({
+    summary: 'Reads what a run saw when a step could not find its element',
+    description:
+      "The step, how many elements each of its selectors matched, the page, and the visible elements it could have meant, each with selectors that matched only it. Kept beside the run's recordings, so only by a test's latest runs. 404 when the run kept none."
+  })
+  @ApiParam({ name: 'projectSlug' })
+  @ApiParam({ name: 'eventId' })
+  @ApiQuery({
+    name: 'run',
+    required: false,
+    description: "The run's id; the latest run by default"
+  })
+  @Get('step-failures/:projectSlug/:eventId')
+  async getStepFailure(
+    @Param('projectSlug') projectSlug: string,
+    @Param('eventId') eventId: string,
+    @Query('run', new ParseIntPipe({ optional: true })) run?: number
+  ): Promise<StepFailureContext> {
+    return await this.stepFailures.get(projectSlug, eventId, run);
   }
 }
