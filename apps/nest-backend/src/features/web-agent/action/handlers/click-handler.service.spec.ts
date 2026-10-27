@@ -63,14 +63,24 @@ const timedOut = (selector: string) =>
   );
 
 function makePage() {
-  return {
+  const page: {
+    waitForSelector: ReturnType<typeof vi.fn>;
+    $: ReturnType<typeof vi.fn>;
+    evaluate: ReturnType<typeof vi.fn>;
+    mouse: { click: ReturnType<typeof vi.fn> };
+    browserContext: () => { pages: ReturnType<typeof vi.fn> };
+    url: () => string;
+    mainFrame: () => unknown;
+  } = {
     waitForSelector: vi.fn().mockResolvedValue({ dispose: vi.fn() }),
     $: vi.fn(),
     evaluate: vi.fn().mockResolvedValue(undefined),
     mouse: { click: vi.fn() },
     browserContext: () => ({ pages: vi.fn().mockResolvedValue([{}]) }),
-    url: () => 'https://other.test/'
+    url: () => 'https://other.test/',
+    mainFrame: () => page
   };
+  return page;
 }
 
 describe('ClickHandler', () => {
@@ -222,8 +232,9 @@ describe('ClickHandler', () => {
     'uses the stored final-click bookmark (%s)',
     async (stopNavigation) => {
       const { handler, testEventRepositoryService } = build({ stopNavigation });
+      const page = makePage();
       const evaluate = vi.fn().mockResolvedValue(undefined);
-      const page = { ...makePage(), evaluate };
+      page.evaluate = evaluate;
       await handler.handle(
         page as never,
         'project',
@@ -261,8 +272,9 @@ describe('ClickHandler', () => {
       stopNavigation: true,
       clickThrows: new Error('click failed')
     });
+    const page = makePage();
     const evaluate = vi.fn().mockResolvedValue(undefined);
-    const page = { ...makePage(), evaluate };
+    page.evaluate = evaluate;
     await expect(
       handler.handle(
         page as never,
@@ -274,5 +286,47 @@ describe('ClickHandler', () => {
     ).rejects.toThrow('Failed to click');
     expect(evaluate).toHaveBeenCalledTimes(2);
     expect(evaluate.mock.calls[1][0]).toContain('typeof window[key]');
+  });
+
+  it('clicks through a shadow selector chain', async () => {
+    const { handler, clickStrategyService } = build();
+    const step: Step = {
+      selectors: [['my-widget', 'button.buy']],
+      target: 'main'
+    } as never;
+
+    await handler.handle(makePage() as never, 'p', 'e', step, false);
+
+    expect(
+      (clickStrategyService.clickElement as ReturnType<typeof vi.fn>).mock
+        .calls[0][3]
+    ).toBe('my-widget >>>> button.buy');
+  });
+
+  it('clicks in the recorded child frame', async () => {
+    const { handler, clickStrategyService } = build();
+    const child = {
+      waitForSelector: vi.fn().mockResolvedValue({ dispose: vi.fn() }),
+      $: vi.fn(),
+      evaluate: vi.fn(),
+      childFrames: () => []
+    };
+    const page = makePage();
+    page.mainFrame = () => ({ childFrames: () => [child] });
+
+    await handler.handle(
+      page as never,
+      'p',
+      'e',
+      { type: 'click', selectors: [['#inside']], frame: [0] } as Step,
+      false
+    );
+
+    expect(page.waitForSelector).not.toHaveBeenCalled();
+    expect(child.waitForSelector).toHaveBeenCalled();
+    expect(
+      (clickStrategyService.clickElement as ReturnType<typeof vi.fn>).mock
+        .calls[0][0]
+    ).toBe(child);
   });
 });

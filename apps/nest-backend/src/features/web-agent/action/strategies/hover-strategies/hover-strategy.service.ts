@@ -1,6 +1,6 @@
 import { PageHoverService } from './page-hover.service';
 import { Injectable, Logger } from '@nestjs/common';
-import { Page } from 'puppeteer';
+import type { QueryRoot } from '../../handlers/frame';
 import { EvaluateHoverService } from './evaluate-hover.service';
 
 /**
@@ -20,7 +20,7 @@ export class HoverStrategyService {
    * neither did. Never throws.
    */
   async hoverElement(
-    page: Page,
+    page: QueryRoot,
     projectName: string,
     eventId: string,
     selector: string,

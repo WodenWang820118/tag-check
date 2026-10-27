@@ -51,7 +51,7 @@ describe('StepFailureCollectorService', () => {
   it("records the page, the candidates and what each of the step's selectors matched", async () => {
     const { page, dispose } = pageWith({
       'aria/Add to cart': 0,
-      '#add': 2,
+      '#add >>>> #ignored': 2,
       'xpath//main/button': new Error('bad selector')
     });
 
@@ -68,7 +68,7 @@ describe('StepFailureCollectorService', () => {
       stepType: 'click',
       selectors: [
         { selector: 'aria/Add to cart', matches: 0 },
-        { selector: '#add', matches: 2 },
+        { selector: '#add >>>> #ignored', matches: 2 },
         { selector: 'xpath//main/button', matches: null }
       ],
       timeoutMs: 15000,
@@ -103,5 +103,35 @@ describe('StepFailureCollectorService', () => {
     await expect(
       collector.collect(page as never, step, 1, 15000)
     ).resolves.toBeNull();
+  });
+
+  it('counts the selectors in the step frame', async () => {
+    const dispose = vi.fn().mockResolvedValue(undefined);
+    const frame = {
+      evaluate: vi.fn().mockResolvedValue(facts),
+      $$: vi.fn(async () => [{ dispose }]),
+      childFrames: () => []
+    };
+    const page = {
+      evaluate: vi.fn(),
+      $$: vi.fn(),
+      mainFrame: () => ({ childFrames: () => [frame] })
+    };
+
+    const context = await collector.collect(
+      page as never,
+      { type: 'click', selectors: [['#inside']], frame: [0] },
+      1,
+      1000,
+      new Date('2026-10-27T10:00:00.000Z')
+    );
+
+    expect(page.evaluate).not.toHaveBeenCalled();
+    expect(page.$$).not.toHaveBeenCalled();
+    expect(frame.evaluate).toHaveBeenCalled();
+    expect(frame.$$).toHaveBeenCalledWith('#inside');
+    expect(context).toMatchObject({
+      selectors: [{ selector: '#inside', matches: 1 }]
+    });
   });
 });

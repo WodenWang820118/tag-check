@@ -1,7 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import type { Page } from 'puppeteer';
 import type { ElementCandidate, Step, StepFailureContext } from '@utils';
-import { getFirstSelector } from '../handlers/utils';
+import {
+  resolveStepFrame,
+  targetFrame,
+  type QueryRoot
+} from '../handlers/frame';
+import { toPuppeteerSelector } from '../handlers/utils';
 import { withTimeout } from '../strategies/with-timeout';
 import { collectCandidatesSource } from './collect-candidates.script';
 
@@ -58,12 +63,13 @@ export class StepFailureCollectorService {
     timeoutMs: number,
     now: Date
   ): Promise<StepFailureContext> {
-    const facts = (await page.evaluate(
+    const root = targetFrame(await this.queryRoot(page, step, timeoutMs));
+    const facts = (await root.evaluate(
       collectCandidatesSource(CANDIDATES_KEPT)
     )) as PageFacts;
     const selectors = [];
-    for (const selector of (step.selectors ?? []).map(getFirstSelector)) {
-      selectors.push({ selector, matches: await this.count(page, selector) });
+    for (const selector of (step.selectors ?? []).map(toPuppeteerSelector)) {
+      selectors.push({ selector, matches: await this.count(root, selector) });
     }
     return {
       stepIndex,
@@ -84,12 +90,36 @@ export class StepFailureCollectorService {
   }
 
   /**
-   * How many elements `selector` matches now, in Puppeteer's syntax (CSS,
-   * or aria/, xpath/, pierce/, text/); null when it cannot be run.
+   * The document the step was searching. A step without a frame is the page
+   * itself, so callers that mock the page do not need a main frame. The wait
+   * is capped at the collect budget: this record must not outlast it.
    */
-  private async count(page: Page, selector: string): Promise<number | null> {
+  private async queryRoot(
+    page: Page,
+    step: Step,
+    timeoutMs: number
+  ): Promise<QueryRoot> {
+    if (!step.frame || step.frame.length === 0) {
+      return page;
+    }
+    return resolveStepFrame(
+      page,
+      step.frame,
+      Math.min(timeoutMs, COLLECT_TIMEOUT_MS)
+    );
+  }
+
+  /**
+   * How many elements `selector` matches now, in Puppeteer's syntax (CSS,
+   * or aria/, xpath/, pierce/, text/, or a shadow chain); null when it
+   * cannot be run.
+   */
+  private async count(
+    page: QueryRoot,
+    selector: string
+  ): Promise<number | null> {
     try {
-      const handles = await page.$$(selector);
+      const handles = await targetFrame(page).$$(selector);
       await Promise.all(handles.map((handle) => handle.dispose()));
       return handles.length;
     } catch {

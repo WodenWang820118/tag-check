@@ -1,5 +1,6 @@
 import { Page } from 'puppeteer';
-import { getFirstSelector } from '../handlers/utils';
+import { resolveStepFrame } from '../handlers/frame';
+import { toPuppeteerSelector } from '../handlers/utils';
 import { EventInspectionPresetDto } from '../../../../shared/dto/event-inspection-preset.dto';
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { DataLayerService } from '../../action/web-monitoring/data-layer/data-layer.service';
@@ -19,6 +20,22 @@ function navigateUrl(step: Step): string {
     throw new Error(`Step "${step.type}" has no url to navigate to`);
   }
   return step.url;
+}
+
+/**
+ * How long a click, change or key-up waits for the navigation its
+ * `assertedEvents` entry describes. The recording's last step keeps its own
+ * longer wait. A timeout is only a warning: some sites navigate with
+ * history.pushState, which never fires a document load, and the wait must
+ * not fail the step.
+ */
+export const ASSERTED_NAVIGATION_TIMEOUT_MS = 5_000;
+
+/** Whether the recorder says this step loads a new document. */
+export function assertsNavigation(step: Step): boolean {
+  return (step.assertedEvents ?? []).some(
+    (event) => event.type === 'navigation'
+  );
 }
 
 /** The step handlers that StepExecutorService runs itself. */
@@ -43,6 +60,21 @@ export class StepExecutorUtilsService {
   ) {
     await this.handleNavigationIfNeeded(page, isLastStep, delay);
     await this.dataLayerService.updateSelfDataLayer(page, projectName, eventId);
+  }
+
+  /**
+   * Waits for the navigation a click, change or key-up asserts. Never throws:
+   * on timeout it logs a warning and the replay continues.
+   */
+  async waitForAssertedNavigation(page: Page): Promise<void> {
+    try {
+      await page.waitForNavigation({ timeout: ASSERTED_NAVIGATION_TIMEOUT_MS });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.warn(
+        `Asserted navigation did not happen within ${ASSERTED_NAVIGATION_TIMEOUT_MS} ms: ${message}`
+      );
+    }
   }
 
   /**
@@ -113,14 +145,15 @@ export class StepExecutorUtilsService {
    * StepElementNotFoundError (404) when none does.
    */
   async handleWaitForElement(page: Page, step: Step, timeout: number) {
-    for (const selector of step.selectors ?? []) {
+    const root = await resolveStepFrame(page, step.frame, timeout);
+    const selectors = (step.selectors ?? []).map(toPuppeteerSelector);
+    for (const selector of selectors) {
       try {
         // sometimes SSR may send multiple SPA pages, so it's necessary to wait for navigation
         // but sometimes it's not necessary, so we do race
-        const firstSelector = getFirstSelector(selector);
         await Promise.race([
           page.waitForNavigation({ waitUntil: 'load', timeout }),
-          page.waitForSelector(firstSelector, {
+          root.waitForSelector(selector, {
             visible: step.visible === true,
             timeout: timeout
           })
@@ -137,7 +170,7 @@ export class StepExecutorUtilsService {
     // screenshot, and the caller decides whether the browser closes.
     throw new StepElementNotFoundError(
       'Failed to find any of the specified selectors',
-      (step.selectors ?? []).map(getFirstSelector),
+      selectors,
       timeout,
       HttpStatus.NOT_FOUND
     );

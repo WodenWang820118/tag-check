@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Page } from 'puppeteer';
+import { targetFrame, type QueryRoot } from '../../handlers/frame';
 import { ChangeOperation } from './utils';
 import { withTimeout } from '../with-timeout';
 
@@ -12,7 +12,7 @@ import { withTimeout } from '../with-timeout';
 export class PageChangeService implements ChangeOperation {
   private readonly logger = new Logger(PageChangeService.name);
   async operate(
-    page: Page,
+    page: QueryRoot,
     projectName: string,
     eventId: string,
     selector: string,
@@ -26,24 +26,28 @@ export class PageChangeService implements ChangeOperation {
         return false;
       }
 
-      // Helper-free on purpose: swc compiles this function to ES5 for the
-      // page, which has none of the bundle's helpers (see AGENTS.md).
-      const isSelect = await page.evaluate((selector) => {
-        const element = document.querySelector(selector);
-        return element?.tagName.toLowerCase() === 'select';
-      }, selector);
+      // A source string: swc would compile a function to ES5 for the page,
+      // which has none of the bundle's helpers (see AGENTS.md). The same
+      // string runs in a frame.
+      const frame = targetFrame(page);
+      const isSelect = await frame.evaluate(
+        `(() => {
+          const element = document.querySelector(${JSON.stringify(selector)});
+          return !!(element && element.tagName.toLowerCase() === "select");
+        })()`
+      );
 
       if (isSelect) {
         this.logger.log('Selecting the select element');
         await withTimeout(
-          page.select(selector, value),
+          frame.select(selector, value),
           timeout,
           'Timeout exceeded'
         );
       } else {
         this.logger.log('Typing the input element');
         await withTimeout(
-          page.type(selector, value),
+          frame.type(selector, value),
           timeout,
           'Timeout exceeded'
         );

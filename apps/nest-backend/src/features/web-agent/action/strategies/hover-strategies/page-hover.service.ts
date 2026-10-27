@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Page } from 'puppeteer';
+import { targetFrame, type QueryRoot } from '../../handlers/frame';
 import { withTimeout } from '../with-timeout';
 
 /**
@@ -10,7 +10,7 @@ import { withTimeout } from '../with-timeout';
 export class PageHoverService {
   private readonly logger = new Logger(PageHoverService.name);
   async operate(
-    page: Page,
+    page: QueryRoot,
     projectName: string,
     title: string,
     selector: string,
@@ -18,7 +18,11 @@ export class PageHoverService {
     timeout = 5000
   ): Promise<boolean> {
     try {
-      await withTimeout(page.hover(selector), timeout, 'Timeout exceeded');
+      await withTimeout(
+        targetFrame(page).hover(selector),
+        timeout,
+        'Timeout exceeded'
+      );
       return true;
     } catch (error) {
       this.logger.error(

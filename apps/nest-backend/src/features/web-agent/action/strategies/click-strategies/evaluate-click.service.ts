@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Page } from 'puppeteer';
+import type { QueryRoot } from '../../handlers/frame';
 import { ClickOperation } from './utils';
 import { ActionUtilsService } from '../../action-utils/action-utils.service';
 import { withTimeout } from '../with-timeout';
@@ -13,7 +13,7 @@ export class EvaluateClickService implements ClickOperation {
   private readonly logger = new Logger(EvaluateClickService.name);
   constructor(private readonly actionUtilsService: ActionUtilsService) {}
   async operate(
-    page: Page,
+    page: QueryRoot,
     projectName: string,
     eventId: string,
     selector: string,
