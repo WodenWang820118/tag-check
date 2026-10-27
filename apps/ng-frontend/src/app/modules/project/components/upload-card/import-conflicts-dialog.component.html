@@ -1,0 +1,86 @@
+<h2 mat-dialog-title>Event names changed</h2>
+
+<mat-dialog-content
+  class="flex! max-h-[60vh] flex-col gap-[1.6rem] overflow-auto text-[1.4rem]"
+  data-testid="import-conflicts-dialog"
+>
+  <p class="m-0! leading-[1.5]">
+    These tags already have a test, but the event name in the container changed.
+    Update keeps the recording and past runs, and replaces the spec with the
+    container's. Keep both leaves the existing test and adds a new one.
+  </p>
+
+  <ul class="m-0! flex list-none flex-col gap-[1.6rem] p-0!">
+    @for (
+      conflict of data.conflicts;
+      track conflict.tagName;
+      let index = $index
+    ) {
+      <li
+        class="flex flex-col gap-[0.8rem]"
+        [attr.data-testid]="'import-conflict-' + index"
+      >
+        <div class="flex flex-col gap-[0.2rem]">
+          <span class="font-medium">{{ conflict.tagName }}</span>
+          <span class="text-[#55605d]">
+            Event: <code>{{ conflict.existingEventName }}</code> →
+            <code>{{ conflict.newEventName }}</code>
+          </span>
+        </div>
+        @if (conflict.specEdited) {
+          <p class="m-0! text-[#7a4e00]">
+            The spec was edited. Updating still replaces it, because the event
+            name changed.
+          </p>
+        }
+        <div class="flex flex-wrap gap-[1.2rem]">
+          <label class="inline-flex cursor-pointer items-center gap-[0.6rem]">
+            <input
+              type="radio"
+              [name]="'import-conflict-choice-' + index"
+              [checked]="resolutionFor(conflict.tagName) === 'update'"
+              (change)="choose(conflict.tagName, 'update')"
+              [attr.data-testid]="'import-conflict-update-' + index"
+            />
+            Update
+          </label>
+          <label class="inline-flex cursor-pointer items-center gap-[0.6rem]">
+            <input
+              type="radio"
+              [name]="'import-conflict-choice-' + index"
+              [checked]="resolutionFor(conflict.tagName) === 'keepBoth'"
+              (change)="choose(conflict.tagName, 'keepBoth')"
+              [attr.data-testid]="'import-conflict-keep-' + index"
+            />
+            Keep both as {{ nameFor(conflict.tagName) }}
+          </label>
+        </div>
+      </li>
+    }
+  </ul>
+
+  <p class="m-0! text-[#55605d]">
+    If that name is already used in the project, the import picks the next free
+    number.
+  </p>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button
+    mat-stroked-button
+    type="button"
+    data-testid="import-conflicts-cancel"
+    (click)="cancel()"
+  >
+    Cancel
+  </button>
+  <button
+    mat-flat-button
+    color="primary"
+    type="button"
+    data-testid="import-conflicts-confirm"
+    (click)="confirm()"
+  >
+    Import
+  </button>
+</mat-dialog-actions>

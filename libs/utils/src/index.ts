@@ -19,6 +19,7 @@ export * from './lib/functions/utils';
 export * from './lib/functions/tag-build-contract';
 export * from './lib/functions/ga4-reference';
 export * from './lib/functions/gtm-container-export';
+export * from './lib/functions/gtm-import';
 export * from './lib/functions/measurement-plan';
 export * from './lib/functions/measurement-plan-extract';
 export * from './lib/functions/ga4-collect-summary';
