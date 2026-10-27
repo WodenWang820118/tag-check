@@ -50,6 +50,44 @@ const RUN_RESULT = JSON.parse(
 ) as ReportDetailResponse[];
 
 describe('ReportTableFacadeService.runTest', () => {
+  it('does not override headless when Run is clicked before settings finish loading', async () => {
+    localStorage.clear();
+    const pendingSettings = new Subject<ProjectSetting>();
+    const getProjectSettings = vi
+      .fn()
+      .mockReturnValueOnce(pendingSettings)
+      .mockReturnValue(
+        of({
+          ...SETTINGS,
+          browserSettings: { ...SETTINGS.browserSettings, headless: true }
+        })
+      );
+    const runInspectionViaGtm = vi.fn(() => of(RUN_RESULT));
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: ChangeDetectorRef, useValue: { markForCheck: vi.fn() } },
+        { provide: ReportService, useValue: {} },
+        { provide: MatDialog, useValue: { open: vi.fn() } },
+        { provide: MatSnackBar, useValue: { open: vi.fn() } },
+        { provide: SettingsService, useValue: { getProjectSettings } },
+        { provide: GtmOperatorService, useValue: { runInspectionViaGtm } }
+      ]
+    });
+    const facade = TestBed.inject(ReportTableFacadeService);
+    TestBed.inject(RunHeadlessService).load('shop');
+    facade.initializeData(
+      TestBed.runInInjectionContext(() => new MatPaginator()),
+      TestBed.runInInjectionContext(() => new MatSort()),
+      { projectSlug: 'shop', projectReport: LIST }
+    );
+    await firstValueFrom(facade.runTest(REPORT_LIST_ITEM_SAMPLE.eventId));
+    expect(runInspectionViaGtm).toHaveBeenCalledWith(
+      'shop',
+      REPORT_LIST_ITEM_SAMPLE.eventId,
+      expect.objectContaining({ headless: true })
+    );
+    pendingSettings.complete();
+  });
   it('writes the result into the table shown when the run ends', async () => {
     const run = new Subject<ReportDetailResponse[]>();
     TestBed.configureTestingModule({

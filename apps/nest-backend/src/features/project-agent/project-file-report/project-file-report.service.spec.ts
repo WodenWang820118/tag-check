@@ -1,13 +1,10 @@
-import { mkdtempSync, rmSync } from 'fs';
-import { tmpdir } from 'os';
-import { join } from 'path';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+import { plainToInstance } from 'class-transformer';
+import { REPORT_DETAIL_SAMPLE } from '@utils';
+import { FullTestEventResponseDto } from '../../../shared';
 import { ProjectFileReportService } from './project-file-report.service';
 
-let root = '';
-
 function build() {
-  root = mkdtempSync(join(tmpdir(), 'file-report-'));
   const runRecordingsService = {
     removeRuns: vi.fn().mockResolvedValue(undefined),
     removeLegacy: vi.fn().mockResolvedValue(undefined)
@@ -17,7 +14,8 @@ function build() {
     getBySlugAndEventIds: vi.fn()
   };
   const testEventDetailRepositoryService = {
-    deleteRuns: vi.fn()
+    deleteRuns: vi.fn(),
+    getRunScreenshot: vi.fn().mockResolvedValue(null)
   };
   const service = new ProjectFileReportService(
     runRecordingsService as never,
@@ -34,11 +32,79 @@ function build() {
   };
 }
 
-afterEach(() => {
-  if (root) rmSync(root, { recursive: true, force: true });
-});
-
 describe('ProjectFileReportService', () => {
+  function reportWithRuns() {
+    return plainToInstance(FullTestEventResponseDto, {
+      ...REPORT_DETAIL_SAMPLE.testEvent,
+      testEventDetails: [
+        REPORT_DETAIL_SAMPLE.testEventDetails,
+        {
+          ...REPORT_DETAIL_SAMPLE.testEventDetails,
+          id: 5,
+          passed: false,
+          message: 'Old failure'
+        }
+      ],
+      latestTestEventDetail: REPORT_DETAIL_SAMPLE.testEventDetails,
+      latestTestImage: REPORT_DETAIL_SAMPLE.testImage
+    });
+  }
+
+  it('exports one run and its own summary and screenshot when a run filter is given', async () => {
+    const ctx = build();
+    ctx.testEventRepositoryService.getBySlugAndEventIds.mockResolvedValue([
+      reportWithRuns()
+    ]);
+    ctx.testEventDetailRepositoryService.getRunScreenshot.mockResolvedValue({
+      id: 5,
+      imageName: 'old.png'
+    });
+
+    await ctx.service.downloadReportFiles(
+      'demo',
+      [REPORT_DETAIL_SAMPLE.testEvent.eventId],
+      5
+    );
+
+    expect(ctx.xlsxReportService.writeXlsxFile).toHaveBeenCalledWith([
+      expect.objectContaining({
+        testEventDetails: [expect.objectContaining({ id: 5 })],
+        latestTestEventDetail: expect.objectContaining({
+          id: 5,
+          passed: false
+        }),
+        latestTestImage: expect.objectContaining({
+          id: 5,
+          imageName: 'old.png'
+        }),
+        message: 'Old failure'
+      })
+    ]);
+    expect(
+      ctx.testEventDetailRepositoryService.getRunScreenshot
+    ).toHaveBeenCalledWith(
+      'demo',
+      REPORT_DETAIL_SAMPLE.testEvent.eventId,
+      5,
+      true
+    );
+  });
+
+  it('does not export the latest run for a missing or foreign run filter', async () => {
+    const ctx = build();
+    ctx.testEventRepositoryService.getBySlugAndEventIds.mockResolvedValue([
+      reportWithRuns()
+    ]);
+    await expect(
+      ctx.service.downloadReportFiles(
+        'demo',
+        [REPORT_DETAIL_SAMPLE.testEvent.eventId],
+        999
+      )
+    ).rejects.toMatchObject({ status: 404 });
+    expect(ctx.xlsxReportService.writeXlsxFile).not.toHaveBeenCalled();
+  });
+
   it("deleteRuns() deletes the runs and their recordings, and a deleted latest run's old ones", async () => {
     const ctx = build();
     const deletedRecordings = [{ eventId: 'add_to_cart', recordingKey: 'k' }];
@@ -78,15 +144,17 @@ describe('ProjectFileReportService', () => {
 
   it('downloadReportFiles() writes the xlsx report when reports are present', async () => {
     const ctx = build();
-    ctx.testEventRepositoryService.getBySlugAndEventIds.mockResolvedValue([
-      { id: 1 }
-    ]);
+    const reports = [reportWithRuns()];
+    ctx.testEventRepositoryService.getBySlugAndEventIds.mockResolvedValue(
+      reports
+    );
     ctx.xlsxReportService.writeXlsxFile.mockResolvedValue('xlsx-buffer');
     expect(await ctx.service.downloadReportFiles('demo', ['a'])).toBe(
       'xlsx-buffer'
     );
-    expect(ctx.xlsxReportService.writeXlsxFile).toHaveBeenCalledWith([
-      { id: 1 }
-    ]);
+    expect(ctx.xlsxReportService.writeXlsxFile).toHaveBeenCalledWith(reports);
+    expect(
+      ctx.testEventDetailRepositoryService.getRunScreenshot
+    ).not.toHaveBeenCalled();
   });
 });

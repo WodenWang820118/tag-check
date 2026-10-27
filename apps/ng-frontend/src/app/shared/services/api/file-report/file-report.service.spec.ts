@@ -65,6 +65,18 @@ describe('FileReportService', () => {
     expect(options.responseType).toBe('blob');
   });
 
+  it('sends the shown run filter with the spreadsheet request', async () => {
+    httpClient.post.mockReturnValueOnce(
+      of(new HttpResponse<Blob>({ body: null }))
+    );
+    await firstValueFrom(service.downloadFileReports('slug', ['e1'], 5));
+    expect(httpClient.post).toHaveBeenCalledWith(
+      `${environment.fileReportApiUrl}/download/slug`,
+      ['e1'],
+      expect.objectContaining({ params: { run: 5 } })
+    );
+  });
+
   it('downloadFileReports saves the blob using a temporary anchor and revokes the URL', async () => {
     const blob = new Blob(['xlsx-bytes']);
     const response = new HttpResponse<Blob>({
