@@ -43,7 +43,10 @@ describe.skipIf(!chromeAvailable)('collectCandidatesSource in Chromium', () => {
     result.candidates.filter((candidate) => candidate.name === name);
 
   beforeAll(async () => {
-    browser = await puppeteer.launch({ headless: true });
+    browser = await puppeteer.launch({
+      headless: true,
+      args: process.platform === 'linux' ? ['--no-sandbox'] : []
+    });
     page = await browser.newPage();
     await page.setViewport({ width: 1024, height: 700 });
     await page.setContent(fixture);
