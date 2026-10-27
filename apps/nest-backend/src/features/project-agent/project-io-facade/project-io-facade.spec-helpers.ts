@@ -1,14 +1,9 @@
 import { Test } from '@nestjs/testing';
-import {
-  existsSync,
-  mkdirSync,
-  mkdtempSync,
-  rmSync,
-  writeFileSync
-} from 'node:fs';
-import { tmpdir } from 'node:os';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { ProjectIoService } from '../../../infrastructure/os/project-io/project-io.service';
+import { ProjectCompressor } from '../../../infrastructure/os/project-io/project-compressor.service';
+import { ProjectUnzipper } from '../../../infrastructure/os/project-io/project-unzipper.service';
 import { FolderPathService } from '../../../infrastructure/os/path/folder-path/folder-path.service';
 import { FolderService } from '../../../infrastructure/os/folder/folder.service';
 import { JsonProjectExportService } from '../../../infrastructure/data-export/json/export/json-project-export.service';
@@ -127,7 +122,7 @@ export async function createProjectIoFacadeHarness(
 }
 
 function mkdtempForHarness(prefix = 'tag-check-facade-') {
-  return mkdtempSync(join(tmpdir(), prefix));
+  return mkdtempSync(join(process.cwd(), prefix));
 }
 
 function createDefaultProjectIoService(): ProjectIoServiceStub {
@@ -145,28 +140,23 @@ function createDefaultProjectIoService(): ProjectIoServiceStub {
       writeFileSync(outputPath, JSON.stringify(manifest), 'utf-8');
     },
 
-    async unzipProject(slug: string, _zipPath: string, output: string) {
-      const staging = join(
-        output,
-        `_import_tmp_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`
-      );
-      mkdirSync(staging, { recursive: true });
-
-      const fixtureName = `${slug}.fixture.json`;
-      writeFixture(join(staging, fixtureName), slug);
-
-      let candidate = slug;
-      let counter = 1;
-      while (existsSync(join(output, candidate))) {
-        candidate = `${slug}-${counter++}`;
+    async unzipProject(slug, _zipPath, output, options) {
+      const source = mkdtempSync(join(output, 'input-'));
+      try {
+        const content = join(source, 'content');
+        mkdirSync(content);
+        writeFixture(join(content, `${slug}.fixture.json`), slug);
+        const archive = join(source, 'archive.zip');
+        await new ProjectCompressor().compress(content, archive, slug);
+        return await new ProjectUnzipper().unzip(
+          slug,
+          archive,
+          output,
+          options
+        );
+      } finally {
+        rmSync(source, { recursive: true, force: true });
       }
-
-      const finalDir = join(output, candidate);
-      mkdirSync(finalDir, { recursive: true });
-      writeFixture(join(finalDir, fixtureName), slug);
-      rmSync(staging, { recursive: true, force: true });
-
-      return candidate;
     }
   };
 }
@@ -179,7 +169,7 @@ function writeFixture(path: string, slug: string) {
       exportedAt: new Date().toISOString(),
       schemaHash: 'x',
       projectSlug: slug,
-      entities: { ProjectEntity: [] }
+      entities: { ProjectEntity: [{ id: 1, projectSlug: slug }] }
     }),
     'utf-8'
   );

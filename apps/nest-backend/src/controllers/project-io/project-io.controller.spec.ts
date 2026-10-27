@@ -10,7 +10,9 @@ vi.mock('node:fs', () => ({
   createWriteStream: vi.fn().mockReturnValue({})
 }));
 vi.mock('node:fs/promises', () => ({
-  unlink: vi.fn().mockResolvedValue(undefined)
+  mkdir: vi.fn().mockResolvedValue(undefined),
+  mkdtemp: vi.fn(async (prefix: string) => `${prefix}unique`),
+  rm: vi.fn().mockResolvedValue(undefined)
 }));
 
 describe('ProjectIoController', () => {
@@ -98,16 +100,25 @@ describe('ProjectIoController', () => {
     ).rejects.toMatchObject({ status: HttpStatus.BAD_REQUEST });
   });
 
-  it('deleteProject deletes from disk and database, ignoring disk errors', async () => {
+  it('deleteProject keeps rows when deleting the folder fails', async () => {
     const { controller, projectIoFacadeService, projectRepositoryService } =
       build({
         deleteProject: vi.fn().mockRejectedValue(new Error('disk error'))
       });
-    const result = await controller.deleteProject('proj-1');
+    await expect(controller.deleteProject('proj-1')).rejects.toThrow(
+      'disk error'
+    );
     expect(projectIoFacadeService.deleteProject).toHaveBeenCalledWith('proj-1');
+    expect(projectRepositoryService.deleteBySlug).not.toHaveBeenCalled();
+  });
+
+  it('deleteProject deletes rows after the folder is removed', async () => {
+    const { controller, projectRepositoryService } = build();
+    await expect(controller.deleteProject('proj-1')).resolves.toBe(
+      'db-deleted'
+    );
     expect(projectRepositoryService.deleteBySlug).toHaveBeenCalledWith(
       'proj-1'
     );
-    expect(result).toBe('db-deleted');
   });
 });

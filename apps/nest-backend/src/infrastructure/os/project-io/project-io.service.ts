@@ -1,6 +1,9 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { ProjectCompressor } from './project-compressor.service';
-import { ProjectUnzipper } from './project-unzipper.service';
+import {
+  ProjectUnzipper,
+  type ProjectUnzipOptions
+} from './project-unzipper.service';
 
 /** Zips a project folder for export and extracts an imported zip. */
 @Injectable()
@@ -45,13 +48,14 @@ export class ProjectIoService {
    * Extracts the zip into `<outputFolderPath>/<slug>`; see ProjectUnzipper.
    *
    * @returns The slug of the extracted project folder.
-   * @throws HttpException 500 when extraction fails.
+   * @throws HttpException from validation or the import callback; 500 for
+   * other extraction or replacement failures.
    */
   async unzipProject(
     providedSlug: string,
     zipFilePath: string,
     outputFolderPath: string,
-    options: { overwriteExisting?: boolean } = {}
+    options: ProjectUnzipOptions = {}
   ): Promise<string> {
     try {
       return await this.unzipper.unzip(
@@ -61,6 +65,7 @@ export class ProjectIoService {
         options
       );
     } catch (error) {
+      if (error instanceof HttpException) throw error;
       this.logger.error(
         `Failed to unzip project '${providedSlug}': ${error instanceof Error ? error.message : String(error)}`
       );

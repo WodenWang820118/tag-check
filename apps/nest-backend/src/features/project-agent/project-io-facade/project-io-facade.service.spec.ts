@@ -3,9 +3,9 @@ import {
   InternalServerErrorException,
   StreamableFile
 } from '@nestjs/common';
-import { existsSync, mkdirSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, readdirSync, writeFileSync } from 'fs';
 import { join } from 'path';
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   createProjectIoFacadeHarness,
   type FolderServiceMock,
@@ -35,13 +35,18 @@ describe('ProjectIoFacadeService', () => {
     const stream = await harness.service.exportProject(slug);
     expect(stream).toBeInstanceOf(StreamableFile);
     // The fixture file should exist before cleanup (zip creation done)
-    const fixture = join(harness.tempRoot, 'temp', `${slug}.fixture.json`);
+    const tempFolder = readdirSync(harness.tempRoot).find((entry) =>
+      entry.startsWith('_export_tmp_')
+    );
+    if (!tempFolder) throw new Error('Export staging folder missing');
+    const fixture = join(harness.tempRoot, tempFolder, `${slug}.fixture.json`);
     expect(existsSync(fixture)).toBe(true);
+    for await (const chunk of stream.getStream())
+      expect(chunk.length).toBeGreaterThan(0);
   });
 
   it('should unzip and import fixture if present', async () => {
     const slug = 'proj2';
-    // Do NOT pre-create the slug folder; mock unzip will create staging + fixture and move into place.
     const importedSlug = await harness.service.importProject(
       slug,
       'dummy.zip',
@@ -55,19 +60,41 @@ describe('ProjectIoFacadeService', () => {
     expect(importedPayload?.projectSlug).toBe(slug);
   });
 
-  it('should resolve slug conflicts by appending a numeric suffix', async () => {
+  it.each(['fixture', 'compression'])(
+    'removes its temporary directory when %s export fails',
+    async (failure) => {
+      const projectFolder = join(harness.tempRoot, 'existing');
+      mkdirSync(projectFolder);
+      writeFileSync(join(projectFolder, 'recording.webm'), 'media');
+      if (failure === 'fixture') {
+        vi.spyOn(
+          harness.jsonExportService,
+          'exportProject'
+        ).mockRejectedValueOnce(new Error('fixture failure'));
+      } else {
+        vi.spyOn(
+          harness.projectIoService,
+          'compressProject'
+        ).mockRejectedValueOnce(new Error('compression failure'));
+      }
+      await expect(harness.service.exportProject('existing')).rejects.toThrow(
+        `${failure} failure`
+      );
+      expect(readdirSync(harness.tempRoot)).toEqual(['existing']);
+      expect(existsSync(join(projectFolder, 'recording.webm'))).toBe(true);
+    }
+  );
+
+  it('replaces the existing folder using the fixture projectSlug', async () => {
     const slug = 'proj-conflict';
-    // Pre-create an existing project folder to cause conflict
     mkdirSync(join(harness.tempRoot, slug), { recursive: true });
-    // Prepare a mock zip extraction (the mock will stage and rename)
     const importedSlug = await harness.service.importProject(
       slug,
       'dummy.zip',
       harness.tempRoot
     );
-    expect(importedSlug).not.toBe(slug); // Should have been suffixed (likely -1)
-    expect(importedSlug.startsWith(slug)).toBe(true);
-    // Import should still have occurred using the original fixture filename (slug.fixture.json)
+    // Suffixing only the folder would split it from the database project.
+    expect(importedSlug).toBe(slug);
     expect(importMock.imported).toBeTruthy();
   });
 
@@ -80,10 +107,15 @@ describe('ProjectIoFacadeService', () => {
   });
 
   it('rejects a fixture that is not JSON as a bad request', async () => {
-    harness.projectIoService.unzipProject = async (slug, _zip, output) => {
+    harness.projectIoService.unzipProject = async (
+      slug,
+      _zip,
+      output,
+      options
+    ) => {
       mkdirSync(join(output, slug), { recursive: true });
       writeFileSync(join(output, slug, `${slug}.fixture.json`), '{not json');
-      return slug;
+      return options?.validateStaged?.(join(output, slug)) ?? slug;
     };
 
     await expect(
