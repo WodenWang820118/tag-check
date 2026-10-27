@@ -1,0 +1,19 @@
+<ul
+  class="diff m-0! list-none overflow-hidden rounded-[0.8rem] p-0! text-[1.25rem] leading-[1.7]"
+>
+  @for (line of changes(); track line.selector) {
+    <li [class]="'diff__line--' + line.change + ' flex gap-[0.8rem] px-[1rem]'">
+      <span aria-hidden="true">{{
+        line.change === 'add' ? '+' : line.change === 'remove' ? '−' : ' '
+      }}</span>
+      <span class="cdk-visually-hidden">{{
+        line.change === 'add'
+          ? 'Added:'
+          : line.change === 'remove'
+            ? 'Removed:'
+            : 'Kept:'
+      }}</span>
+      <code class="[overflow-wrap:anywhere]">{{ line.selector }}</code>
+    </li>
+  }
+</ul>

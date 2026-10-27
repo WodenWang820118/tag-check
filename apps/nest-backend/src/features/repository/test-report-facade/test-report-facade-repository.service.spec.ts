@@ -31,6 +31,7 @@ function build() {
   const runRecordingsService = {
     fileOf: vi.fn().mockResolvedValue(null),
     readStepFailure: vi.fn().mockResolvedValue(null),
+    readStepFallbacks: vi.fn().mockResolvedValue([]),
     removeTests: vi.fn().mockResolvedValue(undefined)
   };
   const service = new TestReportFacadeRepositoryService(
@@ -201,7 +202,8 @@ describe('TestReportFacadeRepositoryService', () => {
         testEventDetails: null,
         testImage: null,
         runs: [],
-        stepFailure: null
+        stepFailure: null,
+        stepFallbacks: []
       });
     });
 
@@ -315,6 +317,39 @@ describe('TestReportFacadeRepositoryService', () => {
         'evt',
         KEY
       );
+    });
+
+    it('lists the fallback selectors the shown run used', async () => {
+      const fallback = {
+        stepIndex: 4,
+        stepType: 'click',
+        selector: '#add',
+        selectors: ['#add'],
+        matchedBy: 'id',
+        value: 'add'
+      };
+      const ctx = setUp(vi.fn().mockResolvedValue(null));
+      ctx.runRecordingsService.readStepFallbacks.mockResolvedValue([fallback]);
+
+      const result = await ctx.service.getReportDetail('demo', 'evt');
+
+      expect(result.stepFallbacks).toEqual([fallback]);
+      expect(ctx.runRecordingsService.readStepFallbacks).toHaveBeenCalledWith(
+        'demo',
+        'evt',
+        KEY
+      );
+    });
+
+    it('lists no fallbacks when they cannot be read', async () => {
+      const ctx = setUp(vi.fn().mockResolvedValue(null));
+      ctx.runRecordingsService.readStepFallbacks.mockRejectedValue(
+        new SyntaxError('Unexpected end of JSON')
+      );
+
+      expect(
+        (await ctx.service.getReportDetail('demo', 'evt')).stepFallbacks
+      ).toEqual([]);
     });
 
     it('is null when the run kept none, or it cannot be read', async () => {

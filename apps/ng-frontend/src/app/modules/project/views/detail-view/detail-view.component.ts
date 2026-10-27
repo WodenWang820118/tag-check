@@ -5,6 +5,7 @@ import {
   DestroyRef,
   inject,
   OnInit,
+  signal,
   ChangeDetectionStrategy
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
@@ -17,7 +18,7 @@ import {
   RouterLink
 } from '@angular/router';
 import { distinctUntilChanged, map, of, startWith, switchMap } from 'rxjs';
-import { VariableConfig } from '@utils';
+import { describeFallbackMatch, StepFallback, VariableConfig } from '@utils';
 import { MatButtonModule } from '@angular/material/button';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIconModule } from '@angular/material/icon';
@@ -37,6 +38,12 @@ import {
   type SelectorHealDialogData,
   type SelectorHealDialogResult
 } from '../../components/run-detail/selector-heal/selector-heal-dialog.component';
+import {
+  SaveFallbackDialogComponent,
+  type SaveFallbackDialogData,
+  type SaveFallbackDialogResult
+} from '../../components/run-detail/selector-heal/save-fallback-dialog.component';
+import { selectorGroupText } from '../../components/run-detail/selector-heal/selector-heal';
 import { SpecComparisonComponent } from '../../components/run-detail/spec-comparison/spec-comparison.component';
 import { Ga4RequestComponent } from '../../components/run-detail/ga4-request/ga4-request.component';
 import { SnackBarComponent } from '../../../../shared/components/snackbar/snackbar.component';
@@ -118,19 +125,31 @@ export class DetailViewComponent implements OnInit {
    * names it: `Step 5 · Click [data-testid="add"]`.
    */
   stepFailureLabel = computed(() => {
+    const failure = this.routeContext()?.stepFailure;
+    return failure ? this.stepLabel(failure.stepIndex, failure.stepType) : null;
+  });
+  /** Steps saved with their fallback selector since the page loaded. */
+  private readonly savedFallbacks = signal<number[]>([]);
+  /**
+   * The steps of the shown run that continued with a fallback selector,
+   * each with how the page names it, why the fallback was chosen, and
+   * whether the recording already waits for it first.
+   */
+  stepFallbacks = computed(() => {
     const context = this.routeContext();
-    const failure = context?.stepFailure;
-    if (!failure) {
-      return null;
-    }
-    const step = context.recording?.steps?.[failure.stepIndex];
-    const described = step ? describeStep(step) : null;
-    return [
-      `Step ${failure.stepIndex + 1}`,
-      described
-        ? [described.label, described.detail].filter(Boolean).join(' ')
-        : failure.stepType
-    ].join(' · ');
+    return (context?.stepFallbacks ?? []).map((fallback) => {
+      const recorded =
+        context?.recording?.steps?.[fallback.stepIndex]?.selectors?.[0];
+      return {
+        fallback,
+        label: this.stepLabel(fallback.stepIndex, fallback.stepType),
+        reason: describeFallbackMatch(fallback),
+        saved:
+          this.savedFallbacks().includes(fallback.stepIndex) ||
+          (recorded !== undefined &&
+            selectorGroupText(recorded) === fallback.selectors[0])
+      };
+    });
   });
   hasRecording = computed(
     () => (this.routeContext()?.videoBlob?.size ?? 0) > 0
@@ -243,6 +262,50 @@ export class DetailViewComponent implements OnInit {
           });
         }
       });
+  }
+
+  /**
+   * Opens the dialog that writes a fallback selector the shown run used
+   * into its step of the recording.
+   */
+  saveFallback(fallback: StepFallback, stepLabel: string) {
+    const context = this.routeContext();
+    if (!context) {
+      return;
+    }
+    this.dialog
+      .open<
+        SaveFallbackDialogComponent,
+        SaveFallbackDialogData,
+        SaveFallbackDialogResult
+      >(SaveFallbackDialogComponent, {
+        data: {
+          projectSlug: context.projectSlug,
+          eventId: context.eventId,
+          fallback,
+          stepLabel
+        },
+        width: 'min(56rem, 100vw)'
+      })
+      .afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((saved) => {
+        if (saved) {
+          this.savedFallbacks.update((steps) => [...steps, fallback.stepIndex]);
+        }
+      });
+  }
+
+  /** A step as the page names it: `Step 5 · Click [data-testid="add"]`. */
+  private stepLabel(stepIndex: number, stepType: string): string {
+    const step = this.routeContext()?.recording?.steps?.[stepIndex];
+    const described = step ? describeStep(step) : null;
+    return [
+      `Step ${stepIndex + 1}`,
+      described
+        ? [described.label, described.detail].filter(Boolean).join(' ')
+        : stepType
+    ].join(' · ');
   }
 
   /** The test's latest run, which the page shows without `?run=`. */

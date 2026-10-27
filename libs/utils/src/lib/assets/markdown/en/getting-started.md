@@ -36,7 +36,7 @@ Each test replays a Chrome Recorder recording that ends with the action that pus
 2. Export the recording as a JSON file.
 3. Open the test and expand **Spec, recording and item definition**. In the **Chrome Recording** panel, select the edit button, **Upload** the file or paste its content, and select **Save**.
 
-TagCheck replays the steps `setViewport`, `navigate`, `click`, `hover`, `change`, `keyDown`, `keyUp` and `waitForElement`, with CSS, ID, ARIA, text, XPath and pierce selectors. Stable selectors, such as `data-testid` attributes, keep recordings working after design changes.
+TagCheck replays the steps `setViewport`, `navigate`, `click`, `hover`, `change`, `keyDown`, `keyUp` and `waitForElement`, with CSS, ID, ARIA, text, XPath and pierce selectors. It also follows selector chains into shadow roots, runs steps inside iframes, and waits for the page a step opens when the recording says the step navigates. Before you record, set the Recorder's **Selector attribute** to `data-testid` (or the test attribute your site uses) and keep every selector type selected: stable selectors keep recordings working after design changes. When none of a step's selectors matches, TagCheck looks for exactly one element with the recorded test hook, id or name, continues with it and says so in the result (see Report management).
 
 ## 5. Run a test
 

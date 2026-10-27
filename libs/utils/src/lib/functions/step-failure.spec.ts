@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { describeStepFailure, describeStepFallback } from './step-failure';
+import {
+  describeFallbackMatch,
+  describeStepFailure,
+  describeStepFallback
+} from './step-failure';
 
 describe('describeStepFailure', () => {
   it('names the step, from 1, and the wait', () => {
@@ -70,5 +74,13 @@ describe('describeStepFallback', () => {
     ).toBe(
       'Step 2 (change) used a fallback selector [aria-label="Search"]: its recorded selectors found nothing, and one element matched the recorded name "Search".'
     );
+  });
+});
+
+describe('describeFallbackMatch', () => {
+  it('says which recorded hint singled the element out', () => {
+    expect(
+      describeFallbackMatch({ matchedBy: 'name', value: 'Add to cart' })
+    ).toBe('one element matched the recorded name "Add to cart"');
   });
 });

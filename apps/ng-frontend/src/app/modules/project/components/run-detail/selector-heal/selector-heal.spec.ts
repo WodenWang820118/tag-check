@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import type { Recording } from '@utils';
-import { selectorChanges, withStepSelectors } from './selector-heal';
+import {
+  selectorChanges,
+  selectorGroupText,
+  withStepSelectors
+} from './selector-heal';
 
 const recording: Recording = {
   title: 'Add to cart',
@@ -72,6 +76,15 @@ describe('withStepSelectors', () => {
   it('refuses a step the recording does not have', () => {
     expect(() => withStepSelectors(recording, 5, ['#new'], false)).toThrow(
       'The recording has no step 6'
+    );
+  });
+});
+
+describe('selectorGroupText', () => {
+  it('reads a selector as recorded, and a shadow chain as one line', () => {
+    expect(selectorGroupText('#add')).toBe('#add');
+    expect(selectorGroupText(['my-widget', 'button.buy'])).toBe(
+      'my-widget >>>> button.buy'
     );
   });
 });

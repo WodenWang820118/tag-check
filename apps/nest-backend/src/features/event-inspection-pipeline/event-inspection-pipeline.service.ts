@@ -152,7 +152,8 @@ export class EventInspectionPipelineService {
   /**
    * Saves the run's screenshot, then its result linked to it and to its
    * recordings, and points the test at both as its latest. What a failed
-   * step saw (`stepFailure`) goes beside the recordings. Older runs past
+   * step saw (`stepFailure`) and the fallback selectors its steps used go
+   * beside the recordings. Older runs past
    * RUN_RECORDINGS_KEPT then lose their recordings.
    */
   private async saveResult(
@@ -200,6 +201,15 @@ export class EventInspectionPipelineService {
     this.logger.debug('Updated info:', JSON.stringify(updatedInfo, null, 2));
     this.logger.debug('Updated event:', JSON.stringify(updatedEvent, null, 2));
     if (recorded) {
+      const fallbacks = this.runStepFallbackService.fallbacks(eventId);
+      if (fallbacks.length > 0) {
+        await this.runRecordingsService.saveStepFallbacks(
+          projectSlug,
+          eventId,
+          recorded.recordingKey,
+          fallbacks
+        );
+      }
       if (stepFailure) {
         await this.runRecordingsService.saveStepFailure(
           projectSlug,

@@ -40,19 +40,4 @@
     border: 1px dashed rgb(0 121 107 / 0.5);
     background: rgb(0 121 107 / 0.04);
   }
-
-  &__diff {
-    border: 1px solid #d5dedc;
-    font-family: 'Roboto Mono', monospace;
-  }
-
-  &__diff-line--add {
-    background: #e6f4ea;
-    color: #1e4f2c;
-  }
-
-  &__diff-line--remove {
-    background: #fdecea;
-    color: #8c1d18;
-  }
 }

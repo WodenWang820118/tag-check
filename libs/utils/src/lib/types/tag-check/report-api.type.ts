@@ -1,4 +1,4 @@
-import type { StepFailureSummary } from './step-failure.type';
+import type { StepFailureSummary, StepFallback } from './step-failure.type';
 import { Auditable } from './auditable.type';
 import { AbstractTestEvent } from './project.type';
 import { TestEventDetailSchema } from './report.type';
@@ -67,6 +67,11 @@ export type ReportDetailResponse = {
    * kept what the step saw; null otherwise.
    */
   stepFailure: StepFailureSummary | null;
+  /**
+   * The steps of that run that continued with a fallback selector, when the
+   * run kept its recordings; empty otherwise.
+   */
+  stepFallbacks: StepFallback[];
 };
 
 /** One run in a test's history (ReportDetailResponse.runs). */

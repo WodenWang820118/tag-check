@@ -41,12 +41,22 @@ export function describeStepFailure(failure: {
  * recorded test hook "add-to-cart".` Steps count from 1. `matchedBy`
  * reads as "test hook", "id" or "name".
  */
-export function describeStepFallback(fallback: StepFallback): string {
+export function describeStepFallback(
+  fallback: Omit<StepFallback, 'selectors'>
+): string {
   const step = `Step ${fallback.stepIndex + 1} (${fallback.stepType})`;
-  const how = MATCH_WORD[fallback.matchedBy];
   return (
     `${step} used a fallback selector ${fallback.selector}: its recorded ` +
-    'selectors found nothing, and one element matched the recorded ' +
-    `${how} "${fallback.value}".`
+    `selectors found nothing, and ${describeFallbackMatch(fallback)}.`
   );
+}
+
+/**
+ * Why a fallback was chosen, such as `one element matched the recorded
+ * test hook "add-to-cart"`.
+ */
+export function describeFallbackMatch(
+  fallback: Pick<StepFallback, 'matchedBy' | 'value'>
+): string {
+  return `one element matched the recorded ${MATCH_WORD[fallback.matchedBy]} "${fallback.value}"`;
 }

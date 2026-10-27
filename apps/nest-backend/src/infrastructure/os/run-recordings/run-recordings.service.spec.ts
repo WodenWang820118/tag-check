@@ -2,10 +2,11 @@ import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { RUN_RECORDINGS_KEPT } from '@utils';
+import { RUN_RECORDINGS_KEPT, type StepFallback } from '@utils';
 import {
   RunRecordingsService,
-  STEP_FAILURE_FILE
+  STEP_FAILURE_FILE,
+  STEP_FALLBACKS_FILE
 } from './run-recordings.service';
 
 /** A run's recording key: a UUID, the n-th one for a test. */
@@ -205,6 +206,37 @@ describe('RunRecordingsService', () => {
       await expect(
         service.readStepFailure('demo', 'e1', '../../etc')
       ).rejects.toThrow('Not a recording key');
+    });
+  });
+  describe('step fallbacks', () => {
+    const fallbacks: StepFallback[] = [
+      {
+        stepIndex: 4,
+        stepType: 'click',
+        selector: '[data-testid="add-to-cart"]',
+        selectors: ['[data-testid="add-to-cart"]'],
+        matchedBy: 'testId',
+        value: 'add-to-cart'
+      }
+    ];
+
+    it("keeps the run's fallbacks in its folder", async () => {
+      await expect(
+        service.saveStepFallbacks('demo', 'e1', key(1), fallbacks)
+      ).resolves.toBe(true);
+
+      expect(
+        existsSync(join(root, 'e1', 'runs', key(1), STEP_FALLBACKS_FILE))
+      ).toBe(true);
+      await expect(
+        service.readStepFallbacks('demo', 'e1', key(1))
+      ).resolves.toEqual(fallbacks);
+    });
+
+    it('reads none for a run that used none', async () => {
+      await expect(
+        service.readStepFallbacks('demo', 'e1', key(2))
+      ).resolves.toEqual([]);
     });
   });
 });

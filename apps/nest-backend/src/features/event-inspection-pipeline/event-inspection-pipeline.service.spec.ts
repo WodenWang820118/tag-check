@@ -44,7 +44,8 @@ describe('EventInspectionPipelineService', () => {
     };
     const runRecordings = {
       prune: vi.fn().mockResolvedValue(undefined),
-      saveStepFailure: vi.fn().mockResolvedValue(true)
+      saveStepFailure: vi.fn().mockResolvedValue(true),
+      saveStepFallbacks: vi.fn().mockResolvedValue(true)
     };
     return {
       svc: new EventInspectionPipelineService(
@@ -257,6 +258,40 @@ describe('EventInspectionPipelineService', () => {
       const { runRecordings } = await run(failure(true), new RunMedia());
 
       expect(runRecordings.saveStepFailure).not.toHaveBeenCalled();
+      expect(runRecordings.saveStepFallbacks).not.toHaveBeenCalled();
+    });
+
+    it('keeps the fallbacks used before the failure beside the recordings', async () => {
+      const fallback: StepFallback = {
+        stepIndex: 1,
+        stepType: 'click',
+        selector: '#open',
+        selectors: ['#open'],
+        matchedBy: 'id',
+        value: 'open'
+      };
+      const media = new RunMedia();
+      media.site = { firstFrameAt: 8_000 } as never;
+      const built = build({ inspectError: failure(true) });
+      built.runStepFallback.fallbacks.mockReturnValue([fallback]);
+
+      await built.svc.singleEventInspectionRecipe(
+        { screenshot: vi.fn().mockResolvedValue(Buffer.from('img')) } as never,
+        'p',
+        'e',
+        'M',
+        { username: '', password: '' },
+        'false',
+        { application: undefined } as never,
+        media
+      );
+
+      expect(built.runRecordings.saveStepFallbacks).toHaveBeenCalledWith(
+        'p',
+        'e',
+        media.recordingKey,
+        [fallback]
+      );
     });
   });
 
@@ -357,6 +392,7 @@ describe('EventInspectionPipelineService', () => {
           stepIndex: 4,
           stepType: 'click',
           selector: '[data-testid="add-to-cart"]',
+          selectors: ['[data-testid="add-to-cart"]'],
           matchedBy: 'testId',
           value: 'add-to-cart'
         },
@@ -364,6 +400,7 @@ describe('EventInspectionPipelineService', () => {
           stepIndex: 1,
           stepType: 'change',
           selector: '#qty',
+          selectors: ['#qty'],
           matchedBy: 'id',
           value: 'qty'
         }

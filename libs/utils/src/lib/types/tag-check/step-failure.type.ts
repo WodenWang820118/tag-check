@@ -82,6 +82,11 @@ export type StepFallback = {
    * candidate; this is its first, which is the most stable.
    */
   selector: string;
+  /**
+   * Every selector of the candidate, most stable first: what the retry
+   * tried, and what saving the fallback writes into the step.
+   */
+  selectors: string[];
   /** Which recorded hint singled the candidate out. */
   matchedBy: 'testId' | 'id' | 'name';
   /** The recorded test hook, id or name it matched. */

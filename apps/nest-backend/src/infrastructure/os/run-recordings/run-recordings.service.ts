@@ -2,7 +2,11 @@ import { Injectable, Logger } from '@nestjs/common';
 import { existsSync } from 'fs';
 import { mkdir, readFile, rm, writeFile } from 'fs/promises';
 import { join } from 'path';
-import { RUN_RECORDINGS_KEPT, type StepFailureContext } from '@utils';
+import {
+  RUN_RECORDINGS_KEPT,
+  type StepFailureContext,
+  type StepFallback
+} from '@utils';
 import { RECORDING_FILES, type RecordingFile } from '../../../shared';
 import { TestEventDetailRepositoryService } from '../../../core/repository/test-event/test-event-detail-repository.service';
 import { FolderPathService } from '../path/folder-path/folder-path.service';
@@ -14,6 +18,9 @@ const RUNS_FOLDER = 'runs';
 
 /** The file in a run's folder that says what its failed step saw. */
 export const STEP_FAILURE_FILE = 'step-failure.json';
+
+/** The file in a run's folder that lists the fallback selectors it used. */
+export const STEP_FALLBACKS_FILE = 'step-fallbacks.json';
 
 /** Where a run's recordings are looked up: see RunRecordingsService.fileOf. */
 export type RunRecordingRef = {
@@ -101,21 +108,13 @@ export class RunRecordingsService {
     recordingKey: string,
     context: StepFailureContext
   ): Promise<boolean> {
-    try {
-      const folder = await this.folderOf(projectSlug, eventId, recordingKey);
-      await mkdir(folder, { recursive: true });
-      await writeFile(
-        join(folder, STEP_FAILURE_FILE),
-        JSON.stringify(context),
-        'utf8'
-      );
-      return true;
-    } catch (error) {
-      this.logger.warn(
-        `Could not save what run ${recordingKey}'s step saw: ${error}`
-      );
-      return false;
-    }
+    return this.saveRunFile(
+      projectSlug,
+      eventId,
+      recordingKey,
+      STEP_FAILURE_FILE,
+      context
+    );
   }
 
   /**
@@ -129,14 +128,89 @@ export class RunRecordingsService {
     eventId: string,
     recordingKey: string
   ): Promise<StepFailureContext | null> {
+    return this.readRunFile<StepFailureContext>(
+      projectSlug,
+      eventId,
+      recordingKey,
+      STEP_FAILURE_FILE
+    );
+  }
+
+  /**
+   * Saves the fallback selectors the run's steps continued with in the
+   * run's folder. Never throws: the run is saved without them, and false
+   * says so.
+   */
+  async saveStepFallbacks(
+    projectSlug: string,
+    eventId: string,
+    recordingKey: string,
+    fallbacks: readonly StepFallback[]
+  ): Promise<boolean> {
+    return this.saveRunFile(
+      projectSlug,
+      eventId,
+      recordingKey,
+      STEP_FALLBACKS_FILE,
+      fallbacks
+    );
+  }
+
+  /**
+   * The fallback selectors the run's steps continued with; empty when it
+   * used none, or its folder was pruned.
+   *
+   * @throws Error when `recordingKey` is not a run's key.
+   */
+  async readStepFallbacks(
+    projectSlug: string,
+    eventId: string,
+    recordingKey: string
+  ): Promise<StepFallback[]> {
+    return (
+      (await this.readRunFile<StepFallback[]>(
+        projectSlug,
+        eventId,
+        recordingKey,
+        STEP_FALLBACKS_FILE
+      )) ?? []
+    );
+  }
+
+  private async saveRunFile(
+    projectSlug: string,
+    eventId: string,
+    recordingKey: string,
+    file: string,
+    content: unknown
+  ): Promise<boolean> {
+    try {
+      const folder = await this.folderOf(projectSlug, eventId, recordingKey);
+      await mkdir(folder, { recursive: true });
+      await writeFile(join(folder, file), JSON.stringify(content), 'utf8');
+      return true;
+    } catch (error) {
+      this.logger.warn(
+        `Could not save ${file} of run ${recordingKey}: ${error}`
+      );
+      return false;
+    }
+  }
+
+  private async readRunFile<T>(
+    projectSlug: string,
+    eventId: string,
+    recordingKey: string,
+    file: string
+  ): Promise<T | null> {
     const path = join(
       await this.folderOf(projectSlug, eventId, recordingKey),
-      STEP_FAILURE_FILE
+      file
     );
     if (!existsSync(path)) {
       return null;
     }
-    return JSON.parse(await readFile(path, 'utf8')) as StepFailureContext;
+    return JSON.parse(await readFile(path, 'utf8')) as T;
   }
 
   /**
