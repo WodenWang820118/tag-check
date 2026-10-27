@@ -39,7 +39,8 @@ describe('ActionService', () => {
       } as never,
       runStatus as never,
       runTimeline as never,
-      { collect: vi.fn() } as never
+      { collect: vi.fn() } as never,
+      { selectorsFor: vi.fn().mockReturnValue(null) } as never
     );
 
     await service.performOperation({} as never, 'project', 'event', {
@@ -91,7 +92,8 @@ describe('ActionService', () => {
         } as never,
         { step: vi.fn() } as never,
         { markStep: vi.fn() } as never,
-        { collect: vi.fn() } as never
+        { collect: vi.fn() } as never,
+        { selectorsFor: vi.fn().mockReturnValue(null) } as never
       );
       await service.performOperation({} as never, 'project', 'event', {
         localStorage: { data: [] },
@@ -163,7 +165,8 @@ describe('ActionService', () => {
         { getRecordingDetails: vi.fn().mockResolvedValue({ steps }) } as never,
         { step: vi.fn() } as never,
         { markStep: vi.fn() } as never,
-        collector as never
+        collector as never,
+        { selectorsFor: vi.fn().mockReturnValue(null) } as never
       );
       const run = service.performOperation(
         { url: () => 'page' } as never,
@@ -196,5 +199,47 @@ describe('ActionService', () => {
       await expect(run).rejects.toBe(error);
       expect(collector.collect).not.toHaveBeenCalled();
     });
+  });
+
+  it("replays a trial's step with the selectors it tries", async () => {
+    const executed: unknown[] = [];
+    const stepExecutor = {
+      executeStep: vi.fn(async ({ step }: { step: unknown }) => {
+        executed.push(step);
+      })
+    };
+    const steps = [
+      { type: BrowserAction.NAVIGATE, url: 'https://example.test' },
+      { type: BrowserAction.CLICK, selectors: [['#gone']], offsetX: 3 }
+    ];
+    const overrides = {
+      selectorsFor: vi.fn((_eventId: string, index: number) =>
+        index === 1 ? ['#new', 'aria/New'] : null
+      )
+    };
+    const service = new ActionService(
+      { sendEventCompleted: vi.fn() } as never,
+      stepExecutor as never,
+      { getRecordingDetails: vi.fn().mockResolvedValue({ steps }) } as never,
+      { step: vi.fn() } as never,
+      { markStep: vi.fn() } as never,
+      { collect: vi.fn() } as never,
+      overrides as never
+    );
+
+    await service.performOperation({} as never, 'project', 'event', {
+      localStorage: { data: [] },
+      cookie: { data: [] }
+    });
+
+    expect(executed).toEqual([
+      steps[0],
+      {
+        type: BrowserAction.CLICK,
+        selectors: [['#new'], ['aria/New']],
+        offsetX: 3
+      }
+    ]);
+    expect(overrides.selectorsFor).toHaveBeenCalledWith('event', 1);
   });
 });

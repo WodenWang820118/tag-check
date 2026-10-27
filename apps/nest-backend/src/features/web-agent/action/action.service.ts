@@ -5,6 +5,7 @@ import { EventInspectionPresetDto } from '../../../shared/dto/event-inspection-p
 import { ProgressEventsService } from '../../../core/events-gateway/progress-events.service';
 import { RunStatusService } from '../../../core/events-gateway/run-status.service';
 import { RunTimelineService } from '../../../core/events-gateway/run-timeline.service';
+import { RunStepOverrideService } from '../../../core/events-gateway/run-step-override.service';
 import { RecordingRepositoryService } from '../../../core/repository/recording/recording-repository.service';
 import { StepElementNotFoundError } from './step-failure/step-element-not-found.error';
 import { StepFailureCollectorService } from './step-failure/step-failure-collector.service';
@@ -27,7 +28,8 @@ export class ActionService {
     private readonly recordingRepositoryService: RecordingRepositoryService,
     private readonly runStatusService: RunStatusService,
     private readonly runTimelineService: RunTimelineService,
-    private readonly stepFailureCollector: StepFailureCollectorService
+    private readonly stepFailureCollector: StepFailureCollectorService,
+    private readonly runStepOverride: RunStepOverrideService
   ) {}
 
   async performOperation(
@@ -50,7 +52,12 @@ export class ActionService {
     };
     const lastClickIndex = steps.map((step) => step.type).lastIndexOf('click');
 
-    for (const [i, step] of steps.entries()) {
+    for (const [i, recorded] of steps.entries()) {
+      // A trial run tries other selectors for one step.
+      const override = this.runStepOverride.selectorsFor(eventId, i);
+      const step = override
+        ? { ...recorded, selectors: override.map((selector) => [selector]) }
+        : recorded;
       this.logger.log(`Performing step ${i + 1} of ${totalSteps}`);
       this.runStatusService.step(eventId, totalSteps, i + 1);
 

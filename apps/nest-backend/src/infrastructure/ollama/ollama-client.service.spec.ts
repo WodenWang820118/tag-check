@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   OLLAMA_PROBE_TIMEOUT_MS,
+  OllamaChatError,
   OllamaClientService
 } from './ollama-client.service';
 
@@ -87,5 +88,75 @@ describe('OllamaClientService', () => {
       'Not an Ollama address on this computer'
     );
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  describe('chat()', () => {
+    const request = {
+      model: 'qwen3.5:9b',
+      messages: [{ role: 'user' as const, content: 'Which one?' }],
+      format: { type: 'object' }
+    };
+
+    it('posts the chat, not streamed, deterministic and without thinking', async () => {
+      const fetchMock = vi.fn().mockResolvedValue(
+        answer(200, {
+          message: { role: 'assistant', content: '{"matches":[]}' }
+        })
+      );
+      vi.stubGlobal('fetch', fetchMock);
+
+      await expect(
+        client.chat('http://127.0.0.1:11434', request)
+      ).resolves.toBe('{"matches":[]}');
+      const [url, init] = fetchMock.mock.calls[0];
+      expect(url).toBe('http://127.0.0.1:11434/api/chat');
+      expect(init.method).toBe('POST');
+      expect(JSON.parse(init.body)).toEqual({
+        ...request,
+        stream: false,
+        think: false,
+        options: { temperature: 0 }
+      });
+    });
+
+    it("reports Ollama's error", async () => {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValue(answer(404, { error: 'model "x" not found' }))
+      );
+
+      await expect(
+        client.chat('http://127.0.0.1:11434', request)
+      ).rejects.toThrow(
+        new OllamaChatError('Ollama answered 404: model "x" not found')
+      );
+    });
+
+    it('reports an answer without a message, or no answer', async () => {
+      vi.stubGlobal(
+        'fetch',
+        vi
+          .fn()
+          .mockResolvedValueOnce(answer(200, { done: true }))
+          .mockRejectedValueOnce(new DOMException('timed out', 'TimeoutError'))
+      );
+
+      await expect(
+        client.chat('http://127.0.0.1:11434', request)
+      ).rejects.toThrow('Ollama answered without a message');
+      await expect(
+        client.chat('http://127.0.0.1:11434', request)
+      ).rejects.toThrow(OllamaChatError);
+    });
+
+    it('never posts to an address off this computer', async () => {
+      const fetchMock = vi.fn();
+      vi.stubGlobal('fetch', fetchMock);
+
+      await expect(
+        client.chat('http://10.0.0.2:11434', request)
+      ).rejects.toThrow('Not an Ollama address on this computer');
+      expect(fetchMock).not.toHaveBeenCalled();
+    });
   });
 });

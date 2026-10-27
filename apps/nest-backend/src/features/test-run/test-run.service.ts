@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import type { RunStatusBatch } from '@utils';
+import type { RunStatusBatch, SelectorTrialRequest } from '@utils';
 import { ProjectRepositoryService } from '../../core/repository/project/project-repository.service';
 import { SingleEventInspectionService } from '../event-inspection/single-event-inspection.service';
 import { GtmOperatorService } from '../gtm-operator/gtm-operator.service';
@@ -25,12 +25,17 @@ export class TestRunService {
    * read when the run is requested, so a change applies to the next run.
    * Rejects as the run does (see GtmOperatorService and
    * SingleEventInspectionService), or with 404 for an unknown project.
-   * `choice.batch` places the run in its batch for the run status.
+   * `choice.batch` places the run in its batch for the run status;
+   * `choice.stepOverride` makes it a trial of other selectors for one step.
    */
   async run(
     projectSlug: string,
     eventId: string,
-    choice: { headless: boolean; batch?: RunStatusBatch }
+    choice: {
+      headless: boolean;
+      batch?: RunStatusBatch;
+      stepOverride?: SelectorTrialRequest;
+    }
   ): Promise<void> {
     const project =
       await this.projectRepositoryService.getRunSettingsEntityBySlug(
@@ -50,7 +55,8 @@ export class TestRunService {
         eventId,
         plan.query,
         plan.preset,
-        choice.batch
+        choice.batch,
+        choice.stepOverride
       );
       return;
     }
@@ -58,7 +64,8 @@ export class TestRunService {
       projectSlug,
       eventId,
       plan.options,
-      choice.batch
+      choice.batch,
+      choice.stepOverride
     );
   }
 

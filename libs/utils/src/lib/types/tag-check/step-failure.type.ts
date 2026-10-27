@@ -57,3 +57,12 @@ export type StepFailureContext = {
   /** ISO 8601. */
   capturedAt: string;
 };
+
+/**
+ * Which step of a run could not find its element: what a test's page shows
+ * before it reads the whole StepFailureContext.
+ */
+export type StepFailureSummary = Pick<
+  StepFailureContext,
+  'stepIndex' | 'stepType' | 'url'
+>;

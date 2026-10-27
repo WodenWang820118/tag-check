@@ -135,6 +135,9 @@ export class SysConfigurationRepositoryService implements OnModuleInit {
       .into(SysConfigurationEntity)
       .values({ name, value, description })
       .orUpdate(['value', 'description'], ['name'])
+      // An upsert that updates reports no inserted id on a fresh SQLite
+      // connection; reading it back into the entity would then throw.
+      .updateEntity(false)
       .execute();
   }
 

@@ -108,7 +108,8 @@ export const REPORT_DETAIL_SAMPLE = {
       runAt: '2026-10-20T06:18:52.000Z',
       hasRecording: true
     }
-  ]
+  ],
+  stepFailure: null
 } satisfies Jsonified<ReportDetailResponse>;
 
 /** One item of GET /file-reports/:projectSlug. */
