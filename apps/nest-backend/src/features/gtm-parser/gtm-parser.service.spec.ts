@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, Logger } from '@nestjs/common';
 import { GtmParserService } from './gtm-parser.service';
 
 function build() {
@@ -113,6 +113,55 @@ describe('GtmParserService', () => {
         }
       ]
     });
+  });
+
+  it('imports an active GA4 event tag and skips a paused one', async () => {
+    const ctx = build();
+    const active = ga4EventTag('GA4 - page_view', 'page_view');
+    const paused = {
+      ...ga4EventTag('GA4 - old_event', 'old_event'),
+      paused: true
+    };
+    const payload = {
+      ...container,
+      containerVersion: {
+        ...container.containerVersion,
+        tag: [active, paused]
+      }
+    };
+    const log = vi
+      .spyOn(Logger.prototype, 'log')
+      .mockImplementation(() => undefined);
+
+    try {
+      const result = await ctx.service.uploadGtmJson('demo', payload);
+
+      const inputs =
+        ctx.projectEventsBuilderService.buildEvents.mock.calls[0]?.[1];
+      expect(inputs).toEqual([
+        {
+          eventName: 'page_view',
+          testName: 'GA4 - page_view',
+          recording: { title: 'page_view', steps: [] },
+          spec: {
+            tag: active,
+            trigger: [container.containerVersion.trigger[0]]
+          }
+        }
+      ]);
+      expect(result.skipped).toContainEqual({
+        tagName: 'GA4 - old_event',
+        reason: 'Paused'
+      });
+      expect(
+        log.mock.calls.some(
+          (call) =>
+            typeof call[0] === 'string' && call[0].includes('GA4 - old_event')
+        )
+      ).toBe(true);
+    } finally {
+      log.mockRestore();
+    }
   });
 
   it('accepts the export as text', async () => {

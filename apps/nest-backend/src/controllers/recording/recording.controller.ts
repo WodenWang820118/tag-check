@@ -63,17 +63,10 @@ export class RecordingController {
     @Param('eventId') eventId: string,
     @Body() recording: Recording
   ) {
-    const updated = await this.recordingRepositoryService.update(
+    return await this.projectRecordingService.updateRecordingAndFile(
       projectSlug,
       eventId,
       { title: recording.title, steps: recording.steps }
     );
-    // Keep the recording file in the project folder in step: a run reads
-    // the site's domain from it, and an exported zip carries it.
-    await this.projectRecordingService.updateRecording(projectSlug, eventId, {
-      title: recording.title,
-      steps: recording.steps
-    });
-    return updated;
   }
 }

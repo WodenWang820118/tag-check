@@ -1,4 +1,5 @@
 import '@angular/localize/init';
+import { APP_BASE_HREF, Location } from '@angular/common';
 import { Component, LOCALE_ID, PLATFORM_ID } from '@angular/core';
 import { TestBed, type ComponentFixture } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
@@ -83,14 +84,18 @@ describe('appRoutes', () => {
     expect(topLevelRoutePaths).not.toContain('xx-unsupported');
   });
 
-  it('creates absolute legacy app redirects so SSR does not keep redirects under /app', () => {
+  it('redirects legacy app URLs relative to the app root so the locale base href stays', () => {
     const directLegacyAppRoute = appRoutes.find(
       (route) => route.path === 'app/**'
     );
+    const target = runRedirect(
+      directLegacyAppRoute?.redirectTo,
+      { from: 'legacy' },
+      'usage'
+    );
 
-    expect(
-      runRedirect(directLegacyAppRoute?.redirectTo, { from: 'legacy' }, 'usage')
-    ).toBe('/documentation/introduction?from=legacy#usage');
+    expect(target.startsWith('/')).toBe(false);
+    expect(target).toBe('documentation/introduction?from=legacy#usage');
   });
 
   it('leaves unsupported locale prefixes to the wildcard redirect', () => {
@@ -147,12 +152,35 @@ describe('appRoutes', () => {
 
     await navigate(fixture, router, '/en/app');
 
-    expect(router.url).toBe('/documentation/introduction');
+    expect(router.url).toBe('/en/documentation/introduction');
+  });
+
+  it('keeps the locale prefix when a legacy app URL is opened under that locale', async () => {
+    const { fixture, router } = await setupRouterTest('en-US');
+
+    await navigate(fixture, router, '/ja/app/tag-builder?from=legacy#usage');
+
+    expect(router.url).toBe('/ja/documentation/introduction?from=legacy#usage');
+  });
+
+  it('keeps a localized build base href when /app redirects to the documentation entry', async () => {
+    const { fixture, location, router } = await setupRouterTest('ja', '/ja/');
+
+    await navigate(fixture, router, '/app?from=legacy#usage');
+
+    expect(router.url).toBe('/documentation/introduction?from=legacy#usage');
+    expect(location.prepareExternalUrl(router.url)).toBe(
+      '/ja/documentation/introduction?from=legacy#usage'
+    );
   });
 });
 
-async function setupRouterTest(localeId: string): Promise<{
+async function setupRouterTest(
+  localeId: string,
+  baseHref?: string
+): Promise<{
   fixture: ComponentFixture<ProductDocRouteTestHostComponent>;
+  location: Location;
   markdown: MarkdownServiceMock;
   router: Router;
 }> {
@@ -170,7 +198,8 @@ async function setupRouterTest(localeId: string): Promise<{
       provideNoopAnimations(),
       { provide: MarkdownService, useValue: markdown },
       { provide: LOCALE_ID, useValue: localeId },
-      { provide: PLATFORM_ID, useValue: 'browser' }
+      { provide: PLATFORM_ID, useValue: 'browser' },
+      ...(baseHref ? [{ provide: APP_BASE_HREF, useValue: baseHref }] : [])
     ]
   }).compileComponents();
 
@@ -179,6 +208,7 @@ async function setupRouterTest(localeId: string): Promise<{
 
   return {
     fixture,
+    location: TestBed.inject(Location),
     markdown,
     router: TestBed.inject(Router)
   };
