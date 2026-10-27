@@ -31,6 +31,10 @@ const HEADER_EVENT_NAME = 'event_name';
 const HEADER_EVENT_PARAMETERS = 'event_parameters';
 const HEADER_ITEM_PARAMETERS = 'item_parameters';
 
+/** GTM uses `event` to name the data layer event, so it cannot also hold a parameter. */
+const EVENT_PARAMETER_CONFLICT =
+  'Event parameter "event" conflicts with the data layer event name; rename the parameter (https://developers.google.com/tag-platform/tag-manager/datalayer).';
+
 /**
  * Maximum number of event parameters allowed per GA4 event (Google: https://support.google.com/analytics/answer/9267744).
  */
@@ -187,6 +191,11 @@ export function parseMeasurementPlanRows(table: string[][]): {
     );
     const itemParameters = splitAndDeduplicateParameters(rawRow[itemParamsIdx]);
 
+    if (eventParameters.includes('event')) {
+      issues.push(`Row ${rowNumber}: ${EVENT_PARAMETER_CONFLICT}`);
+      continue;
+    }
+
     // 1. Validate event name
     const nameIssues = getGa4EventNameIssues(eventName);
     for (const issue of nameIssues) {
@@ -255,8 +264,11 @@ export function measurementPlanToDataLayerSpecs(
   const specs: StrictDataLayerEvent[] = [];
 
   for (const row of rows) {
+    if (row.eventParameters.includes('event')) {
+      throw new Error(`Event "${row.eventName}": ${EVENT_PARAMETER_CONFLICT}`);
+    }
     const isEcommerce =
-      row.eventName in GA4_ECOMMERCE_EVENT_PARAMETERS ||
+      Object.hasOwn(GA4_ECOMMERCE_EVENT_PARAMETERS, row.eventName) ||
       row.itemParameters.length > 0;
 
     if (isEcommerce) {

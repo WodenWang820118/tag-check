@@ -136,6 +136,18 @@ describe('measurement-plan', () => {
   });
 
   describe('parseMeasurementPlanRows - issue reporting', () => {
+    it('rejects an event parameter that would replace the data layer event name', () => {
+      const result = parseMeasurementPlanRows([
+        ['event_name', 'event_parameters', 'item_parameters'],
+        ['login', 'method, event', '']
+      ]);
+
+      expect(result.rows).toEqual([]);
+      expect(result.issues).toEqual([
+        expect.stringMatching(/Row 2:.*"event".*data layer event name/)
+      ]);
+    });
+
     it('reports invalid event names that break GA4 naming rules', () => {
       const table = [
         ['event_name', 'event_parameters', 'item_parameters'],
@@ -271,6 +283,29 @@ describe('measurement-plan', () => {
   });
 
   describe('measurementPlanToDataLayerSpecs', () => {
+    it.each(['constructor', 'toString', 'valueOf'])(
+      'keeps parameters flat for the custom event %s',
+      (eventName) => {
+        expect(
+          measurementPlanToDataLayerSpecs([
+            { eventName, eventParameters: ['method'], itemParameters: [] }
+          ])
+        ).toEqual([{ event: eventName, method: '$method' }]);
+      }
+    );
+
+    it('rejects event parameters that would overwrite the event name even without parsing', () => {
+      expect(() =>
+        measurementPlanToDataLayerSpecs([
+          {
+            eventName: 'login',
+            eventParameters: ['event'],
+            itemParameters: []
+          }
+        ])
+      ).toThrow(/"event".*data layer event name/);
+    });
+
     it('places parameters at top level for non-ecommerce events without item parameters', () => {
       const rows: MeasurementPlanRow[] = [
         {
@@ -466,7 +501,7 @@ describe('measurement-plan', () => {
     // https://developers.google.com/analytics/devguides/collection/ga4/reference/events?client_type=gtm
     it('lists the documented parameters of every non-ecommerce event', () => {
       const rows = getGa4MeasurementPlanTemplateRows().filter(
-        (row) => !(row.eventName in GA4_ECOMMERCE_EVENT_PARAMETERS)
+        (row) => !Object.hasOwn(GA4_ECOMMERCE_EVENT_PARAMETERS, row.eventName)
       );
       expect(
         Object.fromEntries(

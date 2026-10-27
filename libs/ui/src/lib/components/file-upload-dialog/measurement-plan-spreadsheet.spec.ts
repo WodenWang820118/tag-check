@@ -11,6 +11,54 @@ import {
 } from './measurement-plan-spreadsheet';
 
 describe('measurement-plan-spreadsheet', () => {
+  it('rejects an unterminated quoted cell at its opening line before later rows are lost', () => {
+    const csv =
+      '\r\nevent_name,event_parameters,item_parameters\r\n' +
+      'login,"method,\r\nsign_up,method,\r\n';
+
+    expect(() => parseCsvToTable(csv)).toThrow(
+      /Line 3:.*unterminated quoted cell/i
+    );
+  });
+
+  it.each(['login,me"thod,', 'login,"method"suffix,'])(
+    'rejects malformed quoting on the physical line of %s',
+    (row) => {
+      expect(() =>
+        parseCsvToTable(
+          `event_name,event_parameters,item_parameters\r\n\r\n${row}`
+        )
+      ).toThrow(/Line 3:.*quote/i);
+    }
+  );
+
+  it.each(['event_name', 'event_parameters', 'item_parameters'])(
+    'rejects a duplicate required %s header regardless of case or whitespace',
+    (header) => {
+      const csv =
+        '\nevent_name,event_parameters,item_parameters,' +
+        ` ${header.toUpperCase()} \nlogin,method,,ignored`;
+
+      expect(() => parseCsvToTable(csv)).toThrow(
+        new RegExp(`Line 2:.*duplicate required header "${header}"`, 'i')
+      );
+    }
+  );
+
+  it.each(['sign_up,method', 'sign_up,method,,unexpected'])(
+    'rejects an ambiguous row width after a valid multiline cell: %s',
+    (row) => {
+      const csv =
+        'event_name,event_parameters,item_parameters\r\n' +
+        'login,"method,\r\nsource",\r\n' +
+        row;
+
+      expect(() => parseCsvToTable(csv)).toThrow(
+        /Line 4:.*expected 3.*columns.*found/i
+      );
+    }
+  );
+
   it('reads its own template back as the template rows, without issues', () => {
     const table = parseCsvToTable(buildMeasurementPlanTemplateCsv());
 

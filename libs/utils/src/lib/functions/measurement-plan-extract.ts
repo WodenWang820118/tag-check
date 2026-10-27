@@ -20,7 +20,7 @@ import {
   getGa4EventNameIssues
 } from './ga4-reference';
 import {
-  getGa4EventParameterRows,
+  getGa4EventParameterTable,
   resolveVariableReference
 } from './gtm-container-export';
 import type { MeasurementPlanRow } from './measurement-plan';
@@ -51,7 +51,8 @@ const MINIMUM_ITEM_PARAMETERS: readonly string[] = ['item_id', 'item_name'];
 const EVENT_VARIABLE = '{{Event}}';
 const EVENT_FILTER_ARGUMENT = '{{_event}}';
 /** A regex that only lists names, such as `^(view_item|add_to_cart)$`. */
-const NAME_ALTERNATION = /^\^?\(?([\p{L}\p{N}_]+(?:\|[\p{L}\p{N}_]+)*)\)?\$?$/u;
+const NAME_ALTERNATION =
+  /^\^(?:\(([\p{L}\p{N}_]+(?:\|[\p{L}\p{N}_]+)*)\)|([\p{L}\p{N}_]+))\$$/u;
 
 /**
  * Lists one plan row per event name the container's GA4 event tags send.
@@ -149,7 +150,15 @@ function getTriggerEventNames(
 ): { names: string[]; problems: string[] } {
   const names: string[] = [];
   const problems: string[] = [];
-  for (const triggerId of tag.firingTriggerId ?? []) {
+  if (!tag.firingTriggerId?.length) {
+    return {
+      names,
+      problems: [
+        'the event name is {{Event}} and it has no firing triggers; add its events by hand.'
+      ]
+    };
+  }
+  for (const triggerId of tag.firingTriggerId) {
     const trigger = triggers.find(
       (candidate) => candidate.triggerId === triggerId
     );
@@ -169,24 +178,37 @@ function getTriggerEventNames(
 }
 
 function getCustomEventNames(trigger: TriggerConfig): string[] {
+  let names: string[] | undefined;
   for (const condition of trigger.customEventFilter ?? []) {
     const argument = getParameterValue(condition.parameter, 'arg0');
-    const value = getParameterValue(condition.parameter, 'arg1')?.trim();
-    if (
-      argument !== EVENT_FILTER_ARGUMENT ||
-      !value ||
-      getParameterValue(condition.parameter, 'negate') === 'true'
-    ) {
+    if (argument !== EVENT_FILTER_ARGUMENT) {
       continue;
     }
+    const value = getParameterValue(condition.parameter, 'arg1')?.trim();
+    if (
+      !value ||
+      getParameterValue(condition.parameter, 'negate') === 'true' ||
+      getParameterValue(condition.parameter, 'ignore_case') === 'true'
+    ) {
+      return [];
+    }
+    let conditionNames: string[];
     if (condition.type === 'EQUALS') {
-      return [value];
+      conditionNames = [value];
+    } else if (condition.type === 'MATCH_REGEX') {
+      const match = NAME_ALTERNATION.exec(value);
+      conditionNames = (match?.[1] ?? match?.[2])?.split('|') ?? [];
+    } else {
+      return [];
     }
-    if (condition.type === 'MATCH_REGEX') {
-      return NAME_ALTERNATION.exec(value)?.[1].split('|') ?? [];
+    if (conditionNames.length === 0) {
+      return [];
     }
+    names = names
+      ? names.filter((name) => conditionNames.includes(name))
+      : conditionNames;
   }
-  return [];
+  return names ?? [];
 }
 
 function validNames(names: string[]): { names: string[]; problems: string[] } {
@@ -205,7 +227,11 @@ function validNames(names: string[]): { names: string[]; problems: string[] } {
   return { names: valid, problems };
 }
 
-type SentParameters = { names: string[]; notFromDataLayer: string[] };
+type SentParameters = {
+  names: string[];
+  notFromDataLayer: string[];
+  notes: string[];
+};
 
 /** The tag's parameter names, and those whose value is not a data layer key. */
 function getSentParameters(
@@ -214,7 +240,8 @@ function getSentParameters(
 ): SentParameters {
   const names: string[] = [];
   const notFromDataLayer: string[] = [];
-  for (const { parameter, value } of getGa4EventParameterRows(tag, variables)) {
+  const { rows, notes } = getGa4EventParameterTable(tag, variables);
+  for (const { parameter, value } of rows) {
     if (names.includes(parameter)) {
       continue;
     }
@@ -231,7 +258,7 @@ function getSentParameters(
       notFromDataLayer.push(`${parameter} from ${value}`);
     }
   }
-  return { names, notFromDataLayer };
+  return { names, notFromDataLayer, notes };
 }
 
 function withEcommerceParameters(
@@ -240,7 +267,7 @@ function withEcommerceParameters(
   sent: SentParameters
 ): ExtractedMeasurementPlanRow {
   const eventParameters = [...sent.names];
-  const notes: string[] = [];
+  const notes = [...sent.notes];
   if (sent.notFromDataLayer.length > 0) {
     notes.push(
       `Not read directly from the data layer: ${sent.notFromDataLayer.join('; ')}.`
@@ -248,7 +275,9 @@ function withEcommerceParameters(
   }
 
   if (getParameterValue(tag.parameter, 'sendEcommerceData') === 'true') {
-    const recommended = GA4_ECOMMERCE_EVENT_PARAMETERS[eventName];
+    const recommended = Object.hasOwn(GA4_ECOMMERCE_EVENT_PARAMETERS, eventName)
+      ? GA4_ECOMMERCE_EVENT_PARAMETERS[eventName]
+      : undefined;
     if (recommended) {
       eventParameters.push(
         ...recommended.filter((name) => !eventParameters.includes(name))

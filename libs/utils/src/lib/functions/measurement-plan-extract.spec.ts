@@ -112,6 +112,144 @@ const variables = [
 ];
 
 describe('extractMeasurementPlan', () => {
+  it.each(['constructor', 'toString', 'valueOf'])(
+    'extracts the custom ecommerce event %s without inherited recommendations',
+    (eventName) => {
+      const result = extract([
+        eventTag('GA4 - custom', eventName, [], { sendEcommerceData: true })
+      ]);
+
+      expect(result.rows).toEqual([
+        {
+          eventName,
+          eventParameters: [],
+          itemParameters: [],
+          notes: [expect.stringContaining('list the parameters it holds')]
+        }
+      ]);
+      expect(result.skipped).toEqual([]);
+    }
+  );
+
+  it('skips Event trigger patterns that do not name a finite anchored event list', () => {
+    const patterns = [
+      'login',
+      'login|sign_up',
+      '(login|sign_up)',
+      '^login|sign_up$',
+      '^(login|sign_up)',
+      '(login|sign_up)$',
+      '^(login|sign_up$',
+      '^login|sign_up)$',
+      'login_.*',
+      '^(login|{{Unknown}})$'
+    ];
+    const negated = customEventTrigger(
+      'negated',
+      'negated',
+      'MATCH_REGEX',
+      '^login$'
+    );
+    negated.customEventFilter?.[0].parameter.push({
+      type: 'BOOLEAN',
+      key: 'negate',
+      value: 'true'
+    });
+    const caseInsensitive = customEventTrigger(
+      'case-insensitive',
+      'case-insensitive',
+      'MATCH_REGEX',
+      '^login$'
+    );
+    caseInsensitive.customEventFilter?.[0].parameter.push({
+      type: 'BOOLEAN',
+      key: 'ignore_case',
+      value: 'true'
+    });
+    const mixed = customEventTrigger('mixed', 'mixed', 'EQUALS', 'login');
+    mixed.customEventFilter?.push(
+      ...(customEventTrigger('dynamic', 'dynamic', 'MATCH_REGEX', 'login_.*')
+        .customEventFilter ?? [])
+    );
+    const triggers = [
+      ...patterns.map((pattern, index) =>
+        customEventTrigger(String(index), pattern, 'MATCH_REGEX', pattern)
+      ),
+      negated,
+      caseInsensitive,
+      mixed
+    ];
+    const result = extract(
+      [
+        eventTag('GA4 - dynamic', '{{Event}}', [], {
+          firingTriggerId: triggers.map((trigger) => trigger.triggerId ?? '')
+        })
+      ],
+      triggers
+    );
+
+    expect(result.rows).toEqual([]);
+    expect(result.skipped).toEqual(
+      triggers.map(
+        (trigger) =>
+          `Tag "GA4 - dynamic": the event name is {{Event}} and trigger "${trigger.name}" does not name its custom events; add them by hand.`
+      )
+    );
+  });
+
+  it('uses the intersection of finite Event conditions on the same trigger', () => {
+    const trigger = customEventTrigger(
+      '1',
+      'login or sign_up filtered to sign_up',
+      'MATCH_REGEX',
+      '^(login|sign_up)$'
+    );
+    trigger.customEventFilter?.push(
+      ...(customEventTrigger('2', 'sign_up', 'MATCH_REGEX', '^sign_up$')
+        .customEventFilter ?? [])
+    );
+    const result = extract(
+      [eventTag('GA4 - filtered', '{{Event}}', [], { firingTriggerId: ['1'] })],
+      [trigger]
+    );
+
+    expect(result.rows.map((row) => row.eventName)).toEqual(['sign_up']);
+    expect(result.skipped).toEqual([]);
+  });
+
+  it('reports skipped Event tags with no firing triggers', () => {
+    const result = extract([
+      eventTag('GA4 - missing triggers', '{{Event}}', []),
+      eventTag('GA4 - empty triggers', '{{Event}}', [], { firingTriggerId: [] })
+    ]);
+
+    expect(result.rows).toEqual([]);
+    expect(result.skipped).toEqual([
+      'Tag "GA4 - missing triggers": the event name is {{Event}} and it has no firing triggers; add its events by hand.',
+      'Tag "GA4 - empty triggers": the event name is {{Event}} and it has no firing triggers; add its events by hand.'
+    ]);
+  });
+
+  it('merges both tag parameter tables and notes conflicting values', () => {
+    const tag = eventTag('GA4 - login', 'login', [
+      ['method', '{{DLV - method}}']
+    ]);
+    tag.parameter.push({
+      type: 'LIST',
+      key: 'eventParameters',
+      list: [settingsRow('method', 'legacy'), settingsRow('source', 'site')]
+    });
+    const [row] = extract([tag], [], variables).rows;
+
+    expect(row.eventParameters).toEqual(['method', 'source']);
+    expect(row.notes).toContain(
+      'Parameter "method" has conflicting values in eventParameters and eventSettingsTable; kept eventSettingsTable value "{{DLV - method}}" instead of "legacy".'
+    );
+    expect(row.notes).not.toContainEqual(
+      expect.stringContaining('method = "legacy"')
+    );
+  });
+
   it("lists a GA4 event tag's event name and parameters", () => {
     const result = extract(
       [
