@@ -60,6 +60,7 @@ export class EventTag {
       parameter: this.buildParameter(tag, isSendEcommerceData),
       firingTriggerId: this.buildTriggerIds(tag, triggers),
       tagFiringOption: 'ONCE_PER_EVENT',
+      ...(tag.notes ? { notes: tag.notes } : {}),
       monitoringMetadata: {
         type: 'MAP'
       },

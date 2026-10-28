@@ -8,14 +8,17 @@ import {
   getGa4EventParameterRows,
   getParameterListItems,
   getParameterMapValue,
-  getParameterValue
+  getParameterValue,
+  readTagCheckRules,
+  ruleToSpecValue
 } from '@utils';
 
 type SpecNode = Record<string, unknown>;
 
 /**
  * Builds the expected `dataLayer` push of a GA4 event tag, resolving the
- * tag's variables to the data layer keys they read.
+ * tag's variables to the data layer keys they read, and applying any TagCheck
+ * validation rules recorded in the tag's notes.
  */
 @Injectable()
 export class ProjectDataLayerSpecBuilderService {
@@ -27,9 +30,28 @@ export class ProjectDataLayerSpecBuilderService {
    * variable's data layer path, e.g. `{{DLV - ecommerce.value}}` reading
    * `ecommerce.value` requires `ecommerce.value`. Parameters set from other
    * variables or literal values do not come from the data layer and are left
-   * out.
+   * out. Validation rules recorded in the tag's notes replace the placeholders.
    */
   buildDataLayerSpec(
+    spec: Spec,
+    variables: readonly VariableConfig[] = []
+  ): StrictDataLayerEvent {
+    const result: StrictDataLayerEvent = { event: this.getEventName(spec) };
+    for (const { value } of getGa4EventParameterRows(spec.tag, variables)) {
+      const path = getDataLayerVariablePath(value, variables);
+      if (path) {
+        requireAtPath(result as unknown as SpecNode, toObjectPath(path), value);
+      }
+    }
+    this.applyTagCheckRules(result, spec);
+    return result;
+  }
+
+  /**
+   * Builds the spec from variables without applying rules from notes.
+   * Used to check whether a stored spec was generated before notes were added.
+   */
+  buildDataLayerSpecWithoutRules(
     spec: Spec,
     variables: readonly VariableConfig[] = []
   ): StrictDataLayerEvent {
@@ -105,10 +127,82 @@ export class ProjectDataLayerSpecBuilderService {
     try {
       return (
         isDeepStrictEqual(stored, this.buildLegacyDataLayerSpec(rawGtmTag)) ||
-        isDeepStrictEqual(stored, this.buildDataLayerSpec(rawGtmTag, variables))
+        isDeepStrictEqual(
+          stored,
+          this.buildDataLayerSpec(rawGtmTag, variables)
+        ) ||
+        isDeepStrictEqual(
+          stored,
+          this.buildDataLayerSpecWithoutRules(rawGtmTag, variables)
+        )
       );
     } catch {
       return false;
+    }
+  }
+
+  private applyTagCheckRules(result: StrictDataLayerEvent, spec: Spec): void {
+    if (!spec.tag.notes) {
+      return;
+    }
+    const { eventRules, itemRules } = readTagCheckRules(spec.tag.notes);
+    const eventName = result.event;
+    const target = result as unknown as SpecNode;
+
+    for (const rule of eventRules) {
+      if (rule.kind === 'any') {
+        continue;
+      }
+      const specValue = ruleToSpecValue(rule);
+      if (
+        isNode(target['ecommerce']) &&
+        Object.hasOwn(target['ecommerce'], rule.name)
+      ) {
+        (target['ecommerce'] as SpecNode)[rule.name] = specValue;
+      } else if (Object.hasOwn(target, rule.name)) {
+        target[rule.name] = specValue;
+      } else {
+        this.logger.warn(
+          `Rule for parameter "${rule.name}" ignored: parameter is not in the data layer spec for event "${eventName}".`
+        );
+      }
+    }
+
+    if (itemRules.length > 0) {
+      const ecommerceNode = isNode(target['ecommerce'])
+        ? (target['ecommerce'] as SpecNode)
+        : null;
+      const hasEcommerceItems =
+        ecommerceNode && Object.hasOwn(ecommerceNode, 'items');
+      const hasRootItems = Object.hasOwn(target, 'items');
+
+      if (!hasEcommerceItems && !hasRootItems) {
+        for (const rule of itemRules) {
+          this.logger.warn(
+            `Rule for item parameter "${rule.name}" ignored: items is not in the data layer spec for event "${eventName}".`
+          );
+        }
+      } else {
+        const parent =
+          hasEcommerceItems && ecommerceNode ? ecommerceNode : target;
+        let itemsArray: SpecNode[];
+        if (Array.isArray(parent['items'])) {
+          itemsArray = parent['items'] as SpecNode[];
+          if (itemsArray.length === 0) {
+            itemsArray.push({});
+          }
+        } else {
+          itemsArray = [{}];
+          parent['items'] = itemsArray;
+        }
+        const firstItem = itemsArray[0];
+        for (const rule of itemRules) {
+          if (rule.kind === 'any') {
+            continue;
+          }
+          firstItem[rule.name] = ruleToSpecValue(rule);
+        }
+      }
     }
   }
 

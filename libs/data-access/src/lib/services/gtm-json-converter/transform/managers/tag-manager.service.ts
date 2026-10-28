@@ -84,7 +84,8 @@ export class TagManager {
       .map((dL) => ({
         name: dL.event,
         triggers: triggers.filter((t) => t.name === dL.event),
-        parameters: this.preprocessParameters(dL.paths)
+        parameters: this.preprocessParameters(dL.paths),
+        ...(dL.notes ? { notes: dL.notes } : {})
       }));
 
     // GA4 configuration tag

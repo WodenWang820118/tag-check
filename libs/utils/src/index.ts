@@ -22,6 +22,7 @@ export * from './lib/functions/gtm-container-export';
 export * from './lib/functions/gtm-import';
 export * from './lib/functions/measurement-plan';
 export * from './lib/functions/measurement-plan-extract';
+export * from './lib/functions/tag-check-rules';
 export * from './lib/functions/ga4-collect-summary';
 export * from './lib/functions/spec-comparison';
 export * from './lib/functions/run-status';

@@ -37,4 +37,5 @@ export type CustomEventFilter = {
 export type DataLayer = {
   event: string;
   paths: string[];
+  notes?: string;
 };
