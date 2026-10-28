@@ -6,6 +6,7 @@ export type Tag = {
   name: string;
   triggers: Trigger[];
   parameters: Parameter[];
+  notes?: string;
 };
 
 export type TagConfig = {

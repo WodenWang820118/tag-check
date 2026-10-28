@@ -23,7 +23,12 @@ import {
   getGa4EventParameterTable,
   resolveVariableReference
 } from './gtm-container-export';
-import type { MeasurementPlanRow } from './measurement-plan';
+import {
+  MeasurementPlanRow,
+  ParameterRule,
+  formatParameterRuleInPlanSyntax
+} from './measurement-plan';
+import { readTagCheckRules } from './tag-check-rules';
 import { getParameterValue } from './tag-build-contract';
 
 /** A plan row with what the reader should check before relying on it. */
@@ -300,12 +305,64 @@ function withEcommerceParameters(
     );
   }
 
+  const { eventRules, itemRules } = readTagCheckRules(tag.notes);
+  const eventRuleMap = new Map<string, ParameterRule>();
+  for (const rule of eventRules) {
+    eventRuleMap.set(rule.name, rule);
+  }
+  const itemRuleMap = new Map<string, ParameterRule>();
+  for (const rule of itemRules) {
+    itemRuleMap.set(rule.name, rule);
+  }
+
+  const finalEventParameters: string[] = [];
+  for (const name of eventParameters) {
+    if (name === 'items') {
+      continue;
+    }
+    const rule = eventRuleMap.get(name);
+    if (rule && rule.kind !== 'any') {
+      finalEventParameters.push(formatParameterRuleInPlanSyntax(rule));
+      eventRuleMap.delete(name);
+    } else {
+      finalEventParameters.push(name);
+    }
+  }
+  for (const rule of eventRuleMap.values()) {
+    if (rule.kind !== 'any') {
+      finalEventParameters.push(formatParameterRuleInPlanSyntax(rule));
+    }
+  }
+
+  const finalItemParameters: string[] = [];
+  if (itemParameters.length > 0 || itemRules.length > 0) {
+    for (const name of itemParameters) {
+      const rule = itemRuleMap.get(name);
+      if (rule && rule.kind !== 'any') {
+        finalItemParameters.push(formatParameterRuleInPlanSyntax(rule));
+        itemRuleMap.delete(name);
+      } else {
+        finalItemParameters.push(name);
+      }
+    }
+    for (const rule of itemRuleMap.values()) {
+      if (rule.kind !== 'any') {
+        finalItemParameters.push(formatParameterRuleInPlanSyntax(rule));
+      }
+    }
+  }
+
   return {
     eventName,
-    eventParameters: eventParameters.filter((name) => name !== 'items'),
-    itemParameters,
+    eventParameters: finalEventParameters,
+    itemParameters: finalItemParameters,
     notes
   };
+}
+
+function getParamName(entry: string): string {
+  const eqIdx = entry.indexOf('=');
+  return (eqIdx > 0 ? entry.slice(0, eqIdx) : entry).trim();
 }
 
 function mergeInto(
@@ -313,9 +370,20 @@ function mergeInto(
   source: ExtractedMeasurementPlanRow
 ): void {
   for (const key of ['eventParameters', 'itemParameters'] as const) {
-    target[key].push(
-      ...source[key].filter((name) => !target[key].includes(name))
-    );
+    for (const incoming of source[key]) {
+      const incomingName = getParamName(incoming);
+      const existingIdx = target[key].findIndex(
+        (existing) => getParamName(existing) === incomingName
+      );
+      if (existingIdx === -1) {
+        target[key].push(incoming);
+      } else if (
+        !target[key][existingIdx].includes('=') &&
+        incoming.includes('=')
+      ) {
+        target[key][existingIdx] = incoming;
+      }
+    }
   }
   target.notes.push(
     ...source.notes.filter((note) => !target.notes.includes(note))

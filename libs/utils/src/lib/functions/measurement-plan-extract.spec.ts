@@ -432,4 +432,101 @@ describe('extractMeasurementPlan', () => {
       }
     ]);
   });
+
+  it('extracts TagCheck rules from tag notes into plan cell syntax', () => {
+    const notes = [
+      'TagCheck rules:',
+      'currency = "TWD"',
+      'transaction_id ~ /^T\\d+$/',
+      'items.item_id ~ /^SKU-/'
+    ].join('\n');
+
+    const { rows } = extract(
+      [
+        eventTag(
+          'GA4 - purchase',
+          'purchase',
+          [
+            ['currency', '{{DLV - ecommerce.currency}}'],
+            ['value', '{{DLV - ecommerce.value}}'],
+            ['transaction_id', '{{DLV - ecommerce.transaction_id}}'],
+            ['items', '{{DLV - ecommerce.items}}']
+          ],
+          { notes }
+        )
+      ],
+      [],
+      [
+        dataLayerVariable('DLV - ecommerce.currency', 'ecommerce.currency'),
+        dataLayerVariable('DLV - ecommerce.value', 'ecommerce.value'),
+        dataLayerVariable(
+          'DLV - ecommerce.transaction_id',
+          'ecommerce.transaction_id'
+        ),
+        dataLayerVariable('DLV - ecommerce.items', 'ecommerce.items')
+      ]
+    );
+
+    expect(rows).toHaveLength(1);
+    expect(rows[0].eventName).toBe('purchase');
+    expect(rows[0].eventParameters).toEqual([
+      'currency=TWD',
+      'value',
+      'transaction_id=/^T\\d+$/'
+    ]);
+    expect(rows[0].itemParameters).toEqual(['item_id=/^SKU-/', 'item_name']);
+  });
+
+  it('round-trips rules through CSV export and plan parser into dataLayer specs', () => {
+    const notes = [
+      'TagCheck rules:',
+      'currency = "TWD"',
+      'value = 99.9',
+      'items.item_id ~ /^SKU-/'
+    ].join('\n');
+
+    const { rows } = extract(
+      [
+        eventTag(
+          'GA4 - add_to_cart',
+          'add_to_cart',
+          [
+            ['currency', '{{DLV - ecommerce.currency}}'],
+            ['value', '{{DLV - ecommerce.value}}'],
+            ['items', '{{DLV - ecommerce.items}}']
+          ],
+          { notes }
+        )
+      ],
+      [],
+      [
+        dataLayerVariable('DLV - ecommerce.currency', 'ecommerce.currency'),
+        dataLayerVariable('DLV - ecommerce.value', 'ecommerce.value'),
+        dataLayerVariable('DLV - ecommerce.items', 'ecommerce.items')
+      ]
+    );
+
+    const table = [
+      ['event_name', 'event_parameters', 'item_parameters', 'notes'],
+      ...rows.map((row) => [
+        row.eventName,
+        row.eventParameters.join(', '),
+        row.itemParameters.join(', '),
+        row.notes.join(' ')
+      ])
+    ];
+
+    const parsed = parseMeasurementPlanRows(table);
+    expect(parsed.issues).toEqual([]);
+    expect(measurementPlanToDataLayerSpecs(parsed.rows)).toEqual([
+      {
+        event: 'add_to_cart',
+        ecommerce: {
+          currency: 'TWD',
+          value: 99.9,
+          items: [{ item_id: '/^SKU-/', item_name: '$item_name' }]
+        }
+      }
+    ]);
+  });
 });

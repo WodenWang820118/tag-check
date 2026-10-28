@@ -61,7 +61,12 @@ describe('DataLayerManager', () => {
     ]);
 
     expect(dataLayers).toEqual([
-      { event: 'purchase', paths: ['ecommerce.value', 'ecommerce.items'] }
+      {
+        event: 'purchase',
+        paths: ['ecommerce.value', 'ecommerce.items'],
+        // A literal value in the spec is what TagCheck will expect.
+        notes: ['TagCheck rules:', 'value = 10'].join('\n')
+      }
     ]);
   });
 
@@ -129,7 +134,8 @@ describe('DataLayerManager', () => {
       expect(dataLayers).toEqual([
         {
           event: 'add_to_cart',
-          paths: ['ecommerce.currency', 'ecommerce.value']
+          paths: ['ecommerce.currency', 'ecommerce.value'],
+          notes: ['TagCheck rules:', 'value = 10'].join('\n')
         }
       ]);
     });
