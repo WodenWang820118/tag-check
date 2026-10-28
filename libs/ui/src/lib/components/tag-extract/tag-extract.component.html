@@ -15,6 +15,17 @@
       <mat-icon>cloud_upload</mat-icon>
       Upload container export
     </button>
+    @if (projectContainer()) {
+      <button
+        type="button"
+        mat-stroked-button
+        (click)="useProjectContainer()"
+        data-testid="tagextract-use-project"
+      >
+        <mat-icon>folder_open</mat-icon>
+        Use this project's container
+      </button>
+    }
     <input
       hidden
       #fileInput
@@ -85,6 +96,16 @@
     }
 
     @if (result.rows.length > 0) {
+      @if (commonNotes().length > 0) {
+        <ul
+          class="m-0 pl-5 text-[1.4rem] text-gray-700 dark:text-gray-300"
+          data-testid="tagextract-common-notes"
+        >
+          @for (item of commonNotes(); track item.note) {
+            <li>Applies to {{ item.count }} events: {{ item.note }}</li>
+          }
+        </ul>
+      }
       <div
         class="overflow-x-auto rounded-md border border-gray-300 dark:border-gray-700"
       >
@@ -105,7 +126,7 @@
             </tr>
           </thead>
           <tbody>
-            @for (row of result.rows; track row.eventName) {
+            @for (row of rowsWithOwnNotes(); track row.eventName) {
               <tr
                 class="border-t border-gray-200 align-top dark:border-gray-700"
                 [attr.data-testid]="'tagextract-row-' + row.eventName"
@@ -122,7 +143,7 @@
                 <td
                   class="px-[1.2rem] py-[0.8rem] text-gray-600 dark:text-gray-400"
                 >
-                  {{ row.notes.join(' ') }}
+                  {{ row.ownNotes.join(' ') }}
                 </td>
               </tr>
             }

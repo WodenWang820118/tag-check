@@ -28,6 +28,10 @@
 - **Import GA4 events**：上傳或貼上你規劃推送的事件（可以是單一 JSON 物件或陣列），然後點選 **Create tests**。
 - **Create a test manually**：在編輯器中撰寫規格並貼上錄製，然後點選 **Submit**。
 
+在專案的 **TagBuild** 頁面上，**Import into this project** 會把剛建置的容器加入為測試，並進行與 **Import GTM JSON** 相同的衝突檢查。
+
+該頁面的 Tag Extract 在專案已經匯入容器時提供 **Use this project's container**，直接讀取該容器，而不再要求重新上傳。
+
 ## 4. 錄製旅程
 
 每個測試都會重播一份 Chrome Recorder 錄製，其最後一個動作會推送該測試的事件。

@@ -1,9 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
-import { of, throwError } from 'rxjs';
+import { firstValueFrom, of, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { GtmImportConflict, GtmImportSummary } from '@utils';
+import type {
+  GTMConfiguration,
+  GtmImportConflict,
+  GtmImportSummary
+} from '@utils';
 import { GtmJsonParserService } from '../../../../shared/services/api/gtm-json-parser/gtm-json-parser.service';
 import { ReportService } from '../../../../shared/services/api/report/report.service';
 import { ReportTableDataSourceModelService } from '../../services/report-table-data-source-model/report-table-data-source-model.service';
@@ -200,4 +204,88 @@ describe('UploadCardFacadeService', () => {
       message: 'containerVersion is missing.'
     });
   });
+
+  it('uploads a parsed container without the conflict dialog when there are none', async () => {
+    const value = parsedContainer();
+
+    const result = await firstValueFrom(
+      service.importContainerIntoProject('shop', value)
+    );
+
+    expect(gtmJsonParserService.previewGtmJson).toHaveBeenCalledWith(
+      'shop',
+      value
+    );
+    expect(dialog.open).not.toHaveBeenCalled();
+    expect(gtmJsonParserService.uploadGtmJson).toHaveBeenCalledWith(
+      'shop',
+      value
+    );
+    expect(reportService.getProjectReports).toHaveBeenCalledWith('shop');
+    expect(result).toEqual(summary);
+  });
+
+  it('opens the conflict dialog only when the preview lists conflicts', async () => {
+    const value = parsedContainer();
+    const preview = JSON.parse(
+      JSON.stringify({
+        conflicts: [
+          {
+            tagName: 'GA4 - purchase',
+            existingEventName: 'purchase',
+            newEventName: 'begin_checkout',
+            specEdited: true
+          }
+        ]
+      })
+    ) as { conflicts: GtmImportConflict[] };
+    const resolutions = { 'GA4 - purchase': 'keepBoth' as const };
+    gtmJsonParserService.previewGtmJson.mockReturnValue(of(preview));
+    dialog.open.mockReturnValue({ afterClosed: () => of(resolutions) });
+
+    const result = await firstValueFrom(
+      service.importContainerIntoProject('shop', value)
+    );
+
+    expect(dialog.open).toHaveBeenCalledWith(
+      ImportConflictsDialogComponent,
+      expect.objectContaining({ data: { conflicts: preview.conflicts } })
+    );
+    expect(gtmJsonParserService.uploadGtmJson).toHaveBeenCalledWith(
+      'shop',
+      value,
+      resolutions
+    );
+    expect(result).toEqual(summary);
+  });
+
+  it('uploads nothing when the conflict dialog is cancelled', async () => {
+    const preview = JSON.parse(
+      JSON.stringify({
+        conflicts: [
+          {
+            tagName: 'GA4 - purchase',
+            existingEventName: 'purchase',
+            newEventName: 'begin_checkout',
+            specEdited: false
+          }
+        ]
+      })
+    ) as { conflicts: GtmImportConflict[] };
+    gtmJsonParserService.previewGtmJson.mockReturnValue(of(preview));
+    dialog.open.mockReturnValue({ afterClosed: () => of(undefined) });
+
+    const result = await firstValueFrom(
+      service.importContainerIntoProject('shop', parsedContainer())
+    );
+
+    expect(dialog.open).toHaveBeenCalledOnce();
+    expect(gtmJsonParserService.uploadGtmJson).not.toHaveBeenCalled();
+    expect(reportService.getProjectReports).not.toHaveBeenCalled();
+    expect(result).toBeNull();
+  });
 });
+
+function parsedContainer(): GTMConfiguration {
+  return JSON.parse(JSON.stringify(container)) as GTMConfiguration;
+}

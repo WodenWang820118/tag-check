@@ -8,7 +8,7 @@ import {
   TagBuildMode,
   TagBuildModeService
 } from '@data-access';
-import { EditorTypeEnum } from '@utils';
+import { EditorTypeEnum, type GTMConfiguration } from '@utils';
 import { TagExtractComponent } from './tag-extract.component';
 
 // A container export as Tag Manager writes it, trimmed to what extraction
@@ -136,6 +136,11 @@ describe('TagExtractComponent', () => {
     expect(byTestId('tagextract-skipped')?.textContent).toContain(
       'Tag "GA4 event - old": paused.'
     );
+    expect(byTestId('tagextract-use-project')).toBeNull();
+    expect(byTestId('tagextract-common-notes')).toBeNull();
+    expect(row?.querySelectorAll('td')[3]?.textContent).toContain(
+      'Item parameters are not in the container'
+    );
     expect(dataLayer).toEqual([
       { event: 'plan_extract', event_count: 1, skipped_count: 1 }
     ]);
@@ -203,5 +208,99 @@ describe('TagExtractComponent', () => {
 
     expect(editor.contents$.outputJson()).toBe('');
     expect(editor.editor$.outputJson().state.doc.toString()).toBe('');
+  });
+
+  it("extracts the host project's container and hides the button without one", () => {
+    expect(byTestId('tagextract-use-project')).toBeNull();
+
+    fixture.componentRef.setInput(
+      'projectContainer',
+      JSON.parse(containerExport) as GTMConfiguration
+    );
+    fixture.detectChanges();
+    const button = byTestId('tagextract-use-project');
+    expect(button?.textContent).toContain("Use this project's container");
+
+    button?.click();
+    fixture.detectChanges();
+
+    expect(byTestId('tagextract-summary')?.textContent).toMatch(
+      /1\s+event\s+from\s+2\s+GA4 event\s+tags/
+    );
+    expect(byTestId('tagextract-row-add_to_cart')).not.toBeNull();
+    expect(byTestId('tagextract-skipped')?.textContent).toContain(
+      'Tag "GA4 event - old": paused.'
+    );
+    expect(fixture.componentInstance.fileName()).toBe(
+      "This project's container"
+    );
+
+    fixture.componentRef.setInput('projectContainer', null);
+    fixture.detectChanges();
+    expect(byTestId('tagextract-use-project')).toBeNull();
+  });
+
+  it('lifts a note shared by several events and keeps full notes in the CSV', async () => {
+    const shared =
+      'Item parameters are not in the container: item_id and item_name are a start (GA4 requires one of them); add the others the site sends.';
+    const purchase = eventTag('GA4 event - purchase', 'purchase');
+    const table = purchase.parameter.find(
+      (entry) => entry.key === 'eventSettingsTable'
+    );
+    if (!table || !('list' in table) || !Array.isArray(table.list)) {
+      throw new Error('expected an event settings table');
+    }
+    table.list.push({
+      type: 'MAP',
+      map: [
+        { type: 'TEMPLATE', key: 'parameter', value: 'source' },
+        { type: 'TEMPLATE', key: 'parameterValue', value: 'site' }
+      ]
+    });
+    await upload(
+      JSON.stringify({
+        exportFormatVersion: 2,
+        exportTime: '2026-10-26 10:00:00',
+        containerVersion: {
+          tag: [eventTag('GA4 event - add_to_cart', 'add_to_cart'), purchase],
+          trigger: [],
+          variable: [
+            dataLayerVariable('DLV - value', 'ecommerce.value'),
+            dataLayerVariable('DLV - items', 'ecommerce.items')
+          ]
+        }
+      })
+    );
+
+    expect(byTestId('tagextract-common-notes')?.textContent).toContain(
+      `Applies to 2 events: ${shared}`
+    );
+    expect(
+      byTestId('tagextract-row-add_to_cart')
+        ?.querySelectorAll('td')[3]
+        ?.textContent?.trim()
+    ).toBe('');
+    const purchaseNotes = byTestId('tagextract-row-purchase')?.querySelectorAll(
+      'td'
+    )[3]?.textContent;
+    expect(purchaseNotes).toContain('Not read directly from the data layer');
+    expect(purchaseNotes).not.toContain(
+      'Item parameters are not in the container'
+    );
+
+    let csv = '';
+    vi.spyOn(URL, 'createObjectURL').mockImplementation((blob) => {
+      void (blob as Blob).text().then((text) => (csv = text));
+      return 'blob:fake';
+    });
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
+    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(
+      () => undefined
+    );
+    byTestId('tagextract-download')?.click();
+    await vi.waitFor(() => expect(csv).not.toBe(''));
+
+    expect(csv.split(shared).length - 1).toBe(2);
+    expect(csv).toContain('Not read directly from the data layer');
   });
 });

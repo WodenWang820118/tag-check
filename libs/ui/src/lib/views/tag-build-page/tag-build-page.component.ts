@@ -4,7 +4,8 @@ import { FunctionalCardComponent } from '../../components/functional-card/functi
 import { UploadActionComponent } from '../../components/upload-action/upload-action.component';
 import { FileUploadDialogComponent } from '../../components/file-upload-dialog/file-upload-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
-import { EditorTypeEnum, StrictDataLayerEvent } from '@utils';
+import { EditorTypeEnum, GTMConfiguration, StrictDataLayerEvent } from '@utils';
+import type { ProjectContainerImport } from '../../components/conversion-success-dialog/conversion-success-dialog.component';
 import { JsonPipe } from '@angular/common';
 import { MatTabsModule } from '@angular/material/tabs';
 import { TagBuildModeService, TagBuildMode } from '@data-access';
@@ -13,6 +14,11 @@ import { TagExtractComponent } from '../../components/tag-extract/tag-extract.co
 /**
  * tag-build's main view: the Tag Build and Tag Extract tabs with the input
  * and output JSON editors, the convert card and the spec upload.
+ *
+ * `projectImport` and `projectContainer` are optional host inputs. TagCheck
+ * sets them through `NgComponentOutlet` so the built container can be
+ * imported and Tag Extract can read the project's saved container. The
+ * standalone site leaves both unset.
  */
 @Component({
   selector: 'lib-tag-build-page',
@@ -31,6 +37,16 @@ import { TagExtractComponent } from '../../components/tag-extract/tag-extract.co
 export class TagBuildPageComponent {
   specs = input.required<StrictDataLayerEvent[]>();
   projectSlug = input<string>();
+  /**
+   * Imports the built container into the host's project. See
+   * {@link ProjectContainerImport}. Null when the host has no project.
+   */
+  projectImport = input<ProjectContainerImport | null>(null);
+  /**
+   * The project's saved container, for Tag Extract. Null when the host has
+   * no project or the project has not imported a container.
+   */
+  projectContainer = input<GTMConfiguration | null>(null);
   inputExtension = EditorTypeEnum.INPUT_JSON;
   outputExtension = EditorTypeEnum.OUTPUT_JSON;
 

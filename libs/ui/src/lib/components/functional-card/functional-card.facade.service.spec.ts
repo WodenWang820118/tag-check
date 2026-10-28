@@ -67,4 +67,21 @@ describe('FunctionalCardFacade', () => {
     });
     expect(editor.contents$.outputJson()).not.toContain('previous conversion');
   });
+
+  it('passes the project import hook through to the success dialog', () => {
+    const projectImport = {
+      label: 'Import into this project',
+      run: () => Promise.resolve(true)
+    };
+
+    facade.convertCode(undefined, 'demo-shop', projectImport);
+
+    expect(open).toHaveBeenCalledWith(ConversionSuccessDialogComponent, {
+      data: {
+        configuration: JSON.parse(editor.contents$.outputJson()),
+        projectSlug: 'demo-shop',
+        projectImport
+      }
+    });
+  });
 });

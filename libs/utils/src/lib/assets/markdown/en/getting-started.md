@@ -28,6 +28,10 @@ On the **Tests** page, select **Add tests** (+). There are three ways:
 - **Import GA4 events**: upload or paste the events you plan to push, as one JSON object or an array, and select **Create tests**.
 - **Create a test manually**: write the spec and paste a recording in the editors, then select **Submit**.
 
+On the project's **TagBuild** page, **Import into this project** adds the container just built as tests, with the same conflict check as **Import GTM JSON**.
+
+Tag Extract on that page offers **Use this project's container** when the project already has an imported container, and reads that container instead of a new upload.
+
 ## 4. Record the journey
 
 Each test replays a Chrome Recorder recording that ends with the action that pushes its event.
