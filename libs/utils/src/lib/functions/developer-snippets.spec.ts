@@ -251,4 +251,75 @@ describe('developer-snippets', () => {
       expect(formatAllDeveloperSnippets([])).toBe('');
     });
   });
+
+  describe('buildDeveloperSnippet - edge values', () => {
+    it('uses USD for an unruled currency and T12345 for a digit pattern', () => {
+      const snippet = buildDeveloperSnippet(
+        asSpec({
+          event: 'refund',
+          ecommerce: { currency: '$currency', order_ref: String.raw`/^T\d+$/` }
+        })
+      );
+
+      expect(snippet).toContain("currency: 'USD'");
+      expect(snippet).toContain("order_ref: 'T12345'");
+    });
+
+    it('writes a null literal as null with its rule', () => {
+      const snippet = buildDeveloperSnippet(
+        asSpec({ event: 'login', method: null })
+      );
+
+      expect(snippet).toContain('method: null');
+      expect(snippet).toContain('must be null');
+    });
+
+    it('writes an empty ecommerce object for an ecommerce event without parameters', () => {
+      const snippet = buildDeveloperSnippet(
+        asSpec({ event: 'view_cart', ecommerce: {} })
+      );
+
+      expect(snippet).toContain('ecommerce: {}');
+    });
+
+    it.each([
+      ['an empty items array', [], 'items: []'],
+      ['items that are not objects', ['SKU'], 'items: []'],
+      ['an item with no keys', [{}], 'items: [{}]']
+    ])('writes %s as %s', (_name, items, expected) => {
+      const snippet = buildDeveloperSnippet(
+        asSpec({ event: 'add_to_cart', ecommerce: { items } })
+      );
+
+      expect(snippet).toContain(expected);
+    });
+
+    it('comments string and boolean item rules', () => {
+      const snippet = buildDeveloperSnippet(
+        asSpec({
+          event: 'add_to_cart',
+          ecommerce: { items: [{ item_brand: 'Acme', on_sale: true }] }
+        })
+      );
+
+      expect(snippet).toContain("item_brand: 'Acme'");
+      expect(snippet).toContain('item_brand must be "Acme"');
+      expect(snippet).toContain('on_sale must be true');
+    });
+  });
+
+  describe('formatAllDeveloperSnippets from specs', () => {
+    it('builds and joins snippets when given specs instead of snippets', () => {
+      const combined = formatAllDeveloperSnippets(
+        asSpecs([
+          { event: 'login', method: '$method' },
+          { event: 'sign_up', method: 'email' }
+        ])
+      );
+
+      expect(combined).toContain("event: 'login'");
+      expect(combined).toContain("event: 'sign_up'");
+      expect(combined.split('\n\n').length).toBeGreaterThanOrEqual(2);
+    });
+  });
 });

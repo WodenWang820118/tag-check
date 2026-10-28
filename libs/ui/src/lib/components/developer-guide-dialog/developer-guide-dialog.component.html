@@ -1,0 +1,65 @@
+<h2 mat-dialog-title class="developer-guide-dialog__title">
+  For Developers: dataLayer Snippets
+</h2>
+
+<mat-dialog-content class="developer-guide-dialog__content">
+  <div class="developer-guide-dialog__toolbar">
+    <button
+      mat-stroked-button
+      type="button"
+      data-testid="tagbuild-developer-copy"
+      [disabled]="snippets.length === 0"
+      (click)="onCopyAll()"
+    >
+      <mat-icon>content_copy</mat-icon>
+      Copy all
+    </button>
+    <button
+      mat-stroked-button
+      type="button"
+      data-testid="tagbuild-developer-download"
+      [disabled]="snippets.length === 0"
+      (click)="onDownloadJs()"
+    >
+      <mat-icon>download</mat-icon>
+      Download (.js)
+    </button>
+  </div>
+
+  @if (snippets.length === 0) {
+    <p
+      class="developer-guide-dialog__empty"
+      data-testid="tagbuild-developer-empty"
+    >
+      No events in the input. Upload or paste a measurement plan or dataLayer
+      specs first.
+    </p>
+  } @else {
+    <div class="developer-guide-dialog__list">
+      @for (item of snippets; track item.eventName) {
+        <div class="developer-guide-dialog__card">
+          <div class="developer-guide-dialog__card-header">
+            <span class="developer-guide-dialog__event-name">{{
+              item.eventName
+            }}</span>
+            <button
+              mat-button
+              type="button"
+              (click)="onCopySnippet(item.snippet)"
+              class="developer-guide-dialog__copy-snippet-btn"
+            >
+              <mat-icon>content_copy</mat-icon> Copy
+            </button>
+          </div>
+          <pre
+            class="developer-guide-dialog__code"
+          ><code>{{ item.snippet }}</code></pre>
+        </div>
+      }
+    </div>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="close()">Close</button>
+</mat-dialog-actions>

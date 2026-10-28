@@ -11,6 +11,14 @@ import {
 const asSpecs = (value: object[]): StrictDataLayerEvent[] =>
   value as StrictDataLayerEvent[];
 
+/** jsdom has no clipboard: stand one in that resolves or rejects. */
+function stubClipboard(writeText: (text: string) => Promise<void>): void {
+  Object.defineProperty(globalThis.navigator, 'clipboard', {
+    configurable: true,
+    value: { writeText }
+  });
+}
+
 describe('DeveloperGuideDialogComponent', () => {
   let fixture: ComponentFixture<DeveloperGuideDialogComponent>;
   let component: DeveloperGuideDialogComponent;
@@ -45,6 +53,26 @@ describe('DeveloperGuideDialogComponent', () => {
       );
       expect(emptyEl).not.toBeNull();
       expect(emptyEl?.textContent).toContain('No events in the input');
+    });
+
+    it('neither copies nor downloads when there are no events', async () => {
+      const writeText = vi.fn<(text: string) => Promise<void>>();
+      stubClipboard(writeText);
+      const createObjectURL = vi.spyOn(URL, 'createObjectURL');
+
+      await component.onCopyAll();
+      component.onDownloadJs();
+
+      expect(writeText).not.toHaveBeenCalled();
+      expect(createObjectURL).not.toHaveBeenCalled();
+      createObjectURL.mockRestore();
+    });
+
+    it('treats missing dialog data as no events', async () => {
+      TestBed.resetTestingModule();
+      await createComponent(null);
+
+      expect(component.snippets).toEqual([]);
     });
 
     it('disables Copy all and Download buttons when there are no events', () => {
@@ -154,6 +182,39 @@ describe('DeveloperGuideDialogComponent', () => {
       expect(createObjectURL).toHaveBeenCalled();
       expect(downloadSpy).toHaveBeenCalled();
       expect(revokeObjectURL).toHaveBeenCalledWith('blob:test');
+    });
+
+    it('copies one snippet with its own Copy button', async () => {
+      const writeText = vi
+        .fn<(text: string) => Promise<void>>()
+        .mockResolvedValue(undefined);
+      stubClipboard(writeText);
+
+      await component.onCopySnippet(component.snippets[1].snippet);
+
+      expect(writeText).toHaveBeenCalledWith(component.snippets[1].snippet);
+    });
+
+    it('logs instead of throwing when the clipboard refuses', async () => {
+      stubClipboard(() => Promise.reject(new Error('denied')));
+      const error = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => undefined);
+
+      await expect(component.onCopyAll()).resolves.toBeUndefined();
+      await expect(
+        component.onCopySnippet(component.snippets[0].snippet)
+      ).resolves.toBeUndefined();
+
+      expect(error).toHaveBeenCalledWith(
+        'Failed to copy snippets to clipboard',
+        expect.any(Error)
+      );
+      expect(error).toHaveBeenCalledWith(
+        'Failed to copy snippet to clipboard',
+        expect.any(Error)
+      );
+      error.mockRestore();
     });
 
     it('closes the dialog when the Close button is clicked', () => {
