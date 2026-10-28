@@ -1,7 +1,4 @@
-import {
-  getGa4MeasurementPlanTemplateRows,
-  type ExtractedMeasurementPlanRow
-} from '@utils';
+import { type ExtractedMeasurementPlanRow } from '@utils';
 
 /**
  * The measurement plan travels as CSV: Excel and Google Sheets open and save it
@@ -24,14 +21,34 @@ function toCsv(table: readonly string[][]): string {
   return table.map((cells) => cells.map(toCsvCell).join(',')).join('\r\n');
 }
 
-/** The template: the plan header and GA4's recommended events, one per row. */
+/**
+ * Template rows demonstrating realistic GA4 events and every parameter rule form:
+ * - regex patterns (e.g. transaction_id=/^T\d+$/)
+ * - specific literal values (e.g. currency=TWD, method=email)
+ * - plain any-value parameters (e.g. value, currency, method)
+ */
+export const MEASUREMENT_PLAN_TEMPLATE_ROWS: readonly (readonly [
+  eventName: string,
+  eventParameters: string,
+  itemParameters: string
+])[] = [
+  [
+    'purchase',
+    'transaction_id=/^T\\d+$/, currency=TWD, value',
+    'item_id, item_name, price, quantity'
+  ],
+  ['sign_up', 'method=email', ''],
+  ['view_item', 'currency, value', 'item_id, item_name'],
+  ['add_to_cart', 'currency, value', 'item_id, item_name, price, quantity'],
+  ['login', 'method', '']
+];
+
+/** The template: the plan header and realistic rows showing every rule form. */
 export function buildMeasurementPlanTemplateCsv(): string {
-  const rows = getGa4MeasurementPlanTemplateRows().map((row) => [
-    row.eventName,
-    row.eventParameters.join(', '),
-    row.itemParameters.join(', ')
+  return toCsv([
+    PLAN_HEADER,
+    ...MEASUREMENT_PLAN_TEMPLATE_ROWS.map((row) => [...row])
   ]);
-  return toCsv([PLAN_HEADER, ...rows]);
 }
 
 /**

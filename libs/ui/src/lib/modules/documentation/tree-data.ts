@@ -47,6 +47,11 @@ export const TREE_DATA: TopicNode[] = [
         name: $localize`:@@docs.sidebar.reportManagement:Report Management`,
         id: 6,
         route: 'report-management'
+      },
+      {
+        name: $localize`:@@docs.sidebar.measurementPlan:Measurement Plan`,
+        id: 8,
+        route: 'measurement-plan'
       }
     ]
   },

@@ -54,6 +54,46 @@ import { MatIconModule } from '@angular/material/icon';
           Download plan template
         </button>
       </div>
+
+      <details
+        class="file-upload-dialog__help"
+        data-testid="tagbuild-plan-help"
+      >
+        <summary class="file-upload-dialog__help-summary">
+          How to write a plan
+        </summary>
+        <div class="file-upload-dialog__help-content">
+          <p>
+            One row per event: use
+            <a
+              href="https://developers.google.com/analytics/devguides/collection/ga4/reference/events?client_type=gtm"
+              target="_blank"
+              rel="noopener noreferrer"
+              >Google's recommended event names</a
+            >
+            where they fit, or your own custom names.
+          </p>
+          <p>
+            Parameters take three rule forms: <code>currency</code> (any value),
+            <code>currency=TWD</code> (specific value), or
+            <code>transaction_id=/^T\\d+$/</code> (regular expression).
+          </p>
+          <p>
+            Site developers push each row with <code>dataLayer.push</code>; "For
+            developers" generates the code.
+          </p>
+          <p>
+            Learn more in the
+            <!-- The docs site: the standalone Tag Build site has no docs route. -->
+            <a
+              href="https://tag-check-documentation.vercel.app/documentation/measurement-plan"
+              target="_blank"
+              rel="noopener"
+              >Measurement plan documentation</a
+            >.
+          </p>
+        </div>
+      </details>
     </mat-dialog-content>
   </div>`,
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -74,6 +114,37 @@ import { MatIconModule } from '@angular/material/icon';
 
       .file-upload-dialog__actions__action:not(:last-child) {
         margin-bottom: 1rem;
+      }
+
+      .file-upload-dialog__help {
+        margin-top: 1.5rem;
+        padding: 0.8rem 1rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        background: #f9f9f9;
+        font-size: 1.3rem;
+        line-height: 1.5;
+      }
+
+      .file-upload-dialog__help-summary {
+        font-weight: 600;
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .file-upload-dialog__help-content {
+        margin-top: 0.8rem;
+      }
+
+      .file-upload-dialog__help-content p {
+        margin: 0.4rem 0;
+      }
+
+      .file-upload-dialog__help-content code {
+        background: #eee;
+        padding: 0.1rem 0.3rem;
+        border-radius: 3px;
+        font-size: 1.2rem;
       }
     `
   ]
@@ -143,43 +214,46 @@ export class FileUploadDialogComponent {
   }
 
   async handleMeasurementPlanFile(file: File): Promise<void> {
+    const { readMeasurementPlanFile } =
+      await import('./measurement-plan-spreadsheet');
+
+    let table: string[][];
     try {
-      const { readMeasurementPlanFile } =
-        await import('./measurement-plan-spreadsheet');
-      const table = await readMeasurementPlanFile(file);
-      if (this.importPlanTable(table)) {
-        return;
-      }
-      if (this.importLegacySpecsTable(table)) {
-        return;
-      }
-      this.dialog.open(ErrorDialogComponent, {
-        data: {
-          message:
-            'A CSV file must be a measurement plan (event_name, event_parameters, item_parameters) or include a "dataLayer Specs" column.'
-        }
-      });
+      table = await readMeasurementPlanFile(file);
     } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      this.selectedFile = null;
       this.dialog.open(ErrorDialogComponent, {
-        data: {
-          message: `Failed to read spreadsheet file: ${err instanceof Error ? err.message : String(err)}`
-        }
+        data: { message: `Failed to read spreadsheet file: ${message}` }
       });
+      return;
     }
+
+    if (this.importPlanTable(table)) {
+      return;
+    }
+    if (this.importLegacySpecsTable(table)) {
+      return;
+    }
+
+    this.selectedFile = null;
+    this.dialog.open(ErrorDialogComponent, {
+      data: {
+        message:
+          'The uploaded file is neither a measurement plan (expected headers: event_name, event_parameters, item_parameters) nor a dataLayer Specs spreadsheet.'
+      }
+    });
   }
 
-  /**
-   * Imports a measurement plan from a parsed sheet table.
-   * If the first row is the plan header, parses it, opens an error dialog on issues,
-   * or sets the converted dataLayer specs on the input JSON editor.
-   * Returns true if the table was handled as a measurement plan, false otherwise.
-   */
   importPlanTable(table: string[][]): boolean {
     if (table.length === 0 || !isMeasurementPlanHeader(table[0])) {
       return false;
     }
+
     const { rows, issues } = parseMeasurementPlanRows(table);
+
     if (issues.length > 0) {
+      this.selectedFile = null;
       this.dialog.open(ErrorDialogComponent, {
         data: {
           message: issues.join('\n')
@@ -187,27 +261,32 @@ export class FileUploadDialogComponent {
       });
       return true;
     }
+
+    if (rows.length === 0) {
+      this.selectedFile = null;
+      this.dialog.open(ErrorDialogComponent, {
+        data: {
+          message: 'The uploaded measurement plan contains no event rows.'
+        }
+      });
+      return true;
+    }
+
     const specs = measurementPlanToDataLayerSpecs(rows);
     this.editorFacadeService.inputJsonContent = specs;
     this.dialog.closeAll();
     return true;
   }
 
-  /**
-   * Imports dataLayer specs from a parsed sheet table containing a "dataLayer Specs" column.
-   * If any issues are found, opens the error dialog with spreadsheet row numbers and imports nothing.
-   * Otherwise, sets the extracted dataLayer specs on the input JSON editor and closes the dialog.
-   * Returns true if the table was handled as a legacy specs table, false otherwise.
-   */
   importLegacySpecsTable(table: string[][]): boolean {
     if (table.length === 0) {
       return false;
     }
     const headerRow = table[0];
-    const dataLayerSpecsColIndex = headerRow.findIndex(
-      (cell) => cell.trim().toLowerCase() === 'datalayer specs'
+    const colIndex = headerRow.findIndex(
+      (cell) => (cell ?? '').trim().toLowerCase() === 'datalayer specs'
     );
-    if (dataLayerSpecsColIndex === -1) {
+    if (colIndex === -1) {
       return false;
     }
 
@@ -216,27 +295,36 @@ export class FileUploadDialogComponent {
 
     for (let rowIndex = 1; rowIndex < table.length; rowIndex++) {
       const row = table[rowIndex];
-      const cellValue = row[dataLayerSpecsColIndex];
-      if (!cellValue || cellValue.trim() === '') {
+      if (
+        row.length === 0 ||
+        row.every((cell) => !cell || cell.trim() === '')
+      ) {
         continue;
       }
-      const rowNumber = rowIndex + 1;
-      const { specs, issues } = extractDataLayerPushes(cellValue);
+      const cellText = row[colIndex] ?? '';
+      const { specs, issues } = extractDataLayerPushes(cellText);
       for (const issue of issues) {
-        allIssues.push(`Row ${rowNumber}: ${issue}`);
+        allIssues.push(`Row ${rowIndex + 1}: ${issue}`);
       }
       allSpecs.push(...specs);
     }
-    if (allIssues.length === 0 && allSpecs.length === 0) {
-      allIssues.push(
-        'The "dataLayer Specs" column has no dataLayer.push call with an event.'
-      );
-    }
 
     if (allIssues.length > 0) {
+      this.selectedFile = null;
       this.dialog.open(ErrorDialogComponent, {
         data: {
           message: allIssues.join('\n')
+        }
+      });
+      return true;
+    }
+
+    if (allSpecs.length === 0) {
+      this.selectedFile = null;
+      this.dialog.open(ErrorDialogComponent, {
+        data: {
+          message:
+            'The uploaded sheet contained no dataLayer.push call with an event.'
         }
       });
       return true;

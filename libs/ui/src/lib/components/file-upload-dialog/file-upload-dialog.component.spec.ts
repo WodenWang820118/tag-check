@@ -5,6 +5,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { EditorFacadeService, EditorService } from '@data-access';
 import { EditorTypeEnum } from '@utils';
 import { ErrorDialogComponent } from '../error-dialog/error-dialog.component';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('FileUploadDialogComponent', () => {
   let fixture: ComponentFixture<FileUploadDialogComponent>;
@@ -48,6 +49,52 @@ describe('FileUploadDialogComponent', () => {
       );
     downloadBtn?.click();
     expect(spy).toHaveBeenCalled();
+  });
+
+  describe('How to write a plan help section', () => {
+    it('renders the collapsible help section with testid tagbuild-plan-help', () => {
+      const helpEl: HTMLElement | null = fixture.nativeElement.querySelector(
+        '[data-testid="tagbuild-plan-help"]'
+      );
+      expect(helpEl).not.toBeNull();
+      expect(helpEl?.tagName.toLowerCase()).toBe('details');
+
+      const summary = helpEl?.querySelector('summary');
+      expect(summary?.textContent?.trim()).toBe('How to write a plan');
+    });
+
+    it('links to Google recommended events reference and documentation page', () => {
+      const helpEl: HTMLElement | null = fixture.nativeElement.querySelector(
+        '[data-testid="tagbuild-plan-help"]'
+      );
+      const links = helpEl?.querySelectorAll('a');
+      const hrefs = Array.from(links ?? []).map((a) => a.getAttribute('href'));
+
+      expect(
+        hrefs.some(
+          (href) =>
+            href?.includes('developers.google.com/analytics') &&
+            href.includes('reference/events')
+        )
+      ).toBe(true);
+
+      expect(hrefs).toContain(
+        'https://tag-check-documentation.vercel.app/documentation/measurement-plan'
+      );
+    });
+
+    it('covers the three rule forms and dataLayer.push code generation', () => {
+      const helpEl: HTMLElement | null = fixture.nativeElement.querySelector(
+        '[data-testid="tagbuild-plan-help"]'
+      );
+      const text = helpEl?.textContent ?? '';
+
+      expect(text).toContain('currency');
+      expect(text).toContain('currency=TWD');
+      expect(text).toContain('transaction_id=/^T\\d+$/');
+      expect(text).toContain('dataLayer.push');
+      expect(text).toContain('For developers');
+    });
   });
 
   describe('plan import with realistic parsed sheet tables', () => {

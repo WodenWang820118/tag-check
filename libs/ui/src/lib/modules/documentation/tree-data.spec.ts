@@ -10,6 +10,7 @@ describe('documentation tree data', () => {
       { slug: 'getting-started', label: 'Getting Started' },
       { slug: 'quality-assurance', label: 'Quality Assurance' },
       { slug: 'report-management', label: 'Report Management' },
+      { slug: 'measurement-plan', label: 'Measurement Plan' },
       { slug: 'setting-details', label: 'Setting Details' }
     ]);
     expect(DOCUMENTATION_ROUTE_SLUGS).toEqual([
@@ -19,6 +20,7 @@ describe('documentation tree data', () => {
       'getting-started',
       'quality-assurance',
       'report-management',
+      'measurement-plan',
       'setting-details'
     ]);
   });

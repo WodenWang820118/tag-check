@@ -32,3 +32,4 @@ export * from './lib/functions/step-failure';
 export * from './lib/functions/selector-suggestion';
 export * from './lib/functions/selector-fallback';
 export * from './lib/functions/data-layer-push';
+export * from './lib/functions/developer-snippets';
