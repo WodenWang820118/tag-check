@@ -14,7 +14,8 @@ import { ErrorDialogComponent } from '../error-dialog/error-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import {
   ConversionSuccessDialogComponent,
-  type ConversionSuccessDialogData
+  type ConversionSuccessDialogData,
+  type ProjectContainerImport
 } from '../conversion-success-dialog/conversion-success-dialog.component';
 import {
   GTMContainerConfig,
@@ -104,16 +105,18 @@ export class FunctionalCardFacade {
    */
   convertCode(
     accordionContainer?: () => AdvancedExpansionPanelComponent,
-    projectSlug?: string
+    projectSlug?: string,
+    projectImport?: ProjectContainerImport | null
   ) {
     if (this.tagBuildModeService.mode === TagBuildMode.TagBuild) {
-      this.convertTagBuild(accordionContainer, projectSlug);
+      this.convertTagBuild(accordionContainer, projectSlug, projectImport);
     }
   }
 
   private convertTagBuild(
     accordionContainer?: () => AdvancedExpansionPanelComponent,
-    projectSlug?: string
+    projectSlug?: string,
+    projectImport?: ProjectContainerImport | null
   ) {
     try {
       if (accordionContainer) {
@@ -169,7 +172,8 @@ export class FunctionalCardFacade {
           measurementId,
           isSendingEcommerceData === true ? 'true' : 'false',
           esvContent || [],
-          projectSlug
+          projectSlug,
+          projectImport
         );
       } catch (error) {
         const data = {
@@ -194,7 +198,8 @@ export class FunctionalCardFacade {
     measurementId: string,
     isSendingEcommerceData: 'true' | 'false',
     esvContent: { name: string; parameters: { [x: string]: string }[] }[],
-    projectSlug?: string
+    projectSlug?: string,
+    projectImport?: ProjectContainerImport | null
   ) {
     // set input content for downstream presenters
     this.editorFacadeService.inputJsonContent = json;
@@ -217,17 +222,21 @@ export class FunctionalCardFacade {
       isSendingEcommerceData,
       esvContent: esvContent
     });
-    this.postConversion(result, projectSlug);
+    this.postConversion(result, projectSlug, projectImport);
   }
 
-  private postConversion(result: GTMConfiguration, projectSlug?: string) {
+  private postConversion(
+    result: GTMConfiguration,
+    projectSlug?: string,
+    projectImport?: ProjectContainerImport | null
+  ) {
     const readiness = validateGTMImportReadiness(result);
 
     this.editorFacadeService.outputJsonContent = result;
     this._importReadiness.set(readiness);
 
     if (readiness.canImport) {
-      this.openSuccessConversionDialog(result, projectSlug);
+      this.openSuccessConversionDialog(result, projectSlug, projectImport);
     } else {
       this.openDialog({
         message: [
@@ -250,9 +259,15 @@ export class FunctionalCardFacade {
 
   openSuccessConversionDialog(
     configuration: GTMConfiguration,
-    projectSlug?: string
+    projectSlug?: string,
+    projectImport?: ProjectContainerImport | null
   ): void {
     const data: ConversionSuccessDialogData = { configuration, projectSlug };
+    // Omit the hook when the host has none, so the dialog shows only
+    // download and copy. The standalone site never sets it.
+    if (projectImport) {
+      data.projectImport = projectImport;
+    }
     this.dialog.open(ConversionSuccessDialogComponent, { data });
   }
 }

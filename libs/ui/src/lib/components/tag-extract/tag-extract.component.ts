@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  input,
   signal
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
@@ -15,6 +16,7 @@ import {
   extractMeasurementPlan,
   measurementPlanToDataLayerSpecs,
   parseGtmContainerExport,
+  type GTMConfiguration,
   type MeasurementPlanExtraction
 } from '@utils';
 import {
@@ -26,9 +28,12 @@ import {
 export type PlanExtractEvent = 'plan_extract' | 'plan_download';
 
 /**
- * tag-build's Tag Extract tab: reads a container export, lists the GA4
- * events its tags send as a measurement plan, downloads the plan as CSV and
- * opens it in Tag Build.
+ * tag-build's Tag Extract tab: reads a container export, or the host
+ * project's saved container when one is provided, and lists the GA4 events
+ * its tags send as a measurement plan. The plan downloads as CSV and opens
+ * in Tag Build. A note shared by more than one event is shown once above
+ * the table; the CSV keeps every note on its row so the file stays
+ * self-contained.
  */
 @Component({
   selector: 'lib-tag-extract',
@@ -38,10 +43,44 @@ export type PlanExtractEvent = 'plan_extract' | 'plan_download';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TagExtractComponent {
+  /**
+   * The host project's saved container. The standalone site leaves this
+   * unset. TagCheck passes null when the project has not imported one, and
+   * the button stays hidden.
+   */
+  readonly projectContainer = input<GTMConfiguration | null>(null);
+
   readonly fileName = signal<string | null>(null);
   readonly error = signal<string | null>(null);
   readonly extraction = signal<MeasurementPlanExtraction | null>(null);
   readonly rows = computed(() => this.extraction()?.rows ?? []);
+
+  /**
+   * Notes that appear on more than one row, in first-seen order, with the
+   * number of events they apply to. Those notes are lifted out of the rows.
+   */
+  readonly commonNotes = computed(() => {
+    const counts = new Map<string, number>();
+    for (const row of this.rows()) {
+      for (const note of new Set(row.notes)) {
+        counts.set(note, (counts.get(note) ?? 0) + 1);
+      }
+    }
+    return [...counts]
+      .filter(([, count]) => count > 1)
+      .map(([note, count]) => ({ note, count }));
+  });
+
+  /** Plan rows with the shared notes removed. The CSV still uses {@link rows}. */
+  readonly rowsWithOwnNotes = computed(() => {
+    const shared = new Set(this.commonNotes().map((item) => item.note));
+    return this.rows().map((row) => ({
+      eventName: row.eventName,
+      eventParameters: row.eventParameters,
+      itemParameters: row.itemParameters,
+      ownNotes: row.notes.filter((note) => !shared.has(note))
+    }));
+  });
 
   constructor(
     private readonly editorFacadeService: EditorFacadeService,
@@ -49,8 +88,8 @@ export class TagExtractComponent {
   ) {}
 
   async onFileSelected(event: Event): Promise<void> {
-    const input = event.target as HTMLInputElement | null;
-    const file = input?.files?.[0];
+    const fileInput = event.target as HTMLInputElement | null;
+    const file = fileInput?.files?.[0];
     if (!file) {
       return;
     }
@@ -63,11 +102,24 @@ export class TagExtractComponent {
       return;
     } finally {
       // Choosing the same file again must still trigger a change.
-      if (input) {
-        input.value = '';
+      if (fileInput) {
+        fileInput.value = '';
       }
     }
     this.extract(text);
+  }
+
+  /**
+   * Extracts the host project's saved container the same way an uploaded
+   * export is extracted.
+   */
+  useProjectContainer(): void {
+    const container = this.projectContainer();
+    if (!container) {
+      return;
+    }
+    this.fileName.set("This project's container");
+    this.showExtraction(container);
   }
 
   /** Extracts the plan from a container export's text. */
@@ -77,6 +129,10 @@ export class TagExtractComponent {
       this.showError(error);
       return;
     }
+    this.showExtraction(container);
+  }
+
+  private showExtraction(container: GTMConfiguration): void {
     const extraction = extractMeasurementPlan(container);
     this.error.set(null);
     this.extraction.set(extraction);

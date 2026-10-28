@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog } from '@angular/material/dialog';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { GTMConfiguration } from '@utils';
@@ -228,4 +228,94 @@ describe('ConversionSuccessDialogComponent', () => {
       ).componentInstance.onDownload()
     ).not.toThrow();
   });
+
+  it('states how many tags, triggers and variables the container holds', () => {
+    const fixture = TestBed.createComponent(ConversionSuccessDialogComponent);
+    fixture.detectChanges();
+
+    expect(summaryText(fixture.nativeElement)).toBe(
+      '2 tags · 1 trigger · 3 variables'
+    );
+    expect(
+      fixture.nativeElement.querySelector(
+        '[data-testid="tagbuild-import-project"]'
+      )
+    ).toBeNull();
+  });
+
+  it('imports the current container when the host provides a hook', async () => {
+    const run = vi.fn().mockResolvedValue(true);
+    dialogData.projectImport = {
+      label: 'Import into this project',
+      run
+    };
+    const fixture = TestBed.createComponent(ConversionSuccessDialogComponent);
+    fixture.detectChanges();
+    const closeAll = vi
+      .spyOn(fixture.debugElement.injector.get(MatDialog), 'closeAll')
+      .mockImplementation(() => undefined);
+    const button = fixture.nativeElement.querySelector(
+      '[data-testid="tagbuild-import-project"]'
+    );
+    if (!(button instanceof HTMLButtonElement)) {
+      throw new Error('expected the import button');
+    }
+
+    expect(button.disabled).toBe(false);
+    expect(button.textContent).toContain('Import into this project');
+    button.click();
+    await vi.waitFor(() => expect(run).toHaveBeenCalledWith(payload));
+
+    expect(closeAll).toHaveBeenCalledOnce();
+  });
+
+  it('leaves the dialog open when the import is cancelled', async () => {
+    const run = vi.fn().mockResolvedValue(false);
+    dialogData.projectImport = {
+      label: 'Import into this project',
+      run
+    };
+    const fixture = TestBed.createComponent(ConversionSuccessDialogComponent);
+    fixture.detectChanges();
+    const closeAll = vi
+      .spyOn(fixture.debugElement.injector.get(MatDialog), 'closeAll')
+      .mockImplementation(() => undefined);
+
+    await fixture.componentInstance.onImport();
+
+    expect(run).toHaveBeenCalledWith(payload);
+    expect(closeAll).not.toHaveBeenCalled();
+  });
+
+  it('does not import after the result no longer matches the input', async () => {
+    const run = vi.fn().mockResolvedValue(true);
+    dialogData.projectImport = {
+      label: 'Import into this project',
+      run
+    };
+    const fixture = TestBed.createComponent(ConversionSuccessDialogComponent);
+    fixture.detectChanges();
+    editorFacade.inputJsonContent = [{ event: 'login' }];
+    fixture.detectChanges();
+    const button = fixture.nativeElement.querySelector(
+      '[data-testid="tagbuild-import-project"]'
+    );
+    if (!(button instanceof HTMLButtonElement)) {
+      throw new Error('expected the import button');
+    }
+
+    expect(button.disabled).toBe(true);
+    await fixture.componentInstance.onImport();
+
+    expect(run).not.toHaveBeenCalled();
+  });
 });
+
+function summaryText(element: HTMLElement): string {
+  return (
+    element
+      .querySelector('[data-testid="tagbuild-summary"]')
+      ?.textContent?.replace(/\s+/g, ' ')
+      .trim() ?? ''
+  );
+}

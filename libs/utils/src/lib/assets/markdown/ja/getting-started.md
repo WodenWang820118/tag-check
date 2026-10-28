@@ -28,6 +28,10 @@ TagCheck からエクスポートしたプロジェクトの作業を続ける�
 - **Import GA4 events**: プッシュする予定のイベントを、1 つの JSON オブジェクトまたは配列としてアップロードするか貼り付け、**Create tests** を選択します。
 - **Create a test manually**: エディターにスペックを書き、記録を貼り付けてから、**Submit** を選択します。
 
+プロジェクトの **TagBuild** ページでは、**Import into this project** が直前にビルドしたコンテナをテストとして追加し、**Import GTM JSON** と同じ競合確認を行います。
+
+そのページの Tag Extract は、プロジェクトにインポート済みのコンテナがある場合に **Use this project's container** を表示し、新しいファイルをアップロードする代わりにそのコンテナを読み込みます。
+
 ## 4. ジャーニーを記録する
 
 各テストは、そのイベントをプッシュする操作で終わる Chrome Recorder の記録を再生します。
