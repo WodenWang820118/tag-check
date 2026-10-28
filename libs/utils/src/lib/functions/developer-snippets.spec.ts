@@ -67,6 +67,32 @@ describe('developer-snippets', () => {
   });
 
   describe('buildDeveloperSnippet - rule comments and values', () => {
+    it('keeps rule comments next to short lines when the items line is long', () => {
+      const snippet = buildDeveloperSnippet(
+        asSpec({
+          event: 'purchase',
+          ecommerce: {
+            transaction_id: String.raw`/^T\d+$/`,
+            currency: 'TWD',
+            items: [
+              {
+                item_id: '$item_id',
+                item_name: '$item_name',
+                item_category: '$item_category',
+                price: '$price',
+                quantity: '$quantity'
+              }
+            ]
+          }
+        })
+      );
+      const line = snippet
+        .split('\n')
+        .find((l) => l.includes("transaction_id: 'T12345'"));
+
+      expect(line).toMatch(/'T12345',\s{1,20}\/\/ must match/);
+    });
+
     it('gives item rules an example value and a comment, not the pattern as the value', () => {
       const snippet = buildDeveloperSnippet(
         asSpec({

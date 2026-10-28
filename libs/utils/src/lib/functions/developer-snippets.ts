@@ -242,6 +242,9 @@ function formatItemsArray(items: unknown[]): {
   };
 }
 
+/** Lines longer than this keep their comment right after the code. */
+const COMMENT_ALIGN_MAX = 40;
+
 function renderAlignedProperties(
   descriptors: readonly PropertyLineDescriptor[]
 ): string[] {
@@ -250,13 +253,21 @@ function renderAlignedProperties(
     return descriptors.map((d) => d.codePart);
   }
 
-  const maxCodeLen = Math.max(...commented.map((d) => d.codePart.length));
+  // Align comments across the short lines only: a long line, such as the
+  // items line, would push every comment off the right edge of the dialog.
+  const alignable = commented.filter(
+    (d) => d.codePart.length <= COMMENT_ALIGN_MAX
+  );
+  const maxCodeLen = Math.max(0, ...alignable.map((d) => d.codePart.length));
 
   return descriptors.map((d) => {
     if (!d.comment) {
       return d.codePart;
     }
-    const padded = d.codePart.padEnd(maxCodeLen, ' ');
+    const padded =
+      d.codePart.length <= COMMENT_ALIGN_MAX
+        ? d.codePart.padEnd(maxCodeLen, ' ')
+        : d.codePart;
     return `${padded} // ${d.comment}`;
   });
 }
