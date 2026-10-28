@@ -1012,6 +1012,22 @@
           <context context-type="linenumber">59</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="docs.sidebar.measurementPlan" datatype="html">
+        <source>Measurement Plan</source>
+        <target>測定プラン</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/modules/documentation/tree-data.ts</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="developerGuideActionComponentButton" datatype="html">
+        <source> For developers </source>
+        <target> 開発者向け </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/developer-guide-action/developer-guide-action.component.ts</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+      </trans-unit>
     </body>
   </file>
 </xliff>

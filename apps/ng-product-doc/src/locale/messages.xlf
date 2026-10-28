@@ -889,6 +889,27 @@
       <trans-unit id="mermaid.error.retry" datatype="html">
         <source>Retry</source>
       </trans-unit>
+      <trans-unit id="docs.sidebar.measurementPlan" datatype="html">
+        <source>Measurement Plan</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/modules/documentation/tree-data.ts</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="developerGuideActionComponentButton" datatype="html">
+        <source> For developers </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/developer-guide-action/developer-guide-action.component.ts</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="seo.docs.description.measurement-plan" datatype="html">
+        <source>Understand GA4 measurement plans, how parameters and rules convert into GTM tags, and how developer snippets and TagCheck validation fit together.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/ng-product-doc/src/app/seo/seo.service.ts</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+      </trans-unit>
     </body>
   </file>
 </xliff>

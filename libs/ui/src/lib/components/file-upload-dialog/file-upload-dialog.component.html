@@ -1,0 +1,65 @@
+<div class="file-upload-dialog">
+  <mat-dialog-content class="file-upload-dialog__actions">
+    <div class="file-upload-dialog__actions__action">
+      <button type="button" mat-button (click)="fileInput.click()">
+        <mat-icon>cloud_upload</mat-icon>
+        Upload File
+      </button>
+      <input
+        hidden
+        (change)="onFileSelected($event)"
+        #fileInput
+        type="file"
+        accept=".json,.csv"
+      />
+    </div>
+    <div class="file-upload-dialog__actions__action">
+      <button
+        type="button"
+        mat-button
+        (click)="downloadPlanTemplate()"
+        data-testid="tagbuild-plan-template-download"
+      >
+        <mat-icon>download</mat-icon>
+        Download plan template
+      </button>
+    </div>
+
+    <details class="file-upload-dialog__help" data-testid="tagbuild-plan-help">
+      <summary class="file-upload-dialog__help-summary">
+        How to write a plan
+      </summary>
+      <div class="file-upload-dialog__help-content">
+        <p>
+          One row per event: use
+          <a
+            href="https://developers.google.com/analytics/devguides/collection/ga4/reference/events?client_type=gtm"
+            target="_blank"
+            rel="noopener noreferrer"
+            >Google's recommended event names</a
+          >
+          where they fit, or your own custom names.
+        </p>
+        <p>
+          Parameters take three rule forms: <code>currency</code> (any value),
+          <code>currency=TWD</code> (specific value), or
+          <code>transaction_id=/^T\d+$/</code> (regular expression).
+        </p>
+        <p>
+          Site developers push each row with <code>dataLayer.push</code>; "For
+          developers" generates the code.
+        </p>
+        <p>
+          Learn more in the
+          <!-- The docs site: the standalone Tag Build site has no docs route. -->
+          <a
+            href="https://tag-check-documentation.vercel.app/documentation/measurement-plan"
+            target="_blank"
+            rel="noopener"
+            >Measurement plan documentation</a
+          >.
+        </p>
+      </div>
+    </details>
+  </mat-dialog-content>
+</div>

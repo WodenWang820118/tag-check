@@ -7,7 +7,7 @@ import {
 import { By } from '@angular/platform-browser';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { EditorService, TagBuildMode, TagBuildModeService } from '@data-access';
-import type { GTMConfiguration } from '@utils';
+import type { GTMConfiguration, StrictDataLayerEvent } from '@utils';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { ProjectContainerImport } from '../../components/conversion-success-dialog/conversion-success-dialog.component';
 import { EditorComponent } from '../../components/editor/editor.component';
@@ -15,6 +15,7 @@ import { FunctionalCardComponent } from '../../components/functional-card/functi
 import { FunctionalCardFacade } from '../../components/functional-card/functional-card.facade.service';
 import { TagExtractComponent } from '../../components/tag-extract/tag-extract.component';
 import { TagBuildPageComponent } from './tag-build-page.component';
+import { MatDialog, type MatDialogRef } from '@angular/material/dialog';
 
 describe('TagBuildPageComponent', () => {
   afterEach(() => {
@@ -94,6 +95,27 @@ describe('TagBuildPageComponent', () => {
     expect(
       extract.injector.get(TagExtractComponent).projectContainer()
     ).toEqual(container);
+  });
+
+  it('opens the developer guide dialog with current specs', async () => {
+    const { fixture } = await setupPage();
+    const dialog = TestBed.inject(MatDialog);
+    const dialogSpy = vi
+      .spyOn(dialog, 'open')
+      .mockReturnValue(null as unknown as MatDialogRef<unknown>);
+
+    const purchaseSpec: StrictDataLayerEvent = { event: 'purchase' };
+    fixture.componentRef.setInput('specs', [purchaseSpec]);
+    fixture.detectChanges();
+
+    await fixture.componentInstance.openDeveloperGuideDialog();
+
+    expect(dialogSpy).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        data: { specs: [purchaseSpec] }
+      })
+    );
   });
 });
 

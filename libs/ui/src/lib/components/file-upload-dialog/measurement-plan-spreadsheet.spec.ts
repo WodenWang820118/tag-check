@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  getGa4MeasurementPlanTemplateRows,
-  parseMeasurementPlanRows
-} from '@utils';
+import { parseMeasurementPlanRows } from '@utils';
 import {
   buildExtractedMeasurementPlanCsv,
   buildMeasurementPlanTemplateCsv,
@@ -59,7 +56,7 @@ describe('measurement-plan-spreadsheet', () => {
     }
   );
 
-  it('reads its own template back as the template rows, without issues', () => {
+  it('builds a template with realistic rows showing every rule form', () => {
     const table = parseCsvToTable(buildMeasurementPlanTemplateCsv());
 
     expect(table[0]).toEqual([
@@ -67,10 +64,25 @@ describe('measurement-plan-spreadsheet', () => {
       'event_parameters',
       'item_parameters'
     ]);
-    expect(parseMeasurementPlanRows(table)).toEqual({
-      rows: getGa4MeasurementPlanTemplateRows(),
-      issues: []
-    });
+
+    // purchase row with regex, specific value, and any value rules
+    const purchaseRow = table.find((row) => row[0] === 'purchase');
+    expect(purchaseRow).toBeDefined();
+    expect(purchaseRow?.[1]).toContain('transaction_id=/^T\\d+$/');
+    expect(purchaseRow?.[1]).toContain('currency=TWD');
+    expect(purchaseRow?.[1]).toContain('value');
+    expect(purchaseRow?.[2]).toContain('item_id');
+
+    // sign_up row with specific value method=email
+    const signUpRow = table.find((row) => row[0] === 'sign_up');
+    expect(signUpRow).toBeDefined();
+    expect(signUpRow?.[1]).toContain('method=email');
+
+    // plain view_item row
+    const viewItemRow = table.find((row) => row[0] === 'view_item');
+    expect(viewItemRow).toBeDefined();
+    expect(viewItemRow?.[1]).toContain('currency');
+    expect(viewItemRow?.[1]).toContain('value');
   });
 
   it('writes an extracted plan with notes that the plan upload reads back', () => {

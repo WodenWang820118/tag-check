@@ -2,13 +2,19 @@ import { EditorComponent } from '../../components/editor/editor.component';
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { FunctionalCardComponent } from '../../components/functional-card/functional-card.component';
 import { UploadActionComponent } from '../../components/upload-action/upload-action.component';
+import { DeveloperGuideActionComponent } from '../../components/developer-guide-action/developer-guide-action.component';
 import { FileUploadDialogComponent } from '../../components/file-upload-dialog/file-upload-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { EditorTypeEnum, GTMConfiguration, StrictDataLayerEvent } from '@utils';
 import type { ProjectContainerImport } from '../../components/conversion-success-dialog/conversion-success-dialog.component';
 import { JsonPipe } from '@angular/common';
 import { MatTabsModule } from '@angular/material/tabs';
-import { TagBuildModeService, TagBuildMode } from '@data-access';
+import {
+  TagBuildModeService,
+  TagBuildMode,
+  EditorFacadeService,
+  SpecExtractService
+} from '@data-access';
 import { TagExtractComponent } from '../../components/tag-extract/tag-extract.component';
 
 /**
@@ -29,6 +35,7 @@ import { TagExtractComponent } from '../../components/tag-extract/tag-extract.co
     EditorComponent,
     MatTabsModule,
     UploadActionComponent,
+    DeveloperGuideActionComponent,
     TagExtractComponent
   ],
   templateUrl: './tag-build-page.component.html',
@@ -64,7 +71,9 @@ export class TagBuildPageComponent {
 
   constructor(
     private readonly dialog: MatDialog,
-    private readonly tagBuildModeService: TagBuildModeService
+    private readonly tagBuildModeService: TagBuildModeService,
+    private readonly editorFacadeService: EditorFacadeService,
+    private readonly specExtractService: SpecExtractService
   ) {}
 
   onUpload() {
@@ -73,5 +82,33 @@ export class TagBuildPageComponent {
 
   openFileUploadDialog() {
     this.dialog.open(FileUploadDialogComponent);
+  }
+
+  async openDeveloperGuideDialog(): Promise<void> {
+    let currentSpecs: StrictDataLayerEvent[] = [];
+    try {
+      const inputContent = this.editorFacadeService?.inputJsonContent?.();
+      if (
+        inputContent &&
+        typeof inputContent === 'string' &&
+        inputContent.trim() !== ''
+      ) {
+        currentSpecs = this.specExtractService.preprocessInput(inputContent);
+      }
+    } catch {
+      currentSpecs = [];
+    }
+
+    if (currentSpecs.length === 0 && this.specs() && this.specs().length > 0) {
+      currentSpecs = this.specs();
+    }
+
+    const { DeveloperGuideDialogComponent } =
+      await import('../../components/developer-guide-dialog/developer-guide-dialog.component');
+    this.dialog.open(DeveloperGuideDialogComponent, {
+      data: { specs: currentSpecs },
+      width: '800px',
+      maxWidth: '95vw'
+    });
   }
 }
