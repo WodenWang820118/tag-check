@@ -17,7 +17,8 @@ const gates = new WeakMap<DataSource, SqliteTransactionGate>();
  * transaction while one is open joins it and is rolled back with it.
  *
  * The gate queues transactions and holds queries made outside the open
- * transaction until it ends. A transaction starts only once a `save()` that
+ * transaction until it ends; a `save()` made outside it opens its own
+ * transaction afterwards. A transaction starts only once a `save()` that
  * opened its own transaction has finished. Work inside a transaction,
  * including a nested transaction, passes straight through, so a transaction
  * body must not wait for work started outside it that queries the database.
@@ -62,9 +63,15 @@ class SqliteTransactionGate {
     }
   }
 
-  async query<T>(run: () => Promise<T>): Promise<T> {
-    while (this.holder !== null && !this.isHolder()) await this.closed;
+  /** Runs work once no transaction but the caller's own is open. */
+  async whenFree<T>(run: () => Promise<T>): Promise<T> {
+    while (this.excludesCaller()) await this.closed;
     return run();
+  }
+
+  /** Whether a transaction the caller is not part of is open. */
+  excludesCaller(): boolean {
+    return this.holder !== null && !this.isHolder();
   }
 
   private isHolder(): boolean {
@@ -107,7 +114,27 @@ export function serializeSqliteTransactions(dataSource: DataSource): void {
     ...args: unknown[]
   ) => Promise<unknown>;
   runner.query = ((...args: unknown[]) =>
-    gate.query(() => query(...args))) as QueryRunner['query'];
+    gate.whenFree(() => query(...args))) as QueryRunner['query'];
+
+  // save() and the query builders open their own transaction only when the
+  // runner shows none. Outside the open transaction they see none, so they
+  // open their own once it ends instead of joining it.
+  let active = runner.isTransactionActive;
+  Object.defineProperty(runner, 'isTransactionActive', {
+    configurable: true,
+    enumerable: true,
+    get: () => !gate.excludesCaller() && active,
+    set: (value: boolean) => {
+      active = value;
+    }
+  });
+  const startTransaction = runner.startTransaction.bind(runner) as (
+    ...args: unknown[]
+  ) => Promise<void>;
+  runner.startTransaction = ((...args: unknown[]) =>
+    gate.whenFree(() =>
+      startTransaction(...args)
+    )) as QueryRunner['startTransaction'];
 
   const manager = dataSource.manager;
   const transaction = manager.transaction.bind(manager) as (

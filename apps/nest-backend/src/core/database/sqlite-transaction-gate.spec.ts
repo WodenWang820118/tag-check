@@ -79,12 +79,6 @@ describe('serializeSqliteTransactions (SQLite, migrated)', () => {
   it('keeps a save made outside an open transaction out of its rollback', async () => {
     const entered = deferred();
     const release = deferred();
-    const outsideInserting = deferred();
-    dataSource.subscribers.push({
-      beforeInsert: async (event: InsertEvent<ProjectEntity>) => {
-        if (event.entity.projectSlug === 'outside') outsideInserting.resolve();
-      }
-    });
     const failing = dataSource.transaction(async (manager) => {
       await manager.save(ProjectEntity, project('inside'));
       entered.resolve();
@@ -96,7 +90,6 @@ describe('serializeSqliteTransactions (SQLite, migrated)', () => {
     const outside = dataSource
       .getRepository(ProjectEntity)
       .save(project('outside'));
-    await outsideInserting.promise;
     // Without the gate, the save's INSERT runs inside the open transaction.
     await pause(20);
     release.resolve();
@@ -106,15 +99,39 @@ describe('serializeSqliteTransactions (SQLite, migrated)', () => {
     expect(await slugs()).toEqual(['outside']);
   });
 
+  it('gives a save made during an open transaction a transaction of its own', async () => {
+    await dataSource.getRepository(ProjectEntity).save(project('taken'));
+    const entered = deferred();
+    const release = deferred();
+    const open = dataSource.transaction(async (manager) => {
+      await manager.save(ProjectEntity, project('inside'));
+      entered.resolve();
+      await release.promise;
+    });
+
+    await entered.promise;
+    // The second row breaks the unique slug, so the whole save rolls back.
+    const outside = dataSource
+      .getRepository(ProjectEntity)
+      .save([project('partial'), project('taken')]);
+    await pause(20);
+    release.resolve();
+
+    await open;
+    await expect(outside).rejects.toThrow(/UNIQUE/);
+    expect(await slugs()).toEqual(['inside', 'taken']);
+  });
+
   it('lets a transaction open a nested one without waiting for itself', async () => {
     await dataSource.transaction(async (manager) => {
       await manager.save(ProjectEntity, project('outer'));
       await dataSource.transaction((inner) =>
         inner.save(ProjectEntity, project('inner'))
       );
+      await manager.save(ProjectEntity, project('after inner'));
     });
 
-    expect(await slugs()).toEqual(['inner', 'outer']);
+    expect(await slugs()).toEqual(['after inner', 'inner', 'outer']);
   });
 
   it('starts a transaction only after a save that opened its own has ended', async () => {
