@@ -4,7 +4,6 @@ import {
   existsSync,
   mkdtempSync,
   readdirSync,
-  renameSync,
   rmSync,
   mkdirSync,
   ReadStream
@@ -12,6 +11,7 @@ import {
 import { Writable } from 'stream';
 import * as unzipper from 'unzipper';
 import { join } from 'path';
+import { renameWithRetry } from './rename-with-retry';
 
 /**
  * A slug that names exactly one folder: not empty, not `.` or `..`, and
@@ -145,18 +145,18 @@ export class ProjectUnzipper {
           throw new Error(`Target folder already exists: ${finalPath}`);
         backupDir = mkdtempSync(join(outputFolderPath, '_import_backup_'));
         const previousPath = join(backupDir, 'project');
-        renameSync(finalPath, previousPath);
+        await renameWithRetry(finalPath, previousPath);
         backupPath = previousPath;
       }
       // Staging and backup live under the output root, so rename is on the
       // same filesystem. A failed rename must not fall back to merging files.
-      renameSync(stagingDir, finalPath);
+      await renameWithRetry(stagingDir, finalPath);
       published = true;
       await afterReplace?.();
     } catch (error) {
       try {
-        if (published) renameSync(finalPath, stagingDir);
-        if (backupPath) renameSync(backupPath, finalPath);
+        if (published) await renameWithRetry(finalPath, stagingDir);
+        if (backupPath) await renameWithRetry(backupPath, finalPath);
       } catch (restoreError) {
         throw new AggregateError(
           [error, restoreError],
