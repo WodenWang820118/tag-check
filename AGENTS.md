@@ -117,6 +117,13 @@ module that provides any other: a second provider creates a second instance.
   database created before migrations is synchronized once on its first start
   and every migration is recorded as applied, so a migration's data changes
   never run on it.
+- TypeORM's SQLite driver gives the whole backend one query runner, so
+  overlapping transactions would merge. `createMigratedDataSource` installs
+  `core/database/sqlite-transaction-gate.ts`: transactions run one at a
+  time and other queries wait for the open one. A transaction body must not
+  wait for work started outside it that queries the database (it
+  deadlocks). Code that calls `startTransaction` itself goes through
+  `runExclusively`.
 - The nest-backend bundle targets ES5 (rspack + swc without `jsc.target`).
   Functions passed to `page.evaluate` or `evaluateOnNewDocument` are compiled
   with swc helpers that do not exist in the page, so pass source strings.

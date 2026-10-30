@@ -2,6 +2,7 @@ import { DataSource, DataSourceOptions } from 'typeorm';
 import { InitialSchema1792540800000 } from './migrations/1792540800000-initial-schema';
 import { BatchRunsAndSchedules1792886400000 } from './migrations/1792886400000-batch-runs-and-schedules';
 import { RunMedia1793059200000 } from './migrations/1793059200000-run-media';
+import { serializeSqliteTransactions } from './sqlite-transaction-gate';
 
 /** Every migration, oldest first. Add a migration for each schema change. */
 export const DATABASE_MIGRATIONS = [
@@ -42,6 +43,7 @@ export async function migrateDatabase(dataSource: DataSource): Promise<void> {
 /**
  * Opens the database and migrates it, for TypeOrmModule's
  * dataSourceFactory: no module queries the database before it is migrated.
+ * Its transactions then run one at a time (`serializeSqliteTransactions`).
  *
  * @throws When the options are missing or a migration fails. The connection
  * is closed first: TypeOrmModule retries the factory, and every attempt
@@ -60,5 +62,6 @@ export async function createMigratedDataSource(
     await dataSource.destroy();
     throw error;
   }
+  serializeSqliteTransactions(dataSource);
   return dataSource;
 }
