@@ -1,5 +1,11 @@
 import { Injectable } from '@angular/core';
-import { DataLayer, StrictDataLayerEvent } from '@utils';
+import {
+  DataLayer,
+  ParameterRule,
+  StrictDataLayerEvent,
+  extractTagCheckRulesFromSpec,
+  formatTagCheckNotes
+} from '@utils';
 import { UtilsService } from './utils.service';
 
 /** A path segment that indexes an array, such as the `0` in `items.0.price`. */
@@ -36,7 +42,11 @@ export class DataLayerUtils {
    */
   getDataLayers(specs: StrictDataLayerEvent[]): DataLayer[] {
     const pathsByEvent = new Map<string, Set<string>>();
-    for (const { event, ...rest } of specs) {
+    const eventRulesByEvent = new Map<string, ParameterRule[]>();
+    const itemRulesByEvent = new Map<string, ParameterRule[]>();
+
+    for (const spec of specs) {
+      const { event, ...rest } = spec;
       const paths = pathsByEvent.get(event) ?? new Set<string>();
       for (const path of this.utilsService.getAllObjectPaths(rest)) {
         if (
@@ -48,12 +58,45 @@ export class DataLayerUtils {
         }
       }
       pathsByEvent.set(event, paths);
+
+      const { eventRules, itemRules } = extractTagCheckRulesFromSpec(spec);
+      if (eventRules.length > 0) {
+        const existing = eventRulesByEvent.get(event) ?? [];
+        eventRulesByEvent.set(event, mergeRules(existing, eventRules));
+      }
+      if (itemRules.length > 0) {
+        const existing = itemRulesByEvent.get(event) ?? [];
+        itemRulesByEvent.set(event, mergeRules(existing, itemRules));
+      }
     }
-    return Array.from(pathsByEvent, ([event, paths]) => ({
-      event,
-      paths: [...paths]
-    }));
+
+    return Array.from(pathsByEvent, ([event, paths]) => {
+      const notes = formatTagCheckNotes(
+        eventRulesByEvent.get(event) ?? [],
+        itemRulesByEvent.get(event) ?? []
+      );
+      return {
+        event,
+        paths: [...paths],
+        ...(notes ? { notes } : {})
+      };
+    });
   }
+}
+
+function mergeRules(
+  existing: ParameterRule[],
+  incoming: ParameterRule[]
+): ParameterRule[] {
+  const seen = new Set(existing.map((r) => r.name));
+  const result = [...existing];
+  for (const rule of incoming) {
+    if (!seen.has(rule.name)) {
+      seen.add(rule.name);
+      result.push(rule);
+    }
+  }
+  return result;
 }
 
 /** The value a dot path reads, as a version 2 Data Layer Variable reads it. */

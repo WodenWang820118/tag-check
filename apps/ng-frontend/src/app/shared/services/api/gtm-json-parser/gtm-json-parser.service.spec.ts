@@ -61,4 +61,27 @@ describe('GtmJsonParserService', () => {
       payload
     );
   });
+
+  it('sends chosen resolutions with the container', () => {
+    const obs = of({});
+    httpClient.post.mockReturnValue(obs);
+    const payload = { foo: 'bar' } as unknown as GTMConfiguration;
+    const resolutions = { 'GA4 - purchase': 'keepBoth' as const };
+    expect(service.uploadGtmJson('shop', payload, resolutions)).toBe(obs);
+    expect(httpClient.post).toHaveBeenCalledWith(
+      expect.stringContaining('/upload/shop'),
+      { container: payload, resolutions }
+    );
+  });
+
+  it('asks the preview endpoint with the container', () => {
+    const obs = of({ conflicts: [] });
+    httpClient.post.mockReturnValue(obs);
+    const payload = { foo: 'bar' } as unknown as GTMConfiguration;
+    expect(service.previewGtmJson('shop', payload)).toBe(obs);
+    expect(httpClient.post).toHaveBeenCalledWith(
+      expect.stringContaining('/preview/shop'),
+      payload
+    );
+  });
 });

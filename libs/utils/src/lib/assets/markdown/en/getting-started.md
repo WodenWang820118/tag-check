@@ -24,9 +24,13 @@ Open the project and go to **Settings**:
 
 On the **Tests** page, select **Add tests** (+). There are three ways:
 
-- **Import GTM JSON** (recommended): in Tag Manager, go to **Admin** > **Export container** and upload the file. TagCheck creates one test per GA4 event tag. Each spec lists the parameters the tag reads from Data Layer Variables, and those keys must exist in the push. Tags TagCheck cannot turn into tests are listed under **Skipped tags**.
+- **Import GTM JSON** (recommended): in Tag Manager, go to **Admin** > **Export container** and upload the file. TagCheck creates one test per GA4 event tag. Each spec lists the parameters the tag reads from Data Layer Variables, and those keys must exist in the push. Tags TagCheck cannot turn into tests are listed under **Skipped tags**. When a tag name already has a test but the event name changed, TagCheck asks whether to update that test or keep both.
 - **Import GA4 events**: upload or paste the events you plan to push, as one JSON object or an array, and select **Create tests**.
 - **Create a test manually**: write the spec and paste a recording in the editors, then select **Submit**.
+
+On the project's **TagBuild** page, **Import into this project** adds the container just built as tests, with the same conflict check as **Import GTM JSON**.
+
+Tag Extract on that page offers **Use this project's container** when the project already has an imported container, and reads that container instead of a new upload.
 
 ## 4. Record the journey
 

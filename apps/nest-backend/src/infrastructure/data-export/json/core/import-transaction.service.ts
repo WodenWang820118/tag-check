@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource, EntityMetadata } from 'typeorm';
+import { runExclusively } from '../../../../core/database/sqlite-transaction-gate';
 import { FixtureEnvelopeV1 } from '../../interfaces/fixture-types';
 import { TopologicalSorterService } from './topological-sorter.service';
 import { PointerRepairService } from './pointer-repair.service';
@@ -35,6 +36,14 @@ export class ImportTransactionService {
    * @throws Whatever a step throws, after rolling the transaction back.
    */
   async runWithinTransaction(env: FixtureEnvelopeV1): Promise<{
+    stats: Record<string, ImportStats>;
+  }> {
+    // The import starts and commits its own transaction on SQLite's shared
+    // query runner, so it goes through the gate like manager.transaction.
+    return runExclusively(this.dataSource, () => this.importEntities(env));
+  }
+
+  private async importEntities(env: FixtureEnvelopeV1): Promise<{
     stats: Record<string, ImportStats>;
   }> {
     const queryRunner = this.dataSource.createQueryRunner();

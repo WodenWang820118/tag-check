@@ -201,6 +201,7 @@ describe('ProjectDataLayerSpecBuilderService', () => {
       }) as VariableConfig;
     const variables: VariableConfig[] = [
       dataLayerVariable('DLV - ecommerce.value', 'ecommerce.value'),
+      dataLayerVariable('DLV - ecommerce.currency', 'ecommerce.currency'),
       dataLayerVariable('DLV - ecommerce', 'ecommerce'),
       dataLayerVariable('DLV - first item id', 'ecommerce.items.0.item_id'),
       dataLayerVariable('DLV - method', 'method'),
@@ -212,12 +213,17 @@ describe('ProjectDataLayerSpecBuilderService', () => {
         parameter: []
       }
     ];
-    const tagWith = (eventName: string, rows: [string, string][]): Spec => ({
+    const tagWith = (
+      eventName: string,
+      rows: [string, string][],
+      notes?: string
+    ): Spec => ({
       tag: {
         name: `GA4 event - ${eventName}`,
         type: 'gaawe',
         accountId: 'acc',
         containerId: 'cont',
+        ...(notes ? { notes } : {}),
         parameter: [
           { type: 'TEMPLATE', key: 'eventName', value: eventName },
           {
@@ -298,6 +304,52 @@ describe('ProjectDataLayerSpecBuilderService', () => {
       });
     });
 
+    it('applies rules from tag notes replacing the DLV placeholder at its path', () => {
+      const notes = [
+        'TagCheck rules:',
+        'currency = "TWD"',
+        'value = 99.5',
+        'items.item_id ~ /^SKU-/'
+      ].join('\n');
+
+      const spec = tagWith(
+        'add_to_cart',
+        [
+          ['currency', '{{DLV - ecommerce.currency}}'],
+          ['value', '{{DLV - ecommerce.value}}'],
+          ['item_id', '{{DLV - first item id}}']
+        ],
+        notes
+      );
+
+      const built = service.buildDataLayerSpec(spec, variables);
+      expect(built).toEqual({
+        event: 'add_to_cart',
+        ecommerce: {
+          currency: 'TWD',
+          value: 99.5,
+          items: [{ item_id: '/^SKU-/' }]
+        }
+      });
+    });
+
+    it('ignores rules for parameters not present in the spec and logs warning', () => {
+      const notes = [
+        'TagCheck rules:',
+        'currency = "TWD"',
+        'non_existent_param = "XYZ"'
+      ].join('\n');
+
+      const spec = tagWith('login', [['method', '{{DLV - method}}']], notes);
+
+      const built = service.buildDataLayerSpec(spec, variables);
+      // login spec only has method; currency and non_existent_param are ignored
+      expect(built).toEqual({
+        event: 'login',
+        method: '{{DLV - method}}'
+      });
+    });
+
     describe('upgradeLegacyDataLayerSpec()', () => {
       const raw = tagWith('add_to_cart', [
         ['value', '{{DLV - ecommerce.value}}'],
@@ -354,6 +406,54 @@ describe('ProjectDataLayerSpecBuilderService', () => {
           service.isGeneratedDataLayerSpec(
             { event: 'add_to_cart', custom: 1 } as never,
             raw,
+            variables
+          )
+        ).toBe(false);
+      });
+
+      it('treats a spec built with rules from notes as generated on re-import', () => {
+        const notes = ['TagCheck rules:', 'value = 100'].join('\n');
+        const rawWithRules = tagWith(
+          'add_to_cart',
+          [['value', '{{DLV - ecommerce.value}}']],
+          notes
+        );
+        const builtWithRules = service.buildDataLayerSpec(
+          rawWithRules,
+          variables
+        );
+
+        // Built spec with rules must be recognised as generated
+        expect(
+          service.isGeneratedDataLayerSpec(
+            builtWithRules,
+            rawWithRules,
+            variables
+          )
+        ).toBe(true);
+
+        // A spec originally generated without rules must also count as generated
+        const builtWithoutRules = service.buildDataLayerSpecWithoutRules(
+          rawWithRules,
+          variables
+        );
+        expect(
+          service.isGeneratedDataLayerSpec(
+            builtWithoutRules,
+            rawWithRules,
+            variables
+          )
+        ).toBe(true);
+
+        // An edited spec (e.g. value manually changed to 999) is not generated
+        const editedSpec = {
+          event: 'add_to_cart',
+          ecommerce: { value: 999 }
+        };
+        expect(
+          service.isGeneratedDataLayerSpec(
+            editedSpec as never,
+            rawWithRules,
             variables
           )
         ).toBe(false);

@@ -43,6 +43,7 @@ const DOC_DESCRIPTIONS: Record<string, string> = {
   'getting-started': $localize`:@@seo.docs.description.getting-started:Set up your first TagCheck project, record a user flow with Chrome Recorder, and run your first GTM tag audit.`,
   'quality-assurance': $localize`:@@seo.docs.description.quality-assurance:Learn how TagCheck runs automated checks against GTM Preview, validates GA4 event parameters, and generates QA reports.`,
   'report-management': $localize`:@@seo.docs.description.report-management:Review, export, and manage TagCheck audit reports including screenshots, video recordings, and data layer snapshots.`,
+  'measurement-plan': $localize`:@@seo.docs.description.measurement-plan:Understand GA4 measurement plans, how parameters and rules convert into GTM tags, and how developer snippets and TagCheck validation fit together.`,
   'setting-details': $localize`:@@seo.docs.description.setting-details:Configure TagCheck project settings: browser arguments, pre-load data, GTM Accompanied Mode, and project import/export.`
 };
 

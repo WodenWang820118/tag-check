@@ -1,7 +1,4 @@
-import {
-  getGa4MeasurementPlanTemplateRows,
-  type ExtractedMeasurementPlanRow
-} from '@utils';
+import { type ExtractedMeasurementPlanRow } from '@utils';
 
 /**
  * The measurement plan travels as CSV: Excel and Google Sheets open and save it
@@ -24,14 +21,34 @@ function toCsv(table: readonly string[][]): string {
   return table.map((cells) => cells.map(toCsvCell).join(',')).join('\r\n');
 }
 
-/** The template: the plan header and GA4's recommended events, one per row. */
+/**
+ * Template rows demonstrating realistic GA4 events and every parameter rule form:
+ * - regex patterns (e.g. transaction_id=/^T\d+$/)
+ * - specific literal values (e.g. currency=TWD, method=email)
+ * - plain any-value parameters (e.g. value, currency, method)
+ */
+export const MEASUREMENT_PLAN_TEMPLATE_ROWS: readonly (readonly [
+  eventName: string,
+  eventParameters: string,
+  itemParameters: string
+])[] = [
+  [
+    'purchase',
+    'transaction_id=/^T\\d+$/, currency=TWD, value',
+    'item_id, item_name, price, quantity'
+  ],
+  ['sign_up', 'method=email', ''],
+  ['view_item', 'currency, value', 'item_id, item_name'],
+  ['add_to_cart', 'currency, value', 'item_id, item_name, price, quantity'],
+  ['login', 'method', '']
+];
+
+/** The template: the plan header and realistic rows showing every rule form. */
 export function buildMeasurementPlanTemplateCsv(): string {
-  const rows = getGa4MeasurementPlanTemplateRows().map((row) => [
-    row.eventName,
-    row.eventParameters.join(', '),
-    row.itemParameters.join(', ')
+  return toCsv([
+    PLAN_HEADER,
+    ...MEASUREMENT_PLAN_TEMPLATE_ROWS.map((row) => [...row])
   ]);
-  return toCsv([PLAN_HEADER, ...rows]);
 }
 
 /**
@@ -105,6 +122,8 @@ function detectDelimiter(text: string): string {
  * Supports quoted cells containing line breaks and doubled quotes.
  * Excel saves with `;` in locales that use a decimal comma, so a header line
  * with `;` and no `,` switches the delimiter. Blank lines are skipped.
+ * Malformed quotes, duplicate plan headers and inconsistent widths name the
+ * physical line so an upload cannot silently lose or misalign records.
  */
 export function parseCsvToTable(text: string): string[][] {
   const cleanText = text.replace(/^\uFEFF/, '');
@@ -114,7 +133,33 @@ export function parseCsvToTable(text: string): string[][] {
   let cells: string[] = [];
   let current = '';
   let inQuotes = false;
+  let closedQuote = false;
   let rowHasContent = false;
+  let line = 1;
+  let rowStartLine = 1;
+  let quoteStartLine = 1;
+
+  const appendRow = () => {
+    if (!rowHasContent) {
+      return;
+    }
+    const row = [...cells, current];
+    if (rows.length === 0) {
+      const header = row.map((cell) => cell.trim().toLowerCase());
+      for (const required of PLAN_HEADER) {
+        if (header.filter((cell) => cell === required).length > 1) {
+          throw new Error(
+            `Line ${rowStartLine}: duplicate required header "${required}".`
+          );
+        }
+      }
+    } else if (row.length !== rows[0].length) {
+      throw new Error(
+        `Line ${rowStartLine}: expected ${rows[0].length} columns but found ${row.length}.`
+      );
+    }
+    rows.push(row);
+  };
 
   for (let i = 0; i < cleanText.length; i++) {
     const char = cleanText[i];
@@ -124,28 +169,48 @@ export function parseCsvToTable(text: string): string[][] {
       if (inQuotes && cleanText[i + 1] === '"') {
         current += '"';
         i++;
+      } else if (inQuotes) {
+        inQuotes = false;
+        closedQuote = true;
       } else {
-        inQuotes = !inQuotes;
+        if (current !== '' || closedQuote) {
+          throw new Error(
+            `Line ${line}: unexpected quote in an unquoted cell.`
+          );
+        }
+        inQuotes = true;
+        quoteStartLine = line;
       }
     } else if (inQuotes) {
       rowHasContent = true;
       current += char;
+      if (char === '\r' || char === '\n') {
+        if (char === '\r' && cleanText[i + 1] === '\n') {
+          current += '\n';
+          i++;
+        }
+        line++;
+      }
     } else if (char === delimiter) {
       rowHasContent = true;
       cells.push(current);
       current = '';
+      closedQuote = false;
     } else if (char === '\r' || char === '\n') {
       if (char === '\r' && cleanText[i + 1] === '\n') {
         i++;
       }
-      if (rowHasContent) {
-        cells.push(current);
-        rows.push(cells);
-      }
+      appendRow();
       cells = [];
       current = '';
+      closedQuote = false;
       rowHasContent = false;
+      line++;
+      rowStartLine = line;
     } else {
+      if (closedQuote) {
+        throw new Error(`Line ${line}: unexpected text after a closing quote.`);
+      }
       if (char.trim() !== '') {
         rowHasContent = true;
       }
@@ -153,10 +218,10 @@ export function parseCsvToTable(text: string): string[][] {
     }
   }
 
-  if (rowHasContent || cells.length > 0) {
-    cells.push(current);
-    rows.push(cells);
+  if (inQuotes) {
+    throw new Error(`Line ${quoteStartLine}: unterminated quoted cell.`);
   }
+  appendRow();
 
   return rows;
 }

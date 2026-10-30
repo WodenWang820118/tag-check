@@ -5,6 +5,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { FileReportService } from '../../../../shared/services/api/file-report/file-report.service';
 import { VideosService } from '../../../../shared/services/api/videos/videos.service';
 import { ReportTabFacade } from './report-tab-facade.service';
+import { REPORT_DETAIL_SAMPLE, type ReportDetailResponse } from '@utils';
+import { toReportDetails } from '../report-detail.contracts';
 
 describe('ReportTabFacade', () => {
   const fileReportService = {
@@ -148,7 +150,8 @@ describe('ReportTabFacade', () => {
 
     expect(fileReportService.downloadFileReports).toHaveBeenCalledWith(
       'storybook-project',
-      ['evt-1']
+      ['evt-1'],
+      undefined
     );
     expect(snackBar.open).toHaveBeenCalledWith(
       'Spreadsheet downloaded',
@@ -255,7 +258,9 @@ describe('ReportTabFacade', () => {
 
     expect(videosService.getVideo).toHaveBeenCalledWith(
       'storybook-project',
-      'evt-1'
+      'evt-1',
+      undefined,
+      undefined
     );
     expect(click).toHaveBeenCalled();
     expect(snackBar.open).toHaveBeenCalledWith(
@@ -358,17 +363,19 @@ describe('ReportTabFacade', () => {
       new Blob(['video'], { type: 'video/webm' })
     );
 
-    expect(shareSpreadsheetSpy).toHaveBeenCalledWith('storybook-project', {
-      eventId: 'evt-1',
-      eventName: 'purchase'
-    });
+    expect(shareSpreadsheetSpy).toHaveBeenCalledWith(
+      'storybook-project',
+      { eventId: 'evt-1', eventName: 'purchase' },
+      undefined
+    );
     expect(exportRecordingSpy).toHaveBeenCalledWith(
       'storybook-project',
       {
         eventId: 'evt-1',
         eventName: 'purchase'
       },
-      expect.any(Blob)
+      expect.any(Blob),
+      undefined
     );
     expect(snackBar.open).toHaveBeenCalledWith(
       'Starting event export (XLSX + WEBM)',
@@ -378,6 +385,32 @@ describe('ReportTabFacade', () => {
         horizontalPosition: 'right',
         verticalPosition: 'top'
       }
+    );
+  });
+
+  it('exports only the shown older run in both spreadsheet and uncached video downloads', () => {
+    const response = JSON.parse(
+      JSON.stringify({
+        ...REPORT_DETAIL_SAMPLE,
+        testEventDetails: { ...REPORT_DETAIL_SAMPLE.testEventDetails, id: 5 }
+      })
+    ) as ReportDetailResponse;
+    const details = toReportDetails(response);
+    fileReportService.downloadFileReports.mockReturnValue(of({ ok: true }));
+    videosService.getVideo.mockReturnValue(of({ blob: new Blob() }));
+
+    service.exportEvent('demo', details, new Blob(), 5);
+
+    expect(fileReportService.downloadFileReports).toHaveBeenCalledWith(
+      'demo',
+      [REPORT_DETAIL_SAMPLE.testEvent.eventId],
+      5
+    );
+    expect(videosService.getVideo).toHaveBeenCalledWith(
+      'demo',
+      REPORT_DETAIL_SAMPLE.testEvent.eventId,
+      undefined,
+      5
     );
   });
 });

@@ -39,11 +39,19 @@
 
     <!-- Middle: Actions Panel -->
     <div class="main-page__board__item min-w-0 w-full xl:[grid-area:actions]">
-      <lib-functional-card class="h-full w-full">
+      <lib-functional-card
+        class="h-full w-full"
+        [projectSlug]="projectSlug()"
+        [projectImport]="projectImport()"
+      >
         <lib-upload-action
           class="functional-card__actions__item"
           (uploadClick)="onUpload()"
         ></lib-upload-action>
+        <lib-developer-guide-action
+          class="functional-card__actions__item"
+          (guideClick)="openDeveloperGuideDialog()"
+        ></lib-developer-guide-action>
       </lib-functional-card>
     </div>
 
@@ -71,7 +79,9 @@
       "
       class="mb-12 w-full"
     >
-      <lib-tag-extract></lib-tag-extract>
+      <lib-tag-extract
+        [projectContainer]="projectContainer()"
+      ></lib-tag-extract>
     </div>
   }
 </main>

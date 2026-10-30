@@ -4,7 +4,8 @@ import { RecordingController } from './recording.controller';
 describe('RecordingController', () => {
   function build() {
     const projectRecordingService = {
-      updateRecording: vi.fn().mockResolvedValue(undefined)
+      updateRecording: vi.fn().mockResolvedValue(undefined),
+      updateRecordingAndFile: vi.fn().mockResolvedValue('updated')
     };
     const recordingRepositoryService = {
       listByProject: vi.fn().mockResolvedValue([{ id: 'r-1' }]),
@@ -37,32 +38,28 @@ describe('RecordingController', () => {
     expect(result).toEqual({ id: 'r-1' });
   });
 
-  it('updateRecording forwards only title and steps to the repository', async () => {
-    const { controller, recordingRepositoryService } = build();
+  it('updateRecording forwards only title and steps to the recording service', async () => {
+    const { controller, projectRecordingService, recordingRepositoryService } =
+      build();
     const recording = {
       title: 'My Recording',
       steps: [{ type: 'click' }],
       ignored: 'should not be passed'
     } as never;
-    await controller.updateRecording('proj-1', 'evt-1', recording);
-    expect(recordingRepositoryService.update).toHaveBeenCalledWith(
+    const result = await controller.updateRecording(
       'proj-1',
       'evt-1',
-      { title: 'My Recording', steps: [{ type: 'click' }] }
+      recording
     );
-  });
-
-  it('updateRecording also rewrites the recording file a run reads', async () => {
-    const { controller, projectRecordingService } = build();
-    const steps = [{ type: 'navigate', url: 'https://new.example' }];
-    await controller.updateRecording('proj-1', 'evt-1', {
-      title: 'checkout',
-      steps
-    } as never);
-    expect(projectRecordingService.updateRecording).toHaveBeenCalledWith(
+    expect(projectRecordingService.updateRecordingAndFile).toHaveBeenCalledWith(
       'proj-1',
       'evt-1',
-      { title: 'checkout', steps }
+      {
+        title: 'My Recording',
+        steps: [{ type: 'click' }]
+      }
     );
+    expect(recordingRepositoryService.update).not.toHaveBeenCalled();
+    expect(result).toBe('updated');
   });
 });

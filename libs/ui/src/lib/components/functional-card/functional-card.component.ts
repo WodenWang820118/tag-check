@@ -7,6 +7,7 @@ import {
   ChangeDetectionStrategy
 } from '@angular/core';
 import { TagBuildMode } from '@data-access';
+import type { ProjectContainerImport } from '../conversion-success-dialog/conversion-success-dialog.component';
 import { FunctionalCardFacade } from './functional-card.facade.service';
 import { AdvancedExpansionPanelComponent } from '../advanced-expansion-panel/advanced-expansion-panel.component';
 import { MatButtonModule } from '@angular/material/button';
@@ -29,6 +30,13 @@ export class FunctionalCardComponent {
   accordionContainer =
     viewChild.required<AdvancedExpansionPanelComponent>('accordionContainer');
   color = input<string>('primary');
+  projectSlug = input<string>();
+  /**
+   * Host hook for importing the built container. Null on the standalone
+   * site; TagCheck sets it. Read when Convert is clicked, so a hook that
+   * arrives with the project is the one the dialog uses.
+   */
+  projectImport = input<ProjectContainerImport | null>(null);
   readonly isConvertDisabled$ = this.facade.isConvertDisabled$;
   readonly importReadiness = this.facade.importReadiness;
   readonly importReadinessLabel = this.facade.importReadinessLabel;
@@ -42,6 +50,10 @@ export class FunctionalCardComponent {
   }
 
   convertCode() {
-    this.facade.convertCode(this.accordionContainer);
+    this.facade.convertCode(
+      this.accordionContainer,
+      this.projectSlug(),
+      this.projectImport()
+    );
   }
 }

@@ -108,4 +108,29 @@ describe('EventTag', () => {
       ).map(({ parameter }) => parameter)
     ).toEqual(['currency', 'items']);
   });
+
+  it('includes notes when the tag carries TagCheck rules while still reading DLVs', () => {
+    const tagWithNotes = {
+      ...(tag as object),
+      notes: 'TagCheck rules:\ncurrency = "TWD"\ntransaction_id ~ /^T\\d+$/'
+    } as never;
+    const config = service.createTag(
+      'GA4',
+      'a',
+      'c',
+      tagWithNotes,
+      triggers,
+      'false'
+    );
+    expect(config.notes).toBe(
+      'TagCheck rules:\ncurrency = "TWD"\ntransaction_id ~ /^T\\d+$/'
+    );
+    const eventParameters = config.parameter?.[2];
+    expect(eventParameters?.list?.[0].map?.[1].value).toBe('{{DLV - USD}}');
+  });
+
+  it('omits notes when the tag carries no rules', () => {
+    const config = service.createTag('GA4', 'a', 'c', tag, triggers, 'false');
+    expect(config.notes).toBeUndefined();
+  });
 });

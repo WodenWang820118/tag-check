@@ -1,8 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ElementRef } from '@angular/core';
 import { FileUploadDialogComponent } from './file-upload-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
-import { EditorFacadeService } from '@data-access';
+import { EditorFacadeService, EditorService } from '@data-access';
+import { EditorTypeEnum } from '@utils';
 import { ErrorDialogComponent } from '../error-dialog/error-dialog.component';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('FileUploadDialogComponent', () => {
   let fixture: ComponentFixture<FileUploadDialogComponent>;
@@ -46,6 +49,52 @@ describe('FileUploadDialogComponent', () => {
       );
     downloadBtn?.click();
     expect(spy).toHaveBeenCalled();
+  });
+
+  describe('How to write a plan help section', () => {
+    it('renders the collapsible help section with testid tagbuild-plan-help', () => {
+      const helpEl: HTMLElement | null = fixture.nativeElement.querySelector(
+        '[data-testid="tagbuild-plan-help"]'
+      );
+      expect(helpEl).not.toBeNull();
+      expect(helpEl?.tagName.toLowerCase()).toBe('details');
+
+      const summary = helpEl?.querySelector('summary');
+      expect(summary?.textContent?.trim()).toBe('How to write a plan');
+    });
+
+    it('links to Google recommended events reference and documentation page', () => {
+      const helpEl: HTMLElement | null = fixture.nativeElement.querySelector(
+        '[data-testid="tagbuild-plan-help"]'
+      );
+      const links = helpEl?.querySelectorAll('a');
+      const hrefs = Array.from(links ?? []).map((a) => a.getAttribute('href'));
+
+      expect(
+        hrefs.some(
+          (href) =>
+            href?.includes('developers.google.com/analytics') &&
+            href.includes('reference/events')
+        )
+      ).toBe(true);
+
+      expect(hrefs).toContain(
+        'https://tag-check-documentation.vercel.app/documentation/measurement-plan'
+      );
+    });
+
+    it('covers the three rule forms and dataLayer.push code generation', () => {
+      const helpEl: HTMLElement | null = fixture.nativeElement.querySelector(
+        '[data-testid="tagbuild-plan-help"]'
+      );
+      const text = helpEl?.textContent ?? '';
+
+      expect(text).toContain('currency');
+      expect(text).toContain('currency=TWD');
+      expect(text).toContain('transaction_id=/^T\\d+$/');
+      expect(text).toContain('dataLayer.push');
+      expect(text).toContain('For developers');
+    });
   });
 
   describe('plan import with realistic parsed sheet tables', () => {
@@ -176,6 +225,22 @@ describe('FileUploadDialogComponent', () => {
         target: { files: [file] }
       } as unknown as Event);
 
+    it('shows the spreadsheet error message without an extra Error prefix', async () => {
+      await select(
+        new File(
+          ['event_name,event_parameters,item_parameters\n"unterminated'],
+          'broken.csv'
+        )
+      );
+
+      expect(dialog.open).toHaveBeenCalledWith(ErrorDialogComponent, {
+        data: {
+          message:
+            'Failed to read spreadsheet file: Line 2: unterminated quoted cell.'
+        }
+      });
+    });
+
     it('imports a CSV measurement plan into the input JSON editor', async () => {
       await select(
         new File(
@@ -300,5 +365,52 @@ describe('FileUploadDialogComponent', () => {
       expect(editorFacade.inputJsonContent).toEqual([{ event: 'page_view' }]);
       expect(dialog.closeAll).toHaveBeenCalled();
     });
+  });
+});
+
+describe('FileUploadDialogComponent with the shared editors', () => {
+  let editor: EditorService;
+
+  afterEach(() => {
+    editor.editor$.inputJson().destroy();
+    editor.editor$.outputJson().destroy();
+  });
+
+  it.each([
+    [
+      'plan.csv',
+      'event_name,event_parameters,item_parameters\nsign_up,method,\n'
+    ],
+    [
+      'legacy.csv',
+      'dataLayer Specs\n"dataLayer.push({ event: \'login\' });"\n'
+    ],
+    ['specs.json', '[{"event":"page_view"}]']
+  ])('clears the old output after uploading %s', async (name, content) => {
+    await TestBed.configureTestingModule({
+      imports: [FileUploadDialogComponent],
+      providers: [
+        { provide: MatDialog, useValue: { open: vi.fn(), closeAll: vi.fn() } }
+      ]
+    }).compileComponents();
+    editor = TestBed.inject(EditorService);
+    editor.initEditorView(
+      EditorTypeEnum.OUTPUT_JSON,
+      new ElementRef(document.createElement('div'))
+    );
+    TestBed.inject(EditorFacadeService).outputJsonContent = {
+      exportTime: 'previous conversion'
+    };
+    const fixture = TestBed.createComponent(FileUploadDialogComponent);
+    fixture.detectChanges();
+
+    await fixture.componentInstance.onFileSelected({
+      target: { files: [new File([content], name)] }
+    } as unknown as Event);
+    await Promise.resolve();
+    TestBed.tick();
+
+    expect(editor.contents$.outputJson()).toBe('');
+    expect(editor.editor$.outputJson().state.doc.toString()).toBe('');
   });
 });

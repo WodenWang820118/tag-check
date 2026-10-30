@@ -24,9 +24,13 @@ TagCheck からエクスポートしたプロジェクトの作業を続ける�
 
 **Tests** ページで **Add tests**（+）を選択します。方法は 3 つあります。
 
-- **Import GTM JSON**（推奨）: Tag Manager で **Admin** > **Export container** に移動し、そのファイルをアップロードします。TagCheck は GA4 イベントタグごとに 1 つのテストを作成します。各スペックには、タグがデータレイヤー変数から読み取るパラメータが記載され、それらのキーはプッシュに存在する必要があります。TagCheck がテストに変換できないタグは **Skipped tags** に表示されます。
+- **Import GTM JSON**（推奨）: Tag Manager で **Admin** > **Export container** に移動し、そのファイルをアップロードします。TagCheck は GA4 イベントタグごとに 1 つのテストを作成します。各スペックには、タグがデータレイヤー変数から読み取るパラメータが記載され、それらのキーはプッシュに存在する必要があります。TagCheck がテストに変換できないタグは **Skipped tags** に表示されます。タグ名が既存のテストと一致し、イベント名だけが変わっている場合、TagCheck はそのテストを更新するか、両方を残すかを確認します。
 - **Import GA4 events**: プッシュする予定のイベントを、1 つの JSON オブジェクトまたは配列としてアップロードするか貼り付け、**Create tests** を選択します。
 - **Create a test manually**: エディターにスペックを書き、記録を貼り付けてから、**Submit** を選択します。
+
+プロジェクトの **TagBuild** ページでは、**Import into this project** が直前にビルドしたコンテナをテストとして追加し、**Import GTM JSON** と同じ競合確認を行います。
+
+そのページの Tag Extract は、プロジェクトにインポート済みのコンテナがある場合に **Use this project's container** を表示し、新しいファイルをアップロードする代わりにそのコンテナを読み込みます。
 
 ## 4. ジャーニーを記録する
 

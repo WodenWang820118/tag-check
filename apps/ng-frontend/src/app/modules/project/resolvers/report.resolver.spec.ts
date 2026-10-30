@@ -122,6 +122,16 @@ describe('project report.resolver', () => {
     }
   });
 
+  it('keeps history and the missing-run state from the API for an unknown positive id', async () => {
+    reportService.getReportDetails.mockReturnValueOnce(
+      of({ ...detail, testEventDetails: null, testImage: null })
+    );
+    const page = await firstValueFrom(resolvePage({ run: '999' }));
+    expect(page.runNotFound).toBe(true);
+    expect(page.runs).toEqual(detail.runs);
+    expect(page.isLatestRun).toBe(false);
+  });
+
   it('builds the report page from what it loaded', async () => {
     const page = await firstValueFrom(resolvePage());
 

@@ -143,9 +143,13 @@ describe('BatchRunsController and SchedulesController (HTTP, SQLite)', () => {
           eventIds: ['view_item'],
           headless: true
         });
-        ids.push(created.json().id);
+        expect(created.statusCode).toBe(201);
+        const body: Jsonified<BatchRunResponse> = created.json();
+        ids.push(body.id);
+        // The fake run saves on the same SQLite connection. Finish its
+        // transaction before the next POST starts a batch transaction.
+        await batchQueue.whenIdle();
       }
-      await batchQueue.whenIdle();
 
       const all = await app.inject({ method: 'GET', url: '/batch-runs/shop' });
       const two = await app.inject({

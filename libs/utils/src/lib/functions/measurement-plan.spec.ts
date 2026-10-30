@@ -136,6 +136,18 @@ describe('measurement-plan', () => {
   });
 
   describe('parseMeasurementPlanRows - issue reporting', () => {
+    it('rejects an event parameter that would replace the data layer event name', () => {
+      const result = parseMeasurementPlanRows([
+        ['event_name', 'event_parameters', 'item_parameters'],
+        ['login', 'method, event', '']
+      ]);
+
+      expect(result.rows).toEqual([]);
+      expect(result.issues).toEqual([
+        expect.stringMatching(/Row 2:.*"event".*data layer event name/)
+      ]);
+    });
+
     it('reports invalid event names that break GA4 naming rules', () => {
       const table = [
         ['event_name', 'event_parameters', 'item_parameters'],
@@ -270,7 +282,163 @@ describe('measurement-plan', () => {
     });
   });
 
+  describe('parseMeasurementPlanRows - rule syntax in cells', () => {
+    it('parses each rule kind: any, equals (strings, numbers, booleans, quoted) and regex', () => {
+      const table = [
+        ['event_name', 'event_parameters', 'item_parameters'],
+        [
+          'purchase',
+          'currency=TWD, value=10, in_stock=true, level="10", transaction_id=/^T\\d+$/, coupon',
+          'item_id=/^SKU-/i, price=99.99, is_featured=false, item_name'
+        ]
+      ];
+      const result = parseMeasurementPlanRows(table);
+      expect(result.issues).toEqual([]);
+      expect(result.rows).toHaveLength(1);
+      expect(result.rows[0].eventName).toBe('purchase');
+      expect(result.rows[0].eventParameters).toEqual([
+        'currency=TWD',
+        'value=10',
+        'in_stock=true',
+        'level="10"',
+        'transaction_id=/^T\\d+$/',
+        'coupon'
+      ]);
+      expect(result.rows[0].itemParameters).toEqual([
+        'item_id=/^SKU-/i',
+        'price=99.99',
+        'is_featured=false',
+        'item_name'
+      ]);
+      expect(result.rows[0].eventRules).toEqual([
+        { kind: 'equals', name: 'currency', value: 'TWD' },
+        { kind: 'equals', name: 'value', value: 10 },
+        { kind: 'equals', name: 'in_stock', value: true },
+        { kind: 'equals', name: 'level', value: '10' },
+        { kind: 'pattern', name: 'transaction_id', pattern: '^T\\d+$' },
+        { kind: 'any', name: 'coupon' }
+      ]);
+      expect(result.rows[0].itemRules).toEqual([
+        { kind: 'pattern', name: 'item_id', pattern: '^SKU-', flags: 'i' },
+        { kind: 'equals', name: 'price', value: 99.99 },
+        { kind: 'equals', name: 'is_featured', value: false },
+        { kind: 'any', name: 'item_name' }
+      ]);
+    });
+
+    it('trims spaces around parameter names and values in rules', () => {
+      const table = [
+        ['event_name', 'event_parameters', 'item_parameters'],
+        ['login', '  method =  google ,  attempts = 1  ', '']
+      ];
+      const result = parseMeasurementPlanRows(table);
+      expect(result.issues).toEqual([]);
+      expect(result.rows[0].eventRules).toEqual([
+        { kind: 'equals', name: 'method', value: 'google' },
+        { kind: 'equals', name: 'attempts', value: 1 }
+      ]);
+    });
+
+    it('splits cells containing regular expressions with commas and flags', () => {
+      const table = [
+        ['event_name', 'event_parameters', 'item_parameters'],
+        [
+          'purchase',
+          'transaction_id=/^T\\d{1,3}$/, coupon=/PROMO_\\d{2,4}/i, currency=TWD',
+          'item_id=/^SKU-\\d{1,5}$/'
+        ]
+      ];
+      const result = parseMeasurementPlanRows(table);
+      expect(result.issues).toEqual([]);
+      expect(result.rows[0].eventParameters).toEqual([
+        'transaction_id=/^T\\d{1,3}$/',
+        'coupon=/PROMO_\\d{2,4}/i',
+        'currency=TWD'
+      ]);
+      expect(result.rows[0].eventRules).toEqual([
+        { kind: 'pattern', name: 'transaction_id', pattern: '^T\\d{1,3}$' },
+        {
+          kind: 'pattern',
+          name: 'coupon',
+          pattern: 'PROMO_\\d{2,4}',
+          flags: 'i'
+        },
+        { kind: 'equals', name: 'currency', value: 'TWD' }
+      ]);
+    });
+
+    it('reports an invalid regex as a plan issue with the row number without crashing', () => {
+      const table = [
+        ['event_name', 'event_parameters', 'item_parameters'],
+        ['purchase', 'transaction_id=/[', 'item_id=/unclosed']
+      ];
+      const result = parseMeasurementPlanRows(table);
+      expect(result.issues).toHaveLength(2);
+      expect(
+        result.issues.some(
+          (issue) =>
+            issue.includes('Row 2') &&
+            issue.includes('transaction_id') &&
+            issue.includes('invalid regular expression')
+        )
+      ).toBe(true);
+      expect(
+        result.issues.some(
+          (issue) =>
+            issue.includes('Row 2') &&
+            issue.includes('item_id') &&
+            issue.includes('invalid regular expression')
+        )
+      ).toBe(true);
+    });
+
+    it('keeps old plans without rules completely unchanged and backward-compatible', () => {
+      const table = [
+        ['event_name', 'event_parameters', 'item_parameters'],
+        ['login', 'method', ''],
+        ['purchase', 'currency, value', 'item_id, price']
+      ];
+      const result = parseMeasurementPlanRows(table);
+      expect(result.issues).toEqual([]);
+      expect(result.rows).toEqual([
+        {
+          eventName: 'login',
+          eventParameters: ['method'],
+          itemParameters: []
+        },
+        {
+          eventName: 'purchase',
+          eventParameters: ['currency', 'value'],
+          itemParameters: ['item_id', 'price']
+        }
+      ]);
+    });
+  });
+
   describe('measurementPlanToDataLayerSpecs', () => {
+    it.each(['constructor', 'toString', 'valueOf'])(
+      'keeps parameters flat for the custom event %s',
+      (eventName) => {
+        expect(
+          measurementPlanToDataLayerSpecs([
+            { eventName, eventParameters: ['method'], itemParameters: [] }
+          ])
+        ).toEqual([{ event: eventName, method: '$method' }]);
+      }
+    );
+
+    it('rejects event parameters that would overwrite the event name even without parsing', () => {
+      expect(() =>
+        measurementPlanToDataLayerSpecs([
+          {
+            eventName: 'login',
+            eventParameters: ['event'],
+            itemParameters: []
+          }
+        ])
+      ).toThrow(/"event".*data layer event name/);
+    });
+
     it('places parameters at top level for non-ecommerce events without item parameters', () => {
       const rows: MeasurementPlanRow[] = [
         {
@@ -406,6 +574,75 @@ describe('measurement-plan', () => {
         }
       ]);
     });
+
+    it('generates spec expectations from rules for event and item parameters', () => {
+      const rows: MeasurementPlanRow[] = [
+        {
+          eventName: 'purchase',
+          eventParameters: [
+            'currency=TWD',
+            'value=100',
+            'in_stock=true',
+            'transaction_id=/^T\\d+$/',
+            'coupon'
+          ],
+          itemParameters: [
+            'item_id=/^SKU-\\d{1,3}$/i',
+            'price=50',
+            'item_name="123"',
+            'quantity'
+          ]
+        }
+      ];
+      const specs = measurementPlanToDataLayerSpecs(rows);
+      expect(specs).toEqual([
+        {
+          event: 'purchase',
+          ecommerce: {
+            currency: 'TWD',
+            value: 100,
+            in_stock: true,
+            transaction_id: '/^T\\d+$/',
+            coupon: '$coupon',
+            items: [
+              {
+                item_id: '/^SKU-\\d{1,3}$/i',
+                price: 50,
+                item_name: '123',
+                quantity: '$quantity'
+              }
+            ]
+          }
+        }
+      ]);
+    });
+
+    it('generates spec expectations for non-ecommerce events with rules', () => {
+      const rows: MeasurementPlanRow[] = [
+        {
+          eventName: 'login',
+          eventParameters: [
+            'method="google"',
+            'attempts=3',
+            'success=true',
+            'session_id=/^S\\d+$/',
+            'user_id'
+          ],
+          itemParameters: []
+        }
+      ];
+      const specs = measurementPlanToDataLayerSpecs(rows);
+      expect(specs).toEqual([
+        {
+          event: 'login',
+          method: 'google',
+          attempts: 3,
+          success: true,
+          session_id: '/^S\\d+$/',
+          user_id: '$user_id'
+        }
+      ]);
+    });
   });
 
   describe('getGa4MeasurementPlanTemplateRows()', () => {
@@ -466,7 +703,7 @@ describe('measurement-plan', () => {
     // https://developers.google.com/analytics/devguides/collection/ga4/reference/events?client_type=gtm
     it('lists the documented parameters of every non-ecommerce event', () => {
       const rows = getGa4MeasurementPlanTemplateRows().filter(
-        (row) => !(row.eventName in GA4_ECOMMERCE_EVENT_PARAMETERS)
+        (row) => !Object.hasOwn(GA4_ECOMMERCE_EVENT_PARAMETERS, row.eventName)
       );
       expect(
         Object.fromEntries(

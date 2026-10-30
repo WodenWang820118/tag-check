@@ -8,12 +8,15 @@ import {
 import { ProjectIoService } from '../../../infrastructure/os/project-io/project-io.service';
 import { JsonProjectExportService } from '../../../infrastructure/data-export/json/export/json-project-export.service';
 import { JsonProjectImportService } from '../../../infrastructure/data-export/json/import/json-project-import.service';
+import type { FixtureEnvelopeV1 } from '../../../infrastructure/data-export/interfaces/fixture-types';
+import { isProjectFolderSlug } from '../../../infrastructure/os/project-io/project-unzipper.service';
 import {
   writeFileSync,
   readFileSync,
   readdirSync,
   existsSync,
   mkdirSync,
+  mkdtempSync,
   createReadStream
 } from 'fs';
 import { FolderPathService } from '../../../infrastructure/os/path/folder-path/folder-path.service';
@@ -62,74 +65,70 @@ export class ProjectIoFacadeService {
         JSON.stringify(jsonEnvelope, null, 2),
         'utf-8'
       );
-    } catch (e) {
-      this.logger.error(
-        `Failed to generate JSON export for ${projectSlug}: ${(e as Error).message}`
+      await this.projectIoService.compressProject(
+        projectPath,
+        projectZipPath,
+        projectSlug,
+        [{ path: fixturePath, name: `${projectSlug}.fixture.json` }]
       );
-      throw e;
-    }
-
-    await this.projectIoService.compressProject(
-      projectPath,
-      projectZipPath,
-      projectSlug,
-      [{ path: fixturePath, name: `${projectSlug}.fixture.json` }]
-    );
-    if (!existsSync(projectZipPath)) {
-      // compressProject resolves once the zip is closed; guard anyway so
-      // that the stream below does not fail on a missing file.
-      this.logger.warn(`Zip not found after compression at ${projectZipPath}`);
-      writeFileSync(projectZipPath, '');
-    }
-    const fileStream = createReadStream(projectZipPath);
-    fileStream.on('error', (err) => {
-      this.logger.error(`Stream error reading zip: ${err.message}`);
-    });
-    fileStream.on('close', () => {
+      if (!existsSync(projectZipPath)) {
+        throw new Error(`Zip not found after compression at ${projectZipPath}`);
+      }
+      const fileStream = createReadStream(projectZipPath);
+      fileStream.on('error', (err) => {
+        this.logger.error(`Stream error reading zip: ${err.message}`);
+      });
+      fileStream.on('close', () => {
+        this.cleanupTempFolder(tempFolder);
+      });
+      return new StreamableFile(fileStream);
+    } catch (error) {
       this.cleanupTempFolder(tempFolder);
-    });
-    return new StreamableFile(fileStream);
+      throw error;
+    }
   }
 
   /**
-   * Extracts the zip into the projects folder, then imports its fixture
-   * into the database. A zip without a fixture (from before fixtures were
-   * exported) only restores the folder.
+   * Validates the fixture in staging, then replaces the project folder and
+   * imports its rows. The previous folder is kept until the row transaction
+   * commits and restored on failure. A zip without a fixture only restores
+   * the folder using the supplied slug.
    *
    * @returns The slug of the extracted project folder.
    * @throws BadRequestException when the fixture is not a valid export;
    * InternalServerErrorException when writing its rows fails. The rows are
-   * written in one transaction, so a failed import writes none, but the
-   * extracted folder stays.
+   * written in one transaction, so a failed import changes neither the rows
+   * nor the previous folder.
    */
   async importProject(
     projectSlug: string,
     zipFilePath: string,
     outputFolderPath: string
   ): Promise<string> {
-    // unzipProject resolves the final folder slug from the fixture name.
-    const finalSlug = await this.projectIoService.unzipProject(
+    let fixture: FixtureEnvelopeV1 | undefined;
+    return this.projectIoService.unzipProject(
       projectSlug,
       zipFilePath,
-      outputFolderPath
+      outputFolderPath,
+      {
+        validateStaged: (stagingDir) => {
+          const fixturePath = this.findFixture(stagingDir);
+          if (!fixturePath) {
+            if (!isProjectFolderSlug(projectSlug)) {
+              throw new BadRequestException(
+                `Invalid project slug '${projectSlug}'`
+              );
+            }
+            return projectSlug;
+          }
+          fixture = this.validateFixture(fixturePath);
+          return fixture.projectSlug;
+        },
+        afterReplace: async () => {
+          if (fixture) await this.importFixture(fixture);
+        }
+      }
     );
-
-    const rootProjectFolder =
-      await this.folderPathService.getRootProjectFolderPath();
-    const projectFolder = join(rootProjectFolder, finalSlug);
-    const fixturePath = this.findFixture(projectFolder);
-    if (!fixturePath) {
-      this.logger.warn(
-        `No JSON fixture found in project folder ${projectFolder}; skipping data import.`
-      );
-      return finalSlug;
-    }
-    this.logger.log(
-      `Using fixture file '${basename(fixturePath)}' for project import (extracted folder='${finalSlug}')`
-    );
-    await this.importFixture(fixturePath);
-    this.logger.log(`Imported JSON fixture for project ${finalSlug}`);
-    return finalSlug;
   }
 
   /** Deletes the project's folder; the caller deletes its rows. */
@@ -140,22 +139,12 @@ export class ProjectIoFacadeService {
   }
 
   /**
-   * The project folder's `*.fixture.json`. The folder slug may differ from
-   * the fixture's, so any name is accepted; with several, the first in
-   * alphabetical order wins.
+   * The staging folder's first `*.fixture.json` in alphabetical order.
    */
   private findFixture(projectFolder: string): string | null {
-    let fixtures: string[];
-    try {
-      fixtures = readdirSync(projectFolder)
-        .filter((entry) => entry.endsWith('.fixture.json'))
-        .sort((a, b) => a.localeCompare(b));
-    } catch (err) {
-      this.logger.error(
-        `Failed scanning for fixture in ${projectFolder}: ${(err as Error).message}`
-      );
-      return null;
-    }
+    const fixtures = readdirSync(projectFolder)
+      .filter((entry) => entry.endsWith('.fixture.json'))
+      .sort((a, b) => a.localeCompare(b));
     if (fixtures.length > 1) {
       this.logger.warn(
         `Multiple fixture files found in ${projectFolder}; using '${fixtures[0]}'`
@@ -164,11 +153,43 @@ export class ProjectIoFacadeService {
     return fixtures.length ? join(projectFolder, fixtures[0]) : null;
   }
 
-  private async importFixture(fixturePath: string): Promise<void> {
-    let payload: unknown;
+  private validateFixture(fixturePath: string): FixtureEnvelopeV1 {
     try {
-      payload = JSON.parse(readFileSync(fixturePath, 'utf-8'));
-      this.jsonImportService.validate(payload);
+      const payload: unknown = JSON.parse(readFileSync(fixturePath, 'utf-8'));
+      const fixture = this.jsonImportService.validate(payload);
+      if (!isProjectFolderSlug(fixture.projectSlug)) {
+        throw new Error(`Invalid projectSlug '${fixture.projectSlug}'`);
+      }
+      if (basename(fixturePath) !== `${fixture.projectSlug}.fixture.json`) {
+        throw new Error('Fixture filename does not match projectSlug');
+      }
+      if (
+        typeof fixture.entities !== 'object' ||
+        fixture.entities === null ||
+        Array.isArray(fixture.entities)
+      ) {
+        throw new Error('Invalid entities');
+      }
+      for (const rows of Object.values(fixture.entities)) {
+        if (
+          !Array.isArray(rows) ||
+          rows.some(
+            (row) => !row || typeof row !== 'object' || Array.isArray(row)
+          )
+        ) {
+          throw new Error('Invalid entity rows');
+        }
+      }
+      const projects = fixture.entities['ProjectEntity'];
+      if (
+        projects?.length !== 1 ||
+        projects[0]['projectSlug'] !== fixture.projectSlug
+      ) {
+        throw new Error(
+          'ProjectEntity must contain one project matching projectSlug'
+        );
+      }
+      return fixture;
     } catch (e) {
       this.logger.error(
         `Invalid JSON fixture at ${fixturePath}: ${(e as Error).message}`
@@ -177,11 +198,14 @@ export class ProjectIoFacadeService {
         `The project's data file is not a valid export: ${(e as Error).message}`
       );
     }
+  }
+
+  private async importFixture(fixture: FixtureEnvelopeV1): Promise<void> {
     try {
-      await this.jsonImportService.importProject(payload);
+      await this.jsonImportService.importProject(fixture);
     } catch (e) {
       this.logger.error(
-        `Failed to import JSON fixture at ${fixturePath}: ${(e as Error).message}`
+        `Failed to import JSON fixture for ${fixture.projectSlug}: ${(e as Error).message}`
       );
       throw new InternalServerErrorException(
         "Failed to import the project's data"
@@ -192,9 +216,8 @@ export class ProjectIoFacadeService {
   private async createTempFolder(): Promise<string> {
     const projectRootFolderPath =
       await this.folderPathService.getRootProjectFolderPath();
-    const tempFolder = join(projectRootFolderPath, 'temp');
-    mkdirSync(tempFolder, { recursive: true });
-    return tempFolder;
+    mkdirSync(projectRootFolderPath, { recursive: true });
+    return mkdtempSync(join(projectRootFolderPath, '_export_tmp_'));
   }
 
   private cleanupTempFolder(tempFolder: string) {

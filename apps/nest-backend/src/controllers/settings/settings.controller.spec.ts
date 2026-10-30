@@ -64,6 +64,37 @@ describe('SettingsController', () => {
     expect(result).toBe('au-updated');
   });
 
+  it.each([
+    '',
+    'example.com',
+    '/relative',
+    'ftp://example.com',
+    'javascript:alert(1)',
+    'https://'
+  ])(
+    'rejects a website URL that is not an absolute HTTP(S) URL: %j',
+    async (websiteUrl) => {
+      const { controller, projectFacadeRepositoryService } = build();
+      await expect(
+        controller.updateApplicationSettings('proj-1', { websiteUrl })
+      ).rejects.toMatchObject({ status: 400 });
+      expect(
+        projectFacadeRepositoryService.updateApplicationSettings
+      ).not.toHaveBeenCalled();
+    }
+  );
+
+  it.each(['https://example.com/shop', 'http://localhost:4200/'])(
+    'accepts and forwards the website URL %s',
+    async (websiteUrl) => {
+      const { controller, projectFacadeRepositoryService } = build();
+      await controller.updateApplicationSettings('proj-1', { websiteUrl });
+      expect(
+        projectFacadeRepositoryService.updateApplicationSettings
+      ).toHaveBeenCalledWith('proj-1', { websiteUrl });
+    }
+  );
+
   it('updateBrowserSettings forwards slug and partial settings to the facade', async () => {
     const { controller, projectFacadeRepositoryService } = build();
     const result = await controller.updateBrowserSettings('proj-1', {

@@ -8,6 +8,7 @@ import { QaRequestService } from '../api/qa-request/qa-request.service';
 import { SettingsService } from '../api/settings/settings.service';
 import { ProjectDataSourceService } from '../data-source/project-data-source.service';
 import { TestRunningFacadeService } from './test-running-facade.service';
+import { RunHeadlessService } from '../../../modules/project/services/run-headless/run-headless.service';
 
 /** Project settings as GET /settings/:projectSlug returns them. */
 function settingsJson(isAccompanyMode: boolean): ProjectSetting {
@@ -61,7 +62,10 @@ describe('TestRunningFacadeService.runTestForReport', () => {
     return TestBed.inject(TestRunningFacadeService);
   }
 
-  beforeEach(() => TestBed.resetTestingModule());
+  beforeEach(() => {
+    TestBed.resetTestingModule();
+    localStorage.clear();
+  });
 
   it('runs through GTM Preview headless when the run asks for it', async () => {
     const service = create(true);
@@ -81,7 +85,7 @@ describe('TestRunningFacadeService.runTestForReport', () => {
     expect(service.isRunningTest$()).toBe(false);
   });
 
-  it("uses the project's browser setting when the run does not choose", async () => {
+  it("uses the freshly loaded project's browser setting when the run does not choose", async () => {
     const service = create(true);
 
     await firstValueFrom(service.runTestForReport('evt', 'demo'));
@@ -92,6 +96,26 @@ describe('TestRunningFacadeService.runTestForReport', () => {
       expect.objectContaining({ headless: false })
     );
   });
+
+  it.each([true, false])(
+    'uses the Tests page choice for Run again without options (accompanied: %s)',
+    async (isAccompanyMode) => {
+      const service = create(isAccompanyMode);
+      const choice = TestBed.inject(RunHeadlessService);
+      choice.load('demo');
+      choice.set(true);
+      await firstValueFrom(service.runTestForReport('evt', 'demo'));
+      const run = isAccompanyMode
+        ? runInspectionViaGtm
+        : runDataLayerWithRequestCheck;
+      expect(run).toHaveBeenCalledWith(
+        'demo',
+        'evt',
+        expect.objectContaining({ headless: true })
+      );
+      localStorage.clear();
+    }
+  );
 
   it('opens the site directly when the project does not use accompanied mode', async () => {
     const service = create(false);

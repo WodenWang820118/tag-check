@@ -30,8 +30,30 @@
       <p data-testid="import-gtm-summary">
         Created {{ summary.created.length }} · Updated
         {{ summary.updated.length }} · Unchanged
-        {{ summary.unchanged.length }} · Skipped {{ summary.skipped.length }}
+        {{ summary.unchanged.length }} · Renamed {{ summary.renamed.length }} ·
+        Kept both {{ summary.keptBoth.length }} · Skipped
+        {{ summary.skipped.length }}
       </p>
+      @if (summary.renamed.length) {
+        <details>
+          <summary>Updated event names</summary>
+          <ul>
+            @for (name of summary.renamed; track name) {
+              <li>{{ name }}</li>
+            }
+          </ul>
+        </details>
+      }
+      @if (summary.keptBoth.length) {
+        <details>
+          <summary>Kept both</summary>
+          <ul>
+            @for (kept of summary.keptBoth; track kept.testName) {
+              <li>{{ kept.tagName }}: {{ kept.testName }}</li>
+            }
+          </ul>
+        </details>
+      }
       @if (summary.skipped.length) {
         <details>
           <summary>Skipped tags</summary>

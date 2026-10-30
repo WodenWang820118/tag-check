@@ -36,7 +36,8 @@ export class ReportTabFacade {
   /** Downloads the spreadsheet of the given test through the file-reports API. */
   shareSpreadsheet(
     projectSlug: string | undefined,
-    details: IReportDetails | undefined
+    details: IReportDetails | undefined,
+    runId?: number
   ) {
     if (!details) {
       this.openSnackBar('Spreadsheet not available for this run', 1800);
@@ -53,7 +54,7 @@ export class ReportTabFacade {
     }
 
     this.fileReportService
-      .downloadFileReports(projectSlug, [eventId])
+      .downloadFileReports(projectSlug, [eventId], runId)
       .pipe(take(1))
       .subscribe((response) => {
         if (response) {
@@ -67,7 +68,8 @@ export class ReportTabFacade {
   exportRecording(
     projectSlug: string | undefined,
     details: IReportDetails | undefined,
-    existingBlob: Blob | undefined
+    existingBlob: Blob | undefined,
+    runId?: number
   ) {
     const eventId = details?.eventId;
     const fileBase = this.buildFileBase(
@@ -90,7 +92,7 @@ export class ReportTabFacade {
     }
 
     this.videosService
-      .getVideo(projectSlug, eventId)
+      .getVideo(projectSlug, eventId, undefined, runId)
       .pipe(take(1))
       .subscribe({
         next: ({ blob }) => {
@@ -111,11 +113,12 @@ export class ReportTabFacade {
   exportEvent(
     projectSlug: string | undefined,
     details: IReportDetails | undefined,
-    existingBlob: Blob | undefined
+    existingBlob: Blob | undefined,
+    runId?: number
   ) {
     this.openSnackBar('Starting event export (XLSX + WEBM)', 1200);
-    this.shareSpreadsheet(projectSlug, details);
-    this.exportRecording(projectSlug, details, existingBlob);
+    this.shareSpreadsheet(projectSlug, details, runId);
+    this.exportRecording(projectSlug, details, existingBlob, runId);
   }
 
   private saveBlob(blob: Blob, fileName: string) {

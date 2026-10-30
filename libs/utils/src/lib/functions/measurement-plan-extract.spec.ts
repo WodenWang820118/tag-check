@@ -112,6 +112,144 @@ const variables = [
 ];
 
 describe('extractMeasurementPlan', () => {
+  it.each(['constructor', 'toString', 'valueOf'])(
+    'extracts the custom ecommerce event %s without inherited recommendations',
+    (eventName) => {
+      const result = extract([
+        eventTag('GA4 - custom', eventName, [], { sendEcommerceData: true })
+      ]);
+
+      expect(result.rows).toEqual([
+        {
+          eventName,
+          eventParameters: [],
+          itemParameters: [],
+          notes: [expect.stringContaining('list the parameters it holds')]
+        }
+      ]);
+      expect(result.skipped).toEqual([]);
+    }
+  );
+
+  it('skips Event trigger patterns that do not name a finite anchored event list', () => {
+    const patterns = [
+      'login',
+      'login|sign_up',
+      '(login|sign_up)',
+      '^login|sign_up$',
+      '^(login|sign_up)',
+      '(login|sign_up)$',
+      '^(login|sign_up$',
+      '^login|sign_up)$',
+      'login_.*',
+      '^(login|{{Unknown}})$'
+    ];
+    const negated = customEventTrigger(
+      'negated',
+      'negated',
+      'MATCH_REGEX',
+      '^login$'
+    );
+    negated.customEventFilter?.[0].parameter.push({
+      type: 'BOOLEAN',
+      key: 'negate',
+      value: 'true'
+    });
+    const caseInsensitive = customEventTrigger(
+      'case-insensitive',
+      'case-insensitive',
+      'MATCH_REGEX',
+      '^login$'
+    );
+    caseInsensitive.customEventFilter?.[0].parameter.push({
+      type: 'BOOLEAN',
+      key: 'ignore_case',
+      value: 'true'
+    });
+    const mixed = customEventTrigger('mixed', 'mixed', 'EQUALS', 'login');
+    mixed.customEventFilter?.push(
+      ...(customEventTrigger('dynamic', 'dynamic', 'MATCH_REGEX', 'login_.*')
+        .customEventFilter ?? [])
+    );
+    const triggers = [
+      ...patterns.map((pattern, index) =>
+        customEventTrigger(String(index), pattern, 'MATCH_REGEX', pattern)
+      ),
+      negated,
+      caseInsensitive,
+      mixed
+    ];
+    const result = extract(
+      [
+        eventTag('GA4 - dynamic', '{{Event}}', [], {
+          firingTriggerId: triggers.map((trigger) => trigger.triggerId ?? '')
+        })
+      ],
+      triggers
+    );
+
+    expect(result.rows).toEqual([]);
+    expect(result.skipped).toEqual(
+      triggers.map(
+        (trigger) =>
+          `Tag "GA4 - dynamic": the event name is {{Event}} and trigger "${trigger.name}" does not name its custom events; add them by hand.`
+      )
+    );
+  });
+
+  it('uses the intersection of finite Event conditions on the same trigger', () => {
+    const trigger = customEventTrigger(
+      '1',
+      'login or sign_up filtered to sign_up',
+      'MATCH_REGEX',
+      '^(login|sign_up)$'
+    );
+    trigger.customEventFilter?.push(
+      ...(customEventTrigger('2', 'sign_up', 'MATCH_REGEX', '^sign_up$')
+        .customEventFilter ?? [])
+    );
+    const result = extract(
+      [eventTag('GA4 - filtered', '{{Event}}', [], { firingTriggerId: ['1'] })],
+      [trigger]
+    );
+
+    expect(result.rows.map((row) => row.eventName)).toEqual(['sign_up']);
+    expect(result.skipped).toEqual([]);
+  });
+
+  it('reports skipped Event tags with no firing triggers', () => {
+    const result = extract([
+      eventTag('GA4 - missing triggers', '{{Event}}', []),
+      eventTag('GA4 - empty triggers', '{{Event}}', [], { firingTriggerId: [] })
+    ]);
+
+    expect(result.rows).toEqual([]);
+    expect(result.skipped).toEqual([
+      'Tag "GA4 - missing triggers": the event name is {{Event}} and it has no firing triggers; add its events by hand.',
+      'Tag "GA4 - empty triggers": the event name is {{Event}} and it has no firing triggers; add its events by hand.'
+    ]);
+  });
+
+  it('merges both tag parameter tables and notes conflicting values', () => {
+    const tag = eventTag('GA4 - login', 'login', [
+      ['method', '{{DLV - method}}']
+    ]);
+    tag.parameter.push({
+      type: 'LIST',
+      key: 'eventParameters',
+      list: [settingsRow('method', 'legacy'), settingsRow('source', 'site')]
+    });
+    const [row] = extract([tag], [], variables).rows;
+
+    expect(row.eventParameters).toEqual(['method', 'source']);
+    expect(row.notes).toContain(
+      'Parameter "method" has conflicting values in eventParameters and eventSettingsTable; kept eventSettingsTable value "{{DLV - method}}" instead of "legacy".'
+    );
+    expect(row.notes).not.toContainEqual(
+      expect.stringContaining('method = "legacy"')
+    );
+  });
+
   it("lists a GA4 event tag's event name and parameters", () => {
     const result = extract(
       [
@@ -290,6 +428,103 @@ describe('extractMeasurementPlan', () => {
         ecommerce: {
           value: '$value',
           items: [{ item_id: '$item_id', item_name: '$item_name' }]
+        }
+      }
+    ]);
+  });
+
+  it('extracts TagCheck rules from tag notes into plan cell syntax', () => {
+    const notes = [
+      'TagCheck rules:',
+      'currency = "TWD"',
+      'transaction_id ~ /^T\\d+$/',
+      'items.item_id ~ /^SKU-/'
+    ].join('\n');
+
+    const { rows } = extract(
+      [
+        eventTag(
+          'GA4 - purchase',
+          'purchase',
+          [
+            ['currency', '{{DLV - ecommerce.currency}}'],
+            ['value', '{{DLV - ecommerce.value}}'],
+            ['transaction_id', '{{DLV - ecommerce.transaction_id}}'],
+            ['items', '{{DLV - ecommerce.items}}']
+          ],
+          { notes }
+        )
+      ],
+      [],
+      [
+        dataLayerVariable('DLV - ecommerce.currency', 'ecommerce.currency'),
+        dataLayerVariable('DLV - ecommerce.value', 'ecommerce.value'),
+        dataLayerVariable(
+          'DLV - ecommerce.transaction_id',
+          'ecommerce.transaction_id'
+        ),
+        dataLayerVariable('DLV - ecommerce.items', 'ecommerce.items')
+      ]
+    );
+
+    expect(rows).toHaveLength(1);
+    expect(rows[0].eventName).toBe('purchase');
+    expect(rows[0].eventParameters).toEqual([
+      'currency=TWD',
+      'value',
+      'transaction_id=/^T\\d+$/'
+    ]);
+    expect(rows[0].itemParameters).toEqual(['item_id=/^SKU-/', 'item_name']);
+  });
+
+  it('round-trips rules through CSV export and plan parser into dataLayer specs', () => {
+    const notes = [
+      'TagCheck rules:',
+      'currency = "TWD"',
+      'value = 99.9',
+      'items.item_id ~ /^SKU-/'
+    ].join('\n');
+
+    const { rows } = extract(
+      [
+        eventTag(
+          'GA4 - add_to_cart',
+          'add_to_cart',
+          [
+            ['currency', '{{DLV - ecommerce.currency}}'],
+            ['value', '{{DLV - ecommerce.value}}'],
+            ['items', '{{DLV - ecommerce.items}}']
+          ],
+          { notes }
+        )
+      ],
+      [],
+      [
+        dataLayerVariable('DLV - ecommerce.currency', 'ecommerce.currency'),
+        dataLayerVariable('DLV - ecommerce.value', 'ecommerce.value'),
+        dataLayerVariable('DLV - ecommerce.items', 'ecommerce.items')
+      ]
+    );
+
+    const table = [
+      ['event_name', 'event_parameters', 'item_parameters', 'notes'],
+      ...rows.map((row) => [
+        row.eventName,
+        row.eventParameters.join(', '),
+        row.itemParameters.join(', '),
+        row.notes.join(' ')
+      ])
+    ];
+
+    const parsed = parseMeasurementPlanRows(table);
+    expect(parsed.issues).toEqual([]);
+    expect(measurementPlanToDataLayerSpecs(parsed.rows)).toEqual([
+      {
+        event: 'add_to_cart',
+        ecommerce: {
+          currency: 'TWD',
+          value: 99.9,
+          items: [{ item_id: '/^SKU-/', item_name: '$item_name' }]
         }
       }
     ]);

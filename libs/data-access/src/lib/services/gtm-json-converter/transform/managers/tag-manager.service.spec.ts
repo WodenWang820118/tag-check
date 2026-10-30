@@ -261,5 +261,55 @@ describe('TagManager', () => {
 
       expect(rows).toEqual([['user_id', '{{DLV - user.id}}']]);
     });
+
+    it('sets notes containing rules on the GA4 event tag while reading DLVs', () => {
+      const dataLayer: DataLayer = {
+        event: 'purchase',
+        paths: ['ecommerce.currency', 'ecommerce.transaction_id'],
+        notes: 'TagCheck rules:\ncurrency = "TWD"\ntransaction_id ~ /^T\\d+$/'
+      };
+      const result = service.getTags(
+        mockAccountId,
+        mockContainerId,
+        [dataLayer],
+        [{ name: 'purchase', triggerId: '7' }],
+        mockGoogleTagName,
+        mockMeasurementId,
+        'false'
+      );
+      const tag = result.find((t) => t.name === 'GA4 event - purchase');
+      expect(tag).toBeDefined();
+      expect(tag?.notes).toBe(
+        'TagCheck rules:\ncurrency = "TWD"\ntransaction_id ~ /^T\\d+$/'
+      );
+      const table = tag?.parameter.find((p) => p.key === 'eventSettingsTable');
+      const rows = getParameterListItems(table).map((row) => [
+        getParameterMapValue(row, 'parameter'),
+        getParameterMapValue(row, 'parameterValue')
+      ]);
+      expect(rows).toEqual([
+        ['currency', '{{DLV - ecommerce.currency}}'],
+        ['transaction_id', '{{DLV - ecommerce.transaction_id}}']
+      ]);
+    });
+
+    it('omits notes when the dataLayer has no rules recorded', () => {
+      const dataLayer: DataLayer = {
+        event: 'login',
+        paths: ['method']
+      };
+      const result = service.getTags(
+        mockAccountId,
+        mockContainerId,
+        [dataLayer],
+        [{ name: 'login', triggerId: '7' }],
+        mockGoogleTagName,
+        mockMeasurementId,
+        'false'
+      );
+      const tag = result.find((t) => t.name === 'GA4 event - login');
+      expect(tag).toBeDefined();
+      expect(tag?.notes).toBeUndefined();
+    });
   });
 });

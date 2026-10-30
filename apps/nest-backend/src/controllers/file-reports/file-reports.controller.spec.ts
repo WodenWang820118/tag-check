@@ -51,8 +51,32 @@ describe('FileReportsController', () => {
     ]);
     expect(projectFileReportService.downloadReportFiles).toHaveBeenCalledWith(
       'proj-1',
-      ['evt-1', 'evt-2']
+      ['evt-1', 'evt-2'],
+      undefined
     );
     expect(result).toBe('xlsx-buffer');
   });
+
+  it('forwards an optional run filter to the spreadsheet export', async () => {
+    const { controller, projectFileReportService } = build();
+    await controller.downloadReportFiles('proj-1', ['evt-1'], '5');
+    expect(projectFileReportService.downloadReportFiles).toHaveBeenCalledWith(
+      'proj-1',
+      ['evt-1'],
+      5
+    );
+  });
+
+  it.each(['abc', '', '0', '-1', '1.5'])(
+    'rejects an invalid spreadsheet run filter %j',
+    async (run) => {
+      const { controller, projectFileReportService } = build();
+      await expect(
+        controller.downloadReportFiles('proj-1', ['evt-1'], run)
+      ).rejects.toMatchObject({ status: 400 });
+      expect(
+        projectFileReportService.downloadReportFiles
+      ).not.toHaveBeenCalled();
+    }
+  );
 });

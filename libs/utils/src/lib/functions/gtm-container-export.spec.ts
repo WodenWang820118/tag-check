@@ -153,6 +153,64 @@ describe('resolveVariableReference', () => {
 });
 
 describe('getGa4EventParameterRows', () => {
+  it('keeps a named parameter whose value is an empty string', () => {
+    const tag: TagConfig = {
+      name: 'GA4 event - login',
+      type: 'gaawe',
+      accountId: '1',
+      containerId: '2',
+      parameter: [
+        {
+          type: 'LIST',
+          key: 'eventSettingsTable',
+          list: [settingsRow('method', ''), settingsRow('', 'ignored')]
+        }
+      ]
+    };
+
+    expect(getGa4EventParameterRows(tag, [])).toEqual([
+      { parameter: 'method', value: '' }
+    ]);
+  });
+
+  it.each([false, true])(
+    'merges both tag tables by name with eventSettingsTable taking precedence (reversed: %s)',
+    (reversed) => {
+      const tables = [
+        {
+          type: 'LIST',
+          key: 'eventParameters',
+          list: [
+            settingsRow('method', 'legacy'),
+            settingsRow('constructor', 'custom')
+          ]
+        },
+        {
+          type: 'LIST',
+          key: 'eventSettingsTable',
+          list: [
+            settingsRow('method', ''),
+            settingsRow('source', 'site'),
+            settingsRow('constructor', 'custom')
+          ]
+        }
+      ];
+      const tag: TagConfig = {
+        name: 'GA4 event - login',
+        type: 'gaawe',
+        accountId: '1',
+        containerId: '2',
+        parameter: reversed ? [...tables].reverse() : tables
+      };
+
+      expect(getGa4EventParameterRows(tag, [])).toEqual([
+        { parameter: 'method', value: '' },
+        { parameter: 'constructor', value: 'custom' },
+        { parameter: 'source', value: 'site' }
+      ]);
+    }
+  );
+
   it('reads the tag table and the referenced Event Settings variable', () => {
     const tag = {
       name: 'GA4 event - purchase',

@@ -4,16 +4,14 @@ import {
   existsSync,
   mkdtempSync,
   readdirSync,
-  renameSync,
   rmSync,
   mkdirSync,
-  ReadStream,
-  copyFileSync,
-  Dirent
+  ReadStream
 } from 'fs';
 import { Writable } from 'stream';
 import * as unzipper from 'unzipper';
 import { join } from 'path';
+import { renameWithRetry } from './rename-with-retry';
 
 /**
  * A slug that names exactly one folder: not empty, not `.` or `..`, and
@@ -22,30 +20,44 @@ import { join } from 'path';
 // oxlint-disable-next-line no-control-regex -- control characters are what it rejects
 const SAFE_FOLDER_SLUG = /^(?!\.{1,2}$)[^<>:"/\\|?*\x00-\x1f]+$/;
 
+export function isProjectFolderSlug(value: unknown): value is string {
+  return typeof value === 'string' && SAFE_FOLDER_SLUG.test(value);
+}
+
+export interface ProjectUnzipOptions {
+  overwriteExisting?: boolean;
+  validateStaged?: (stagingDir: string) => string;
+  afterReplace?: () => Promise<void>;
+}
+
 /**
  * Extracts a project zip into the projects folder. The zip is extracted to
  * a staging folder first, so a failed extraction leaves existing projects
- * untouched; the staging folder is then moved to `<output>/<slug>`.
+ * untouched. Replacement keeps the previous folder until its callback
+ * succeeds, and restores it if publication or the callback fails.
  */
 @Injectable()
 export class ProjectUnzipper {
   private readonly logger = new Logger(ProjectUnzipper.name);
+  private publication: Promise<void> = Promise.resolve();
 
   /**
    * @param providedSlug - The slug to use when the zip has no fixture.
    * @param options.overwriteExisting - Replace an existing folder of the
    * same slug (the default) rather than suffixing the slug.
+   * @param options.validateStaged - Validate extracted data before touching
+   * the destination and return its canonical slug.
+   * @param options.afterReplace - Commit associated data while the previous
+   * folder is still available for rollback.
    * @returns The slug of the folder the project was extracted to.
-   * @throws When extraction fails, or when the resolved slug does not name
-   * a single folder, before anything outside the staging folder is touched.
+   * @throws When extraction, validation, replacement or its callback fails.
    */
   async unzip(
     providedSlug: string,
     zipFilePath: string,
     outputFolderPath: string,
-    options: { overwriteExisting?: boolean } = {}
+    options: ProjectUnzipOptions = {}
   ): Promise<string> {
-    const { overwriteExisting = true } = options;
     let stagingDir: string | null = null;
     let readStream: ReadStream | null = null;
     let extractStream: Writable | null = null;
@@ -70,12 +82,30 @@ export class ProjectUnzipper {
         );
       });
 
-      return this.finalizeExtraction({
-        providedSlug,
-        stagingDir,
-        outputFolderPath,
-        overwriteExisting
+      const baseSlug = options.validateStaged
+        ? options.validateStaged(stagingDir)
+        : (this.inferSlugFromFixture(stagingDir) ?? providedSlug);
+      if (!isProjectFolderSlug(baseSlug)) {
+        throw new Error(`Invalid project slug '${baseSlug}' in the zip`);
+      }
+      // Keep publication and its callback together so an overlapping failure
+      // cannot restore a backup over another import.
+      const previous = this.publication;
+      let release: () => void = () => undefined;
+      this.publication = new Promise<void>((resolve) => {
+        release = resolve;
       });
+      await previous;
+      try {
+        return await this.finalizeExtraction(
+          baseSlug,
+          stagingDir,
+          outputFolderPath,
+          options
+        );
+      } finally {
+        release();
+      }
     } finally {
       if (readStream) {
         try {
@@ -95,74 +125,61 @@ export class ProjectUnzipper {
     }
   }
 
-  private finalizeExtraction(args: {
-    providedSlug: string;
-    stagingDir: string;
-    outputFolderPath: string;
-    overwriteExisting: boolean;
-  }): string {
-    const { providedSlug, stagingDir, outputFolderPath, overwriteExisting } =
-      args;
-    const inferredSlug = this.inferSlugFromFixture(stagingDir);
-    const baseSlug = inferredSlug || providedSlug;
-    // The slug comes from a file name in the zip or from the upload's name.
-    // An empty one, '.' or '..' would make the overwrite below delete the
-    // projects folder itself or its parent.
-    if (!SAFE_FOLDER_SLUG.test(baseSlug)) {
-      throw new Error(`Invalid project slug '${baseSlug}' in the zip`);
-    }
+  private async finalizeExtraction(
+    baseSlug: string,
+    stagingDir: string,
+    outputFolderPath: string,
+    options: ProjectUnzipOptions
+  ): Promise<string> {
+    const { overwriteExisting = true, afterReplace } = options;
     const finalSlug = overwriteExisting
       ? baseSlug
       : this.ensureUniqueFolderSlug(baseSlug, outputFolderPath);
     const finalPath = join(outputFolderPath, finalSlug);
-    this.prepareFinalDirectory(finalPath, finalSlug, overwriteExisting);
-    this.moveOrCopy(stagingDir, finalPath);
+    let backupDir: string | undefined;
+    let backupPath: string | undefined;
+    let published = false;
+    try {
+      if (existsSync(finalPath)) {
+        if (!overwriteExisting)
+          throw new Error(`Target folder already exists: ${finalPath}`);
+        backupDir = mkdtempSync(join(outputFolderPath, '_import_backup_'));
+        const previousPath = join(backupDir, 'project');
+        await renameWithRetry(finalPath, previousPath);
+        backupPath = previousPath;
+      }
+      // Staging and backup live under the output root, so rename is on the
+      // same filesystem. A failed rename must not fall back to merging files.
+      await renameWithRetry(stagingDir, finalPath);
+      published = true;
+      await afterReplace?.();
+    } catch (error) {
+      try {
+        if (published) await renameWithRetry(finalPath, stagingDir);
+        if (backupPath) await renameWithRetry(backupPath, finalPath);
+      } catch (restoreError) {
+        throw new AggregateError(
+          [error, restoreError],
+          `Failed to restore project '${finalSlug}'; previous files remain at '${backupPath}'`
+        );
+      }
+      if (backupDir) this.cleanupDirectory(backupDir);
+      throw error;
+    }
+    // The callback has committed. Cleanup failure must not roll back files
+    // after the database has already accepted the new project.
+    if (backupDir) this.cleanupDirectory(backupDir);
     this.logger.log(
       `Extraction complete. baseSlug='${baseSlug}' finalSlug='${finalSlug}' path='${finalPath}' overwrite=${overwriteExisting}`
     );
     return finalSlug;
   }
 
-  private prepareFinalDirectory(
-    finalPath: string,
-    finalSlug: string,
-    overwriteExisting: boolean
-  ) {
-    if (existsSync(finalPath)) {
-      if (overwriteExisting) {
-        this.logger.log(
-          `Overwriting existing folder for slug='${finalSlug}' at path='${finalPath}'`
-        );
-        try {
-          rmSync(finalPath, { recursive: true, force: true });
-        } catch (e) {
-          const msg = e instanceof Error ? e.message : String(e);
-          this.logger.warn(
-            `Failed initial removal of existing folder (${msg}); attempting continue.`
-          );
-        }
-      } else {
-        throw new Error(
-          `Unexpected: target folder already exists: ${finalPath}`
-        );
-      }
-    }
-  }
-
-  private moveOrCopy(stagingDir: string, finalPath: string) {
+  private cleanupDirectory(path: string) {
     try {
-      renameSync(stagingDir, finalPath);
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
-      this.logger.warn(
-        `Primary rename failed (${msg}); attempting manual copy fallback.`
-      );
-      this.copyDirRecursive(stagingDir, finalPath);
-      try {
-        rmSync(stagingDir, { recursive: true, force: true });
-      } catch {
-        /* ignore */
-      }
+      rmSync(path, { recursive: true, force: true });
+    } catch (error) {
+      this.logger.warn(`Failed to clean up '${path}': ${String(error)}`);
     }
   }
 
@@ -214,21 +231,5 @@ export class ProjectUnzipper {
       }
     }
     return candidate;
-  }
-
-  private copyDirRecursive(src: string, dest: string) {
-    if (!existsSync(dest)) mkdirSync(dest, { recursive: true });
-    const entries: Dirent[] = readdirSync(src, {
-      withFileTypes: true
-    }) as unknown as Dirent[];
-    for (const entry of entries) {
-      const srcPath = join(src, entry.name);
-      const destPath = join(dest, entry.name);
-      if (entry.isDirectory()) {
-        this.copyDirRecursive(srcPath, destPath);
-      } else if (entry.isFile()) {
-        copyFileSync(srcPath, destPath);
-      }
-    }
   }
 }

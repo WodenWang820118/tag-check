@@ -24,9 +24,13 @@
 
 在 **Tests** 頁面點選 **Add tests**（+）。共有三種方式：
 
-- **Import GTM JSON**（建議）：在 Tag Manager 中前往 **Admin** > **Export container**，然後上傳該檔案。TagCheck 會為每個 GA4 事件代碼建立一個測試。每份規格會列出代碼從資料層變數讀取的參數，這些鍵必須存在於推送中。TagCheck 無法轉換成測試的代碼會列在 **Skipped tags** 之下。
+- **Import GTM JSON**（建議）：在 Tag Manager 中前往 **Admin** > **Export container**，然後上傳該檔案。TagCheck 會為每個 GA4 事件代碼建立一個測試。每份規格會列出代碼從資料層變數讀取的參數，這些鍵必須存在於推送中。TagCheck 無法轉換成測試的代碼會列在 **Skipped tags** 之下。如果代碼名稱已對應一個測試，但事件名稱已變更，TagCheck 會詢問要更新該測試，還是兩者都保留。
 - **Import GA4 events**：上傳或貼上你規劃推送的事件（可以是單一 JSON 物件或陣列），然後點選 **Create tests**。
 - **Create a test manually**：在編輯器中撰寫規格並貼上錄製，然後點選 **Submit**。
+
+在專案的 **TagBuild** 頁面上，**Import into this project** 會把剛建置的容器加入為測試，並進行與 **Import GTM JSON** 相同的衝突檢查。
+
+該頁面的 Tag Extract 在專案已經匯入容器時提供 **Use this project's container**，直接讀取該容器，而不再要求重新上傳。
 
 ## 4. 錄製旅程
 
