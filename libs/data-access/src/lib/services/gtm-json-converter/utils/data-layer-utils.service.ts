@@ -84,6 +84,10 @@ export class DataLayerUtils {
   }
 }
 
+/**
+ * Keep the first rule for each name so repeated event specs preserve their
+ * original expectation.
+ */
 function mergeRules(
   existing: ParameterRule[],
   incoming: ParameterRule[]

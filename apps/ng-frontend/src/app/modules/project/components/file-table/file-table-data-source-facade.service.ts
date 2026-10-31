@@ -11,6 +11,11 @@ import { MatSort } from '@angular/material/sort';
 import { FileTableDataSourceModelService } from '../../services/file-table-data-source-model/file-table-data-source-model.service';
 import { SelectionModel } from '@angular/cdk/collections';
 import { runFilterPredicate, toRunFilter } from './run-filter';
+import {
+  getCurrentPageRows,
+  togglePageSelection,
+  toggleRowSelection
+} from '../../../../shared/services/utils/table-selection';
 
 /**
  * The Reports page's runs: one row per run, newest first. The toolbar
@@ -156,42 +161,10 @@ export class FileTableDataSourceFacadeService {
   }
 
   toggleAllRows() {
-    // Toggle selection for only the rows displayed on the current page
     const ds = this.fileTableDataSourceModelService.dataSource();
     const sel = this.fileTableDataSourceModelService.selection();
-
-    // Derive the working set: prefer filteredData if present, else all data
-    // Note: MatTableDataSource exposes filteredData publicly
-    const working =
-      (ds as unknown as { filteredData?: Jsonified<RunSummary>[] })
-        .filteredData ?? ds.data;
-    // Apply sorting consistent with the table if available
-    const sorted = ds.sort ? ds.sortData(working, ds.sort) : working;
-
-    const pageIndex = ds.paginator?.pageIndex ?? 0;
-    const pageSize = ds.paginator?.pageSize ?? sorted.length;
-    const start = pageIndex * pageSize;
-    const end = Math.min(start + pageSize, sorted.length);
-    const pageRows = sorted.slice(start, end);
-
-    // Determine if all rows on the current page are already selected
-    const allPageSelected = pageRows.every((r) => sel.isSelected(r));
-
-    // Build next selection set immutably
-    let nextSelected: Jsonified<RunSummary>[];
-    if (allPageSelected) {
-      // Deselect only the current page rows
-      const pageSet = new Set(pageRows);
-      nextSelected = sel.selected.filter((r) => !pageSet.has(r));
-    } else {
-      // Select union of existing selection and current page rows
-      const set = new Set(sel.selected);
-      for (const r of pageRows) {
-        set.add(r);
-      }
-      nextSelected = Array.from(set);
-    }
-
+    const pageRows = getCurrentPageRows(ds);
+    const nextSelected = togglePageSelection(sel.selected, pageRows);
     const newModel = new SelectionModel<Jsonified<RunSummary>>(
       true,
       nextSelected
@@ -201,11 +174,7 @@ export class FileTableDataSourceFacadeService {
 
   toggleRow(row: Jsonified<RunSummary>) {
     const prevModel = this.fileTableDataSourceModelService.selection();
-    const prevSelected = prevModel.selected;
-    const isSelected = prevModel.isSelected(row);
-    const newSelected = isSelected
-      ? prevSelected.filter((r) => r !== row)
-      : [...prevSelected, row];
+    const newSelected = toggleRowSelection(prevModel.selected, row);
     const newModel = new SelectionModel<Jsonified<RunSummary>>(
       true,
       newSelected
@@ -234,16 +203,7 @@ export class FileTableDataSourceFacadeService {
   get isAllSelected(): boolean {
     const ds = this.fileTableDataSourceModelService.dataSource();
     const sel = this.fileTableDataSourceModelService.selection();
-
-    const working =
-      (ds as unknown as { filteredData?: Jsonified<RunSummary>[] })
-        .filteredData ?? ds.data;
-    const sorted = ds.sort ? ds.sortData(working, ds.sort) : working;
-    const pageIndex = ds.paginator?.pageIndex ?? 0;
-    const pageSize = ds.paginator?.pageSize ?? sorted.length;
-    const start = pageIndex * pageSize;
-    const end = Math.min(start + pageSize, sorted.length);
-    const pageRows = sorted.slice(start, end);
+    const pageRows = getCurrentPageRows(ds);
     return pageRows.length > 0 && pageRows.every((r) => sel.isSelected(r));
   }
 }

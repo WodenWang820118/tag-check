@@ -16,6 +16,10 @@ import { ImportRowProcessorService } from './import-row-processor.service';
 import { ImportTransactionService } from './import-transaction.service';
 import { SinglePerParentUpsertService } from './single-per-parent-upsert.service';
 
+/**
+ * Keep import helpers under one provider owner so import phases share the same
+ * ID registries.
+ */
 @Module({
   providers: [
     TopologicalSorterService,

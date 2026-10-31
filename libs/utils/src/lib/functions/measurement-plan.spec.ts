@@ -643,6 +643,131 @@ describe('measurement-plan', () => {
         }
       ]);
     });
+
+    it('encodes already-prefixed names, boolean false, and absent/empty flag patterns for root, ecommerce, and item parameters', () => {
+      const rows: MeasurementPlanRow[] = [
+        {
+          eventName: 'login',
+          eventParameters: [],
+          itemParameters: [],
+          eventRules: [
+            { kind: 'equals', name: 'is_guest', value: false },
+            { kind: 'pattern', name: 'session_id', pattern: '^S\\d+$' },
+            {
+              kind: 'pattern',
+              name: 'query_code',
+              pattern: '^[a-z]+$',
+              flags: ''
+            },
+            { kind: 'any', name: '$existing_token' }
+          ]
+        },
+        {
+          eventName: 'purchase',
+          eventParameters: [],
+          itemParameters: [],
+          eventRules: [
+            { kind: 'equals', name: 'tax_exempt', value: false },
+            { kind: 'pattern', name: 'transaction_id', pattern: '^T\\d+$' },
+            {
+              kind: 'pattern',
+              name: 'promo_code',
+              pattern: '^SALE$',
+              flags: ''
+            },
+            { kind: 'any', name: '$checkout_id' }
+          ],
+          itemRules: [
+            { kind: 'equals', name: 'is_discounted', value: false },
+            { kind: 'pattern', name: 'item_id', pattern: '^SKU-\\d+$' },
+            { kind: 'pattern', name: 'variant', pattern: '^RED$', flags: '' },
+            { kind: 'any', name: '$item_ref' }
+          ]
+        }
+      ];
+
+      const specs = measurementPlanToDataLayerSpecs(rows);
+
+      expect(specs).toEqual([
+        {
+          event: 'login',
+          is_guest: false,
+          session_id: '/^S\\d+$/',
+          query_code: '/^[a-z]+$/',
+          $existing_token: '$existing_token'
+        },
+        {
+          event: 'purchase',
+          ecommerce: {
+            tax_exempt: false,
+            transaction_id: '/^T\\d+$/',
+            promo_code: '/^SALE$/',
+            $checkout_id: '$checkout_id',
+            items: [
+              {
+                is_discounted: false,
+                item_id: '/^SKU-\\d+$/',
+                variant: '/^RED$/',
+                $item_ref: '$item_ref'
+              }
+            ]
+          }
+        }
+      ]);
+    });
+
+    it('converts string-based parameters with boolean false, absent flags, and prefixed names', () => {
+      const rows: MeasurementPlanRow[] = [
+        {
+          eventName: 'login',
+          eventParameters: [
+            'is_guest=false',
+            'session_id=/^S\\d+$/',
+            '$existing_token'
+          ],
+          itemParameters: []
+        },
+        {
+          eventName: 'purchase',
+          eventParameters: [
+            'tax_exempt=false',
+            'transaction_id=/^T\\d+$/',
+            '$checkout_id'
+          ],
+          itemParameters: [
+            'is_discounted=false',
+            'item_id=/^SKU-\\d+$/',
+            '$item_ref'
+          ]
+        }
+      ];
+
+      const specs = measurementPlanToDataLayerSpecs(rows);
+
+      expect(specs).toEqual([
+        {
+          event: 'login',
+          is_guest: false,
+          session_id: '/^S\\d+$/',
+          $existing_token: '$existing_token'
+        },
+        {
+          event: 'purchase',
+          ecommerce: {
+            tax_exempt: false,
+            transaction_id: '/^T\\d+$/',
+            $checkout_id: '$checkout_id',
+            items: [
+              {
+                is_discounted: false,
+                item_id: '/^SKU-\\d+$/',
+                $item_ref: '$item_ref'
+              }
+            ]
+          }
+        }
+      ]);
+    });
   });
 
   describe('getGa4MeasurementPlanTemplateRows()', () => {

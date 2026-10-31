@@ -154,10 +154,18 @@ export class EditorService {
     }
   }
 
+  /**
+   * Spec documents require an event name so valid JSON alone cannot enable an
+   * unusable test spec.
+   */
   hasSyntaxError(content: string, extension?: EditorExtension): boolean {
     return this.checkSyntax(content, extension);
   }
 
+  /**
+   * Keep per-editor errors separate so editing one document does not erase
+   * another editor’s validation state.
+   */
   isEditorSyntaxError(extension: EditorExtension) {
     return EditorView.updateListener.of((update) => {
       if (update.docChanged) {
