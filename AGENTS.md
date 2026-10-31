@@ -103,6 +103,19 @@ module that provides any other: a second provider creates a second instance.
   returns (dates are strings), not a hand-built object cast to the type. A
   mapper once read a nested field the API never sent, and its specs still
   passed.
+- Angular code keeps state in signals and forms in Signal Forms
+  (`@angular/forms/signals`). Read route data with `toSignal` and await
+  one-shot requests with `firstValueFrom`. After the await, return early
+  when `DestroyRef.destroyed` is true, as `takeUntilDestroyed` did. RxJS
+  stays where the code is a stream or needs its operators:
+  - HttpClient API services and CDK `DataSource.connect()`;
+  - SSE progress events, router events, and polling;
+  - flows that order or cancel requests, such as the report table's
+    effects facade.
+
+  A `[formField]` element cannot take a `readonly` attribute (use
+  `readonly()` in the schema). `(ngSubmit)` fires only with
+  `FormsModule` or `ReactiveFormsModule`, so Signal Forms use `(submit)`.
 
 ## Pitfalls
 
