@@ -75,6 +75,9 @@
         "development": {
           "buildTarget": "ng-gtm-sample:build:development"
         }
+      },
+      "readyWhen": {
+        "signal": true
       }
     },
     "extract-i18n": {
@@ -134,16 +137,16 @@
     "serve-static": {
       "continuous": true,
       "executor": "@nx/web:file-server",
+      "readyWhen": {
+        "signal": true
+      },
+      "dependsOn": ["build"],
       "options": {
         "buildTarget": "ng-gtm-sample:build",
         "port": 4200,
         "staticFilePath": "dist/apps/ng-gtm-sample/browser",
         "spa": false
-      },
-      "readyWhen": {
-        "signal": true
-      },
-      "dependsOn": ["build"]
+      }
     }
   }
 }

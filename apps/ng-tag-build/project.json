@@ -4,7 +4,6 @@
   "projectType": "application",
   "prefix": "app",
   "sourceRoot": "apps/ng-tag-build/src",
-  "tags": ["scope:frontend", "type:app"],
   "i18n": {
     "sourceLocale": {
       "code": "en-US",
@@ -25,11 +24,13 @@
       }
     }
   },
+  "tags": ["scope:frontend", "type:app"],
   "targets": {
     "typecheck-spec": {},
     "build": {
       "executor": "@angular-devkit/build-angular:application",
       "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
       "options": {
         "outputPath": "dist/apps/ng-tag-build",
         "index": "apps/ng-tag-build/src/index.html",
@@ -94,11 +95,11 @@
           "extractLicenses": false,
           "sourceMap": true
         }
-      },
-      "defaultConfiguration": "production"
+      }
     },
     "serve": {
       "executor": "@angular-devkit/build-angular:dev-server",
+      "defaultConfiguration": "development",
       "configurations": {
         "zh-Hant": {
           "buildTarget": "ng-tag-build:build:zh-Hant"
@@ -116,7 +117,9 @@
           "buildTarget": "ng-tag-build:build:development"
         }
       },
-      "defaultConfiguration": "development"
+      "readyWhen": {
+        "signal": true
+      }
     },
     "test": {
       "executor": "@analogjs/vitest-angular:test",

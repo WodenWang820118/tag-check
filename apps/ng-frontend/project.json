@@ -162,6 +162,9 @@
         "staging": {
           "buildTarget": "ng-frontend:build:staging"
         }
+      },
+      "readyWhen": {
+        "signal": true
       }
     },
     "mock": {
@@ -177,6 +180,9 @@
             }
           ]
         }
+      },
+      "readyWhen": {
+        "signal": true
       }
     },
     "staging": {
@@ -192,6 +198,9 @@
             }
           ]
         }
+      },
+      "readyWhen": {
+        "signal": true
       }
     },
     "extract-i18n": {
@@ -223,6 +232,10 @@
     "storybook": {
       "executor": "@storybook/angular:start-storybook",
       "continuous": true,
+      "readyWhen": {
+        "port": "{env.SBCONFIG_PORT ?? options.port ?? 9009}",
+        "host": "{env.SBCONFIG_HOSTNAME ?? options.host ?? localhost}"
+      },
       "options": {
         "port": 4400,
         "configDir": "apps/ng-frontend/.storybook",
@@ -236,10 +249,6 @@
         "ci": {
           "quiet": true
         }
-      },
-      "readyWhen": {
-        "port": "{env.SBCONFIG_PORT ?? options.port ?? 9009}",
-        "host": "{env.SBCONFIG_HOSTNAME ?? options.host ?? localhost}"
       }
     },
     "build-storybook": {
