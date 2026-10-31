@@ -69,7 +69,7 @@
                 selectId="persons"
                 class="w-full"
                 data-testid="travelers"
-                [formControl]="numberOfPersonsControl"
+                [formField]="numberOfPersonsControl"
               >
                 @for (option of personOptions; track option.value) {
                   <option hlmNativeSelectOption [value]="option.value">

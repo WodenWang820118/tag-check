@@ -67,7 +67,7 @@ describe('AddDataComponent', () => {
   }
 
   function fillValidForm(component: AddDataComponent) {
-    component.destinationForm.setValue({
+    component.destinationModel.set({
       country: 'Japan',
       city: 'Tokyo',
       title: 'Tokyo Lights',
@@ -93,6 +93,8 @@ describe('AddDataComponent', () => {
     expect(component.uploadState()).toBe('error');
     expect(component.uploadMessage()).toContain('Please complete');
     expect(uploadService.upload).not.toHaveBeenCalled();
+    expect(component.destinationForm().invalid()).toBe(true);
+    expect(component.hasError('country')).toBe(true);
   });
 
   it('blocks submission when a valid form is missing one of the required image files', () => {
@@ -147,8 +149,9 @@ describe('AddDataComponent', () => {
     expect(component.uploadMessage()).toContain(
       'Destination created successfully'
     );
-    expect(component.destinationForm.getRawValue().country).toBeNull();
-    expect(component.destinationForm.getRawValue().price).toBeNull();
+    expect(component.destinationForm().value().country).toBe('');
+    expect(component.destinationForm().value().price).toBe('');
+    expect(component.destinationForm().touched()).toBe(false);
     expect(component.selectedFiles()).toEqual({
       imageBig: null,
       image1: null,
@@ -171,5 +174,17 @@ describe('AddDataComponent', () => {
 
     expect(component.uploadState()).toBe('error');
     expect(component.uploadMessage()).toContain('could not be created');
+  });
+
+  it('loads countries from CountriesDataService signal', () => {
+    const fixture = createComponent();
+    const component = fixture.componentInstance;
+
+    expect(component.countries).toEqual([
+      {
+        label: 'Japan',
+        value: 'Japan'
+      }
+    ]);
   });
 });

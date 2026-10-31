@@ -1,25 +1,39 @@
-import { computed, inject, Injectable, signal } from '@angular/core';
-import { FormBuilder } from '@angular/forms';
+import { computed, Injectable, signal } from '@angular/core';
+import { form } from '@angular/forms/signals';
 import { AnalyticsService } from '../analytics/analytics.service';
 import { OrderService } from '../order/order.service';
+
+export interface ShippingFormModel {
+  name: string;
+  address: string;
+  zip: string;
+  city: string;
+}
+
+export interface PaymentFormModel {
+  cardNum: string;
+  expiration: string;
+  security: string;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class CheckoutFormManagerService {
-  private readonly fb = inject(FormBuilder);
-  shippingForm = this.fb.group({
-    name: [''],
-    address: [''],
-    zip: [''],
-    city: ['']
+  readonly shippingModel = signal<ShippingFormModel>({
+    name: '',
+    address: '',
+    zip: '',
+    city: ''
   });
+  readonly shippingForm = form(this.shippingModel);
 
-  paymentForm = this.fb.group({
-    cardNum: [''],
-    expiration: [''],
-    security: ['']
+  readonly paymentModel = signal<PaymentFormModel>({
+    cardNum: '',
+    expiration: '',
+    security: ''
   });
+  readonly paymentForm = form(this.paymentModel);
 
   isShippingFormSubmitted = signal<boolean>(false);
   isPaymentFormSubmitted = signal<boolean>(false);

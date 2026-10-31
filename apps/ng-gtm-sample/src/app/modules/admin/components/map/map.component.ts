@@ -12,7 +12,7 @@ import am5geodata_worldLow from '@amcharts/amcharts5-geodata/worldLow';
 import am5themes_Animated from '@amcharts/amcharts5/themes/Animated';
 import am5themes_Dark from '@amcharts/amcharts5/themes/Dark';
 import { FirestoreDestinationPipelineService } from '../../../../shared/services/firestore-destination-pipeline/firestore-destination-pipeline.service';
-import { take, tap } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { Destination } from '../../../../shared/models/destination.model';
 
 // Enhancement: Add a refresh button to re-fetch latest data from Firestore
@@ -54,26 +54,21 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     private readonly firestoreDestinationPipelineService: FirestoreDestinationPipelineService
   ) {}
 
-  ngAfterViewInit(): void {
-    this.firestoreDestinationPipelineService
-      .getAllDestinationsData()
-      .pipe(
-        take(1),
-        tap((data) => {
-          if (data) {
-            this.destinations = data;
-            const geoJsonData = this.destinations.map((destination) =>
-              this.transformDestinationToGeoJson(destination)
-            );
-            const geoJsonFeatureData: GeoJSON.GeoJSON = {
-              type: 'FeatureCollection',
-              features: geoJsonData
-            };
-            this.initializeMap(geoJsonFeatureData);
-          }
-        })
-      )
-      .subscribe();
+  async ngAfterViewInit(): Promise<void> {
+    const data = await firstValueFrom(
+      this.firestoreDestinationPipelineService.getAllDestinationsData()
+    );
+    if (data) {
+      this.destinations = data;
+      const geoJsonData = this.destinations.map((destination) =>
+        this.transformDestinationToGeoJson(destination)
+      );
+      const geoJsonFeatureData: GeoJSON.GeoJSON = {
+        type: 'FeatureCollection',
+        features: geoJsonData
+      };
+      this.initializeMap(geoJsonFeatureData);
+    }
   }
 
   transformDestinationToGeoJson(

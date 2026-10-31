@@ -1,5 +1,5 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { FormField } from '@angular/forms/signals';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideCheck, lucideWallet } from '@ng-icons/lucide';
 import { HlmButton } from '@spartan-ng/helm/button';
@@ -12,8 +12,7 @@ import { NavigationService } from '../../../../shared/services/navigation/naviga
   selector: 'app-payment-form',
   standalone: true,
   imports: [
-    ReactiveFormsModule,
-    FormsModule,
+    FormField,
     HlmButton,
     HlmInput,
     HlmLabel,
@@ -38,7 +37,7 @@ import { NavigationService } from '../../../../shared/services/navigation/naviga
           </p>
         </div>
 
-        <form [formGroup]="paymentForm" class="space-y-4">
+        <form class="space-y-4">
           <div class="grid gap-4 md:grid-cols-2">
             <div class="space-y-2 md:col-span-2">
               <label
@@ -50,7 +49,7 @@ import { NavigationService } from '../../../../shared/services/navigation/naviga
               </label>
               <input
                 hlmInput
-                formControlName="cardNum"
+                [formField]="paymentForm.cardNum"
                 id="cardNum"
                 class="w-full bg-white"
                 data-testid="payment-cardNum"
@@ -66,7 +65,7 @@ import { NavigationService } from '../../../../shared/services/navigation/naviga
               </label>
               <input
                 hlmInput
-                formControlName="expiration"
+                [formField]="paymentForm.expiration"
                 id="expiration"
                 class="w-full bg-white"
                 data-testid="payment-expiration"
@@ -82,7 +81,7 @@ import { NavigationService } from '../../../../shared/services/navigation/naviga
               </label>
               <input
                 hlmInput
-                formControlName="security"
+                [formField]="paymentForm.security"
                 id="security"
                 class="w-full bg-white"
                 data-testid="payment-security"
@@ -106,17 +105,10 @@ import { NavigationService } from '../../../../shared/services/navigation/naviga
     }
   `
 })
-export class PaymentFormComponent implements OnInit {
-  paymentForm!: FormGroup;
-
-  constructor(
-    public checkoutFormManager: CheckoutFormManagerService,
-    private readonly navigationService: NavigationService
-  ) {}
-
-  ngOnInit(): void {
-    this.paymentForm = this.checkoutFormManager.paymentForm;
-  }
+export class PaymentFormComponent {
+  public readonly checkoutFormManager = inject(CheckoutFormManagerService);
+  private readonly navigationService = inject(NavigationService);
+  readonly paymentForm = this.checkoutFormManager.paymentForm;
 
   placeOrder() {
     this.checkoutFormManager.paymentFormComplete();
