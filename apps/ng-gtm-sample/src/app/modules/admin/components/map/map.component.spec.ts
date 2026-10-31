@@ -55,7 +55,9 @@ describe('MapComponent', () => {
     const fixture = TestBed.createComponent(MapComponent);
     const component = fixture.componentInstance;
 
-    const feature = component.transformDestinationToGeoJson(mockDestinations[0]);
+    const feature = component.transformDestinationToGeoJson(
+      mockDestinations[0]
+    );
 
     expect(feature).toEqual({
       type: 'Feature',

@@ -108,10 +108,7 @@ export class AddDataFacadeService {
     return this.destinationForm[name];
   }
 
-  hasError(
-    name: keyof DestinationFormModel,
-    error?: string
-  ): boolean {
+  hasError(name: keyof DestinationFormModel, error?: string): boolean {
     const field = this.control(name);
     if (!field) return false;
     const state = field();

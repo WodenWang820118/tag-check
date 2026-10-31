@@ -130,9 +130,9 @@ describe('DestinationComponent', () => {
     expect(component.searchModel()).toEqual({ searchTerm: 'tokyo' });
 
     component.onSubmit();
-    expect(navigationServiceMock.navigateToDestinationResults).toHaveBeenCalledWith(
-      'tokyo'
-    );
+    expect(
+      navigationServiceMock.navigateToDestinationResults
+    ).toHaveBeenCalledWith('tokyo');
     expect(searchServiceMock.search).toHaveBeenCalledWith('tokyo');
   });
 });

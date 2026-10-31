@@ -116,10 +116,7 @@ export class AddDataComponent {
     return this.facade.control(name);
   }
 
-  hasError(
-    name: keyof DestinationFormModel,
-    error?: string
-  ): boolean {
+  hasError(name: keyof DestinationFormModel, error?: string): boolean {
     return this.facade.hasError(name, error);
   }
 

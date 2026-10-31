@@ -11,13 +11,7 @@ import { NavigationService } from '../../../../shared/services/navigation/naviga
 @Component({
   selector: 'app-payment-form',
   standalone: true,
-  imports: [
-    FormField,
-    HlmButton,
-    HlmInput,
-    HlmLabel,
-    NgIcon
-  ],
+  imports: [FormField, HlmButton, HlmInput, HlmLabel, NgIcon],
   providers: [provideIcons({ lucideCheck, lucideWallet })],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `

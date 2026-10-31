@@ -10,13 +10,7 @@ import { CheckoutFormManagerService } from '../../../../shared/services/checkout
 @Component({
   selector: 'app-shipping-form',
   standalone: true,
-  imports: [
-    FormField,
-    HlmButton,
-    HlmInput,
-    HlmLabel,
-    NgIcon
-  ],
+  imports: [FormField, HlmButton, HlmInput, HlmLabel, NgIcon],
   providers: [provideIcons({ lucideTruck })],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
@@ -35,10 +29,7 @@ import { CheckoutFormManagerService } from '../../../../shared/services/checkout
         </p>
       </div>
 
-      <form
-        (submit)="$event.preventDefault(); continue()"
-        class="space-y-4"
-      >
+      <form (submit)="$event.preventDefault(); continue()" class="space-y-4">
         <div class="grid gap-4 md:grid-cols-2">
           <div class="space-y-2">
             <label
