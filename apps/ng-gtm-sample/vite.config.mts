@@ -1,6 +1,7 @@
 /// <reference types='vitest' />
 import { defineConfig } from 'vite';
 import angular from '@analogjs/vite-plugin-angular';
+import { nxReadySignal } from '@nx/vite/plugins/nx-ready-signal.plugin';
 
 export default defineConfig(() => ({
   root: import.meta.dirname,
@@ -8,7 +9,7 @@ export default defineConfig(() => ({
   resolve: {
     tsconfigPaths: true
   },
-  plugins: [angular()],
+  plugins: [angular(), nxReadySignal()],
   test: {
     name: 'ng-gtm-sample',
     watch: false,

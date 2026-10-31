@@ -4,13 +4,9 @@ import puppeteer, { type Browser, type Page } from 'puppeteer';
 import type { ElementCandidate } from '@utils';
 import { collectCandidatesSource } from './collect-candidates.script';
 
-const chromeAvailable = (() => {
-  try {
-    return existsSync(puppeteer.executablePath());
-  } catch {
-    return false;
-  }
-})();
+const chromeAvailable = await puppeteer
+  .executablePath()
+  .then(existsSync, () => false);
 
 const fixture = `<!doctype html><title>Blue hoodie</title>
 <main>

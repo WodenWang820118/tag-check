@@ -2,6 +2,7 @@
 
 import angular from '@analogjs/vite-plugin-angular';
 import { defineConfig } from 'vite';
+import { nxReadySignal } from '@nx/vite/plugins/nx-ready-signal.plugin';
 
 export default defineConfig(({ mode }) => {
   return {
@@ -9,7 +10,7 @@ export default defineConfig(({ mode }) => {
     resolve: {
       tsconfigPaths: true
     },
-    plugins: [angular()],
+    plugins: [angular(), nxReadySignal()],
     test: {
       globals: true,
       environment: 'jsdom',

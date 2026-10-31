@@ -10,6 +10,7 @@
     "build": {
       "executor": "@angular/build:application",
       "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
       "options": {
         "outputPath": "dist/apps/ng-frontend",
         "index": "apps/ng-frontend/src/index.html",
@@ -137,11 +138,11 @@
             }
           ]
         }
-      },
-      "defaultConfiguration": "production"
+      }
     },
     "serve": {
       "executor": "@angular/build:dev-server",
+      "defaultConfiguration": "development",
       "configurations": {
         "production": {
           "buildTarget": "ng-frontend:build:production"
@@ -162,10 +163,13 @@
           "buildTarget": "ng-frontend:build:staging"
         }
       },
-      "defaultConfiguration": "development"
+      "readyWhen": {
+        "signal": true
+      }
     },
     "mock": {
       "executor": "@angular/build:dev-server",
+      "defaultConfiguration": "development",
       "configurations": {
         "development": {
           "buildTarget": "ng-frontend:build:development",
@@ -177,10 +181,13 @@
           ]
         }
       },
-      "defaultConfiguration": "development"
+      "readyWhen": {
+        "signal": true
+      }
     },
     "staging": {
       "executor": "@angular/build:dev-server",
+      "defaultConfiguration": "development",
       "configurations": {
         "development": {
           "buildTarget": "ng-frontend:build:development",
@@ -192,7 +199,9 @@
           ]
         }
       },
-      "defaultConfiguration": "development"
+      "readyWhen": {
+        "signal": true
+      }
     },
     "extract-i18n": {
       "executor": "@angular/build:extract-i18n",
@@ -211,6 +220,10 @@
     },
     "serve-static": {
       "executor": "@nx/web:file-server",
+      "readyWhen": {
+        "signal": true
+      },
+      "dependsOn": ["build"],
       "options": {
         "buildTarget": "ng-frontend:build",
         "staticFilePath": "dist/apps/ng-frontend/browser"
@@ -218,6 +231,11 @@
     },
     "storybook": {
       "executor": "@storybook/angular:start-storybook",
+      "continuous": true,
+      "readyWhen": {
+        "port": "{env.SBCONFIG_PORT ?? options.port ?? 9009}",
+        "host": "{env.SBCONFIG_HOSTNAME ?? options.host ?? localhost}"
+      },
       "options": {
         "port": 4400,
         "configDir": "apps/ng-frontend/.storybook",

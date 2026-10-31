@@ -4,7 +4,6 @@
   "projectType": "application",
   "prefix": "app",
   "sourceRoot": "apps/ng-product-doc/src",
-  "tags": ["scope:frontend", "type:app"],
   "i18n": {
     "sourceLocale": {
       "code": "en-US",
@@ -25,11 +24,13 @@
       }
     }
   },
+  "tags": ["scope:frontend", "type:app"],
   "targets": {
     "typecheck-spec": {},
     "build": {
       "executor": "@angular-devkit/build-angular:application",
       "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
       "options": {
         "outputPath": "dist/apps/ng-product-doc",
         "index": "apps/ng-product-doc/src/index.html",
@@ -106,11 +107,11 @@
           "extractLicenses": false,
           "sourceMap": true
         }
-      },
-      "defaultConfiguration": "production"
+      }
     },
     "serve": {
       "executor": "@angular-devkit/build-angular:dev-server",
+      "defaultConfiguration": "development",
       "configurations": {
         "zh-Hant": {
           "buildTarget": "ng-product-doc:build:zh-Hant"
@@ -128,7 +129,9 @@
           "buildTarget": "ng-product-doc:build:development"
         }
       },
-      "defaultConfiguration": "development"
+      "readyWhen": {
+        "signal": true
+      }
     },
     "extract-i18n": {
       "executor": "@angular-devkit/build-angular:extract-i18n",
@@ -163,6 +166,10 @@
     },
     "serve-static": {
       "executor": "@nx/web:file-server",
+      "readyWhen": {
+        "signal": true
+      },
+      "dependsOn": ["build-static"],
       "options": {
         "buildTarget": "ng-product-doc:build-static",
         "port": 4200,

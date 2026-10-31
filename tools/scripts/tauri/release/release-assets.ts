@@ -14,7 +14,7 @@ import {
 } from 'node:fs';
 import { basename, dirname, join, relative } from 'node:path';
 
-import archiver from 'archiver';
+import { TarArchive } from 'archiver';
 
 import {
   getShellSafePackageManagerCommand,
@@ -35,6 +35,7 @@ import {
   releaseAssetsRoot,
   releaseManifestFileName,
   releasePlatformOrder,
+  stagedBackendResourcesDirectory,
   tauriConfigRelativePath,
   type ReleaseManifest,
   type ReleasePlatform
@@ -131,6 +132,10 @@ function cleanRawBundleDirectory(platform: ReleasePlatform) {
   });
 }
 
+function cleanStagedBackendResources() {
+  rmSync(stagedBackendResourcesDirectory, { force: true, recursive: true });
+}
+
 function copyFileWithMode(sourcePath: string, targetPath: string) {
   copyFileSync(sourcePath, targetPath);
   chmodSync(targetPath, statSync(sourcePath).mode);
@@ -150,7 +155,7 @@ async function hashFile(targetPath: string) {
 async function archiveDirectoryAsTarGz(sourcePath: string, targetPath: string) {
   await new Promise<void>((resolve, reject) => {
     const output = createWriteStream(targetPath);
-    const archive = archiver('tar', {
+    const archive = new TarArchive({
       gzip: true,
       gzipOptions: { level: 9 }
     });
@@ -369,6 +374,7 @@ export async function bundleReleaseArtifact(
 ) {
   validateHostForPlatform(platform);
   cleanRawBundleDirectory(platform);
+  cleanStagedBackendResources();
 
   const releaseDirectory = resolveReleaseDirectory(platform);
   removeAndRecreateDirectory(releaseDirectory);

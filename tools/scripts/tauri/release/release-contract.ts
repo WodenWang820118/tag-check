@@ -133,6 +133,20 @@ export const downloadedReleaseAssetsRoot = join(
 export const releaseManifestFileName = 'release-manifest.json';
 export const tauriConfigRelativePath =
   'apps/desktop-tauri/src-tauri/tauri.conf.json';
+/**
+ * Where Tauri copies the backend (`bundle.resources`) before bundling. It
+ * overwrites files there but never deletes ones the backend no longer has, so
+ * a local build would ship whatever an earlier build left behind.
+ */
+export const stagedBackendResourcesDirectory = join(
+  workspaceRoot,
+  'apps',
+  'desktop-tauri',
+  'src-tauri',
+  'target',
+  'release',
+  'backend'
+);
 export const checksumFileName = 'SHA256SUMS.txt';
 export const releasePlatformOrder: ReleasePlatform[] = [
   'windows',
