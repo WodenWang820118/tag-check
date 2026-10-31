@@ -11,7 +11,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { take } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import {
   getCheckStatus,
   IReportDetails,
@@ -82,18 +82,17 @@ const SNACKBAR_CLASSES: Record<Exclude<RunStatus, 'notRun'>, string> = {
   changeDetection: ChangeDetectionStrategy.Eager
 })
 export class ReportTableComponent {
+  readonly testRunningFacadeService = inject(TestRunningFacadeService);
+  readonly batchRunService = inject(BatchRunService);
+  private readonly facade = inject(ReportTableFacadeService);
+  private readonly tableSortService = inject(TableSortService);
+  private readonly snackBar = inject(MatSnackBar);
+  private readonly projectDataSourceService = inject(ProjectDataSourceService);
   private readonly paginator = viewChild<MatPaginator>(MatPaginator);
   private readonly sort = viewChild<MatSort>(MatSort);
   private readonly routeData = toSignal(inject(ActivatedRoute).data);
 
-  constructor(
-    public testRunningFacadeService: TestRunningFacadeService,
-    public batchRunService: BatchRunService,
-    private readonly facade: ReportTableFacadeService,
-    private readonly tableSortService: TableSortService,
-    private readonly snackBar: MatSnackBar,
-    private readonly projectDataSourceService: ProjectDataSourceService
-  ) {
+  constructor() {
     // Rebuild the table on every resolve, not only the first: switching
     // project in the toolbar reuses this component and only resolves the
     // new project's tests. The view queries resolve after the first render,
@@ -162,16 +161,16 @@ export class ReportTableComponent {
   }
 
   /** Runs one test; its row updates when the run ends, then a snackbar says how it went. */
-  runTest(eventId: string) {
+  async runTest(eventId: string): Promise<void> {
     if (this.isSavingNavigation()) return;
-    this.facade
-      .runTest(eventId)
-      .pipe(take(1))
-      .subscribe((report) => {
-        if (report) {
-          this.showSnack(report);
-        }
-      });
+    try {
+      const report = await firstValueFrom(this.facade.runTest(eventId));
+      if (report) {
+        this.showSnack(report);
+      }
+    } catch {
+      // error handled in facade/services
+    }
   }
 
   setStatusFilter(status: StatusFilter) {

@@ -4,6 +4,7 @@ import {
   signal,
   ChangeDetectionStrategy,
   effect,
+  inject,
   untracked
 } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
@@ -17,7 +18,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ProjectDataSourceService } from '../../../../shared/services/data-source/project-data-source.service';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {
   MatButtonToggleChange,
   MatButtonToggleModule
@@ -50,8 +50,6 @@ import {
     MatInputModule,
     MatFormFieldModule,
     MatSlideToggleModule,
-    FormsModule,
-    ReactiveFormsModule,
     MatButtonToggleModule
   ],
   templateUrl: './report-table-toolbar.component.html',
@@ -59,20 +57,21 @@ import {
   styleUrls: ['./report-table-toolbar.component.scss']
 })
 export class ReportTableToolbarComponent {
-  // Signals
-  isSearchVisible = signal(false);
+  private readonly dataSourceService = inject(ProjectDataSourceService);
+  private readonly testRunningFacade = inject(TestRunningFacadeService);
+  private readonly uploadSpecService = inject(UploadSpecService);
+  private readonly reportTableDataSourceModelService = inject(
+    ReportTableDataSourceModelService
+  );
+  private readonly reportTableFacadeService = inject(ReportTableFacadeService);
+  private readonly batchRunService = inject(BatchRunService);
+  readonly runHeadlessService = inject(RunHeadlessService);
+  private readonly dialog = inject(MatDialog);
+  private readonly snackBar = inject(MatSnackBar);
 
-  constructor(
-    private readonly dataSourceService: ProjectDataSourceService,
-    private readonly testRunningFacade: TestRunningFacadeService,
-    private readonly uploadSpecService: UploadSpecService,
-    private readonly reportTableDataSourceModelService: ReportTableDataSourceModelService,
-    private readonly reportTableFacadeService: ReportTableFacadeService,
-    private readonly batchRunService: BatchRunService,
-    readonly runHeadlessService: RunHeadlessService,
-    private readonly dialog: MatDialog,
-    private readonly snackBar: MatSnackBar
-  ) {
+  readonly isSearchVisible = signal(false);
+
+  constructor() {
     // The Run headless toggle shows the choice for the table's project.
     effect(() => {
       const projectSlug = this.reportTableFacadeService.projectSlug$();
@@ -152,25 +151,28 @@ export class ReportTableToolbarComponent {
   }
 
   /** Opens the schedule dialog for the selected tests, in table order. */
-  scheduleSelected() {
+  async scheduleSelected(): Promise<void> {
     const projectSlug = this.reportTableFacadeService.projectSlug$();
     const eventIds = this.selectedEventIds();
     if (!projectSlug || eventIds.length === 0) {
       return;
     }
-    this.dialog
-      .open<ScheduleDialogComponent, ScheduleDialogData, ScheduleJson>(
-        ScheduleDialogComponent,
-        { data: { projectSlug, eventIds } }
-      )
-      .afterClosed()
-      .subscribe((saved) => {
-        if (saved) {
-          this.notify(
-            `Schedule "${saved.name}" saved. The Schedules page lists it.`
-          );
-        }
-      });
+    const dialogRef = this.dialog.open<
+      ScheduleDialogComponent,
+      ScheduleDialogData,
+      ScheduleJson
+    >(ScheduleDialogComponent, { data: { projectSlug, eventIds } });
+
+    try {
+      const saved = await firstValueFrom(dialogRef.afterClosed());
+      if (saved) {
+        this.notify(
+          `Schedule "${saved.name}" saved. The Schedules page lists it.`
+        );
+      }
+    } catch {
+      // dialog dismissed
+    }
   }
 
   setRunHeadless(headless: boolean) {

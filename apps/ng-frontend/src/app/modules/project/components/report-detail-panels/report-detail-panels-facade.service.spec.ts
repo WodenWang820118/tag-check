@@ -1,4 +1,8 @@
+import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
+import { SpecService } from '../../../../shared/services/api/spec/spec.service';
+import { RecordingService } from '../../../../shared/services/api/recording/recording.service';
+import { ItemDefService } from '../../../../shared/services/api/item-def/item-def.service';
 import { ReportDetailPanelsFacadeService } from './report-detail-panels-facade.service';
 
 describe('ReportDetailPanelsFacadeService', () => {
@@ -14,11 +18,15 @@ describe('ReportDetailPanelsFacadeService', () => {
     specService = { updateSpec: vi.fn() };
     recordingService = { updateRecording: vi.fn() };
     itemDefService = { getItemDef: vi.fn(), updateItemDef: vi.fn() };
-    service = new ReportDetailPanelsFacadeService(
-      specService as never,
-      recordingService as never,
-      itemDefService as never
-    );
+    TestBed.configureTestingModule({
+      providers: [
+        ReportDetailPanelsFacadeService,
+        { provide: SpecService, useValue: specService },
+        { provide: RecordingService, useValue: recordingService },
+        { provide: ItemDefService, useValue: itemDefService }
+      ]
+    });
+    service = TestBed.inject(ReportDetailPanelsFacadeService);
   });
 
   it('readFile delegates to File.text', async () => {

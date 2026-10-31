@@ -56,14 +56,14 @@ describe('FileTableDataSourceFacadeService', () => {
     expect(facade.selection.selected).toEqual([]);
   });
 
-  it('deletes the selected runs and drops the rows the server deleted', () => {
+  it('deletes the selected runs and drops the rows the server deleted', async () => {
     facade.initializeData(null as never, null as never, {
       fileReports: [newer, older],
       projectSlug: 'shop'
     });
     facade.selection.select(newer, older);
 
-    facade['handleReportDeletion']();
+    await facade['handleReportDeletion']();
 
     expect(fileReportService.deleteRuns).toHaveBeenCalledWith('shop', [
       newer.runId,
@@ -73,20 +73,20 @@ describe('FileTableDataSourceFacadeService', () => {
     expect(facade.selection.selected).toEqual([]);
   });
 
-  it('sends nothing to delete when no run is selected', () => {
+  it('sends nothing to delete when no run is selected', async () => {
     facade.initializeData(null as never, null as never, {
       fileReports: [newer],
       projectSlug: 'shop'
     });
 
-    facade['handleReportDeletion']();
+    await facade['handleReportDeletion']();
 
     expect(fileReportService.deleteRuns).not.toHaveBeenCalled();
     expect(facade.dataSource.data).toEqual([newer]);
   });
 
-  it('downloads each selected test once, however many of its runs are selected', () => {
-    facade['handleReportDownload']('shop', [newer, older]);
+  it('downloads each selected test once, however many of its runs are selected', async () => {
+    await facade['handleReportDownload']('shop', [newer, older]);
 
     expect(fileReportService.downloadFileReports).toHaveBeenCalledWith('shop', [
       RUN_SUMMARY_SAMPLE.eventId
