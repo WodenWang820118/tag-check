@@ -135,4 +135,12 @@ describe('DestinationComponent', () => {
     ).toHaveBeenCalledWith('tokyo');
     expect(searchServiceMock.search).toHaveBeenCalledWith('tokyo');
   });
+
+  it('resets the search when the query string drops search_term', () => {
+    queryParams$.next(convertToParamMap({}));
+    fixture.detectChanges();
+
+    expect(searchServiceMock.resetSearch).toHaveBeenCalled();
+    expect(component.searchForm.searchTerm().value()).toBe('');
+  });
 });

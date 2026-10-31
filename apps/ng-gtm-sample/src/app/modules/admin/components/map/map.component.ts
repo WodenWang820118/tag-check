@@ -54,7 +54,13 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     private readonly firestoreDestinationPipelineService: FirestoreDestinationPipelineService
   ) {}
 
-  async ngAfterViewInit(): Promise<void> {
+  ngAfterViewInit(): void {
+    this.loadMap().catch((error: unknown) => {
+      console.error('Error loading destinations for the map:', error);
+    });
+  }
+
+  private async loadMap(): Promise<void> {
     const data = await firstValueFrom(
       this.firestoreDestinationPipelineService.getAllDestinationsData()
     );
