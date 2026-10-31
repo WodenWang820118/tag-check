@@ -1,0 +1,38 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": [
+    "apps/*/src/main.ts!",
+    "apps/*/src/main.server.ts!",
+    "apps/*/src/test-setup.ts",
+    "apps/*/src/environments/*.ts!",
+    "apps/*/.storybook/*.{ts,js}",
+    "apps/*/e2e/**/*.e2e-spec.ts",
+    "apps/*-e2e/src/**/*.e2e-spec.ts",
+    "apps/*/{vite,vitest,vitest.seo}.config.{ts,mts}",
+    "apps/*/rspack.config.cjs",
+    "apps/*/playwright.config.{ts,mjs}",
+    "libs/*/src/test-setup.ts",
+    "libs/*/{vite,vitest}.config.{ts,mts}",
+    "apps/*-e2e/src/support/*.ts"
+  ],
+  "project": [
+    "apps/**/*.{ts,mts,cjs,mjs}!",
+    "libs/**/*.{ts,mts}!",
+    "tools/**/*.ts",
+    "!**/*.{spec,e2e-spec,spec-helpers,stories}.ts!",
+    "!**/test-setup.ts!",
+    "!**/testing/**!",
+    "!apps/*-e2e/**!",
+    "!**/{vite,vitest,vitest.seo,playwright,rspack}.config.{ts,mts,cjs,mjs}!",
+    "!**/.storybook/**!"
+  ],
+  "ignore": ["apps/desktop-tauri/src-tauri/**", "**/*.d.ts", "libs/ui-helm/**"],
+  "ignoreExportsUsedInFile": true,
+  "ignoreDependencies": [
+    "@angular/language-service",
+    "@nx/.*",
+    "@spartan-ng/cli",
+    "@storybook/.*"
+  ],
+  "ignoreBinaries": ["where.exe"]
+}
