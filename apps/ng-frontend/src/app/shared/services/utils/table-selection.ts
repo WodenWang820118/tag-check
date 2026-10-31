@@ -9,7 +9,10 @@ export interface TableSelectionDataSource<T, S = unknown> {
   } | null;
 }
 
-/** Selection follows displayed order so select-all affects the page the user sees. */
+/**
+ * Selection follows displayed order so select-all affects the page the user
+ * sees.
+ */
 export function getCurrentPageRows<T, S = unknown>(
   dataSource: TableSelectionDataSource<T, S>
 ): T[] {
@@ -25,7 +28,10 @@ export function getCurrentPageRows<T, S = unknown>(
   return sorted.slice(start, end);
 }
 
-/** Retain off-page selections because select-all applies only to the current page. */
+/**
+ * Retain off-page selections because select-all applies only to the current
+ * page.
+ */
 export function togglePageSelection<T>(
   selected: readonly T[],
   pageRows: readonly T[]

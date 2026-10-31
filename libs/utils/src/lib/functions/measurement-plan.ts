@@ -13,6 +13,7 @@ import {
   getGa4EventNameIssues,
   getGa4ParameterNameIssues
 } from './ga4-reference';
+import { ruleToSpecValue } from './tag-check-rules';
 import type { BaseECommerce, StrictDataLayerEvent } from '../types/tag-check';
 
 /**
@@ -543,16 +544,6 @@ function resolveItemRules(row: MeasurementPlanRow): ParameterRule[] {
   return row.itemParameters.map(
     (param) => parseParameterRule(param).rule ?? { kind: 'any', name: param }
   );
-}
-
-function ruleToSpecValue(rule: ParameterRule): unknown {
-  if (rule.kind === 'equals') {
-    return rule.value;
-  }
-  if (rule.kind === 'pattern') {
-    return rule.flags ? `/${rule.pattern}/${rule.flags}` : `/${rule.pattern}/`;
-  }
-  return rule.name.startsWith('$') ? rule.name : `$${rule.name}`;
 }
 
 /**

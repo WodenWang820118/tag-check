@@ -18,7 +18,8 @@ export interface SortableColumn<T> {
 })
 export class TableSortService {
   /**
-   * Sorts data based on the provided sort configuration and column definitions
+   * Inactive or unknown sorting returns the original array so callers retain
+   * its identity.
    */
   sortData<T>(sort: Sort, data: T[], columns: SortableColumn<T>[]): T[] {
     if (!sort.active || sort.direction === '') {

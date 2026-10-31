@@ -62,6 +62,9 @@ export class EditorService {
     outputJson: null
   };
 
+  /**
+   * Reusing the same host preserves its mounted editor and in-progress text.
+   */
   initEditorView(
     extension: EditorTypeEnum,
     elementRef: ElementRef,
@@ -183,6 +186,10 @@ export class EditorService {
     }
   }
 
+  /**
+   * Replacing input invalidates output because that container was derived from
+   * the previous specs.
+   */
   setContent(extension: EditorTypeEnum, content: string) {
     // set content in contents
     this.updateContent(extension, content);

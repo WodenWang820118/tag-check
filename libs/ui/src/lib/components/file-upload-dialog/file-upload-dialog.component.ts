@@ -175,12 +175,18 @@ export class FileUploadDialogComponent {
     });
   }
 
-  /** Return true for recognized invalid input as well, preventing another format from handling it. */
+  /**
+   * Return true for recognized invalid input as well, preventing another format
+   * from handling it.
+   */
   importPlanTable(table: string[][]): boolean {
     return this.applyTableImportResult(parsePlanTable(table));
   }
 
-  /** Return true for recognized invalid input as well, preventing another format from handling it. */
+  /**
+   * Return true for recognized invalid input as well, preventing another format
+   * from handling it.
+   */
   importLegacySpecsTable(table: string[][]): boolean {
     return this.applyTableImportResult(parseLegacySpecsTable(table));
   }

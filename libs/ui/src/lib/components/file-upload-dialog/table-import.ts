@@ -6,13 +6,19 @@ import {
   type StrictDataLayerEvent
 } from '@utils';
 
-/** Distinguish invalid from unrecognized input so a recognized format's errors stop fallback parsing. */
+/**
+ * Distinguish invalid from unrecognized input so a recognized format's errors
+ * stop fallback parsing.
+ */
 export type TableImportResult =
   | { kind: 'unrecognized' }
   | { kind: 'invalid'; message: string }
   | { kind: 'ready'; specs: StrictDataLayerEvent[] };
 
-/** Recognize the plan header before validation so invalid plans retain their own diagnostics. */
+/**
+ * Recognize the plan header before validation so invalid plans retain their own
+ * diagnostics.
+ */
 export function parsePlanTable(table: string[][]): TableImportResult {
   if (table.length === 0 || !isMeasurementPlanHeader(table[0])) {
     return { kind: 'unrecognized' };
@@ -35,7 +41,9 @@ export function parsePlanTable(table: string[][]): TableImportResult {
   return { kind: 'ready', specs };
 }
 
-/** Retain spreadsheet row numbers so users can locate malformed embedded pushes. */
+/**
+ * Retain spreadsheet row numbers so users can locate malformed embedded pushes.
+ */
 export function parseLegacySpecsTable(table: string[][]): TableImportResult {
   if (table.length === 0) {
     return { kind: 'unrecognized' };
