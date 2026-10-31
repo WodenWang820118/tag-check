@@ -146,6 +146,21 @@ describe('FileUploadDialogComponent', () => {
       expect(editorFacade.inputJsonContent).toBeNull();
     });
 
+    it('shows error dialog when a plan sheet table contains no event rows', () => {
+      const emptyPlanTable: string[][] = [
+        ['event_name', 'event_parameters', 'item_parameters']
+      ];
+
+      const handled = component.importPlanTable(emptyPlanTable);
+      expect(handled).toBe(true);
+      expect(dialog.open).toHaveBeenCalledWith(ErrorDialogComponent, {
+        data: {
+          message: 'The uploaded measurement plan contains no event rows.'
+        }
+      });
+      expect(editorFacade.inputJsonContent).toBeNull();
+    });
+
     it('returns false for sheets without the plan header to preserve today behaviour', () => {
       const todaySheetTable: string[][] = [
         ['dataLayer Specs'],
@@ -202,6 +217,23 @@ describe('FileUploadDialogComponent', () => {
       expect(dialog.open).toHaveBeenCalledWith(ErrorDialogComponent, {
         data: {
           message: expect.stringContaining('Row 3:')
+        }
+      });
+      expect(editorFacade.inputJsonContent).toBeNull();
+    });
+
+    it('shows error dialog when a legacy sheet contains no dataLayer.push event call', () => {
+      const resetOnlyTable: string[][] = [
+        ['dataLayer Specs'],
+        ['window.dataLayer.push({ ecommerce: null });']
+      ];
+
+      const handled = component.importLegacySpecsTable(resetOnlyTable);
+      expect(handled).toBe(true);
+      expect(dialog.open).toHaveBeenCalledWith(ErrorDialogComponent, {
+        data: {
+          message:
+            'The uploaded sheet contained no dataLayer.push call with an event.'
         }
       });
       expect(editorFacade.inputJsonContent).toBeNull();
@@ -288,6 +320,22 @@ describe('FileUploadDialogComponent', () => {
           })
         })
       );
+    });
+
+    it('stops legacy fallback when a file with both headers has an invalid measurement plan', async () => {
+      const csv =
+        'event_name,event_parameters,item_parameters,dataLayer Specs\r\n' +
+        '1invalid_event_name,method,,"window.dataLayer.push({ event: \'valid_legacy\' });"\r\n';
+
+      await select(new File([csv], 'ambiguous.csv'));
+
+      expect(editorFacade.inputJsonContent).toBeNull();
+      expect(dialog.closeAll).not.toHaveBeenCalled();
+      expect(dialog.open).toHaveBeenCalledWith(ErrorDialogComponent, {
+        data: {
+          message: expect.stringContaining('1invalid_event_name')
+        }
+      });
     });
 
     it('rejects a CSV file that is neither a measurement plan nor a legacy sheet, naming both formats', async () => {
