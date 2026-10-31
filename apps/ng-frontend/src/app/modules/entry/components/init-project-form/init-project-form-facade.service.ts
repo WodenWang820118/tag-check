@@ -1,11 +1,11 @@
 import { ComponentType } from '@angular/cdk/portal';
-import { DestroyRef, inject, Injectable } from '@angular/core';
 import {
-  FormBuilder,
-  FormGroup,
-  Validators,
-  FormControl
-} from '@angular/forms';
+  DestroyRef,
+  inject,
+  Injectable,
+  Injector,
+  signal
+} from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfigurationService } from '../../../../shared/services/api/configuration/configuration.service';
 import { ProjectService } from '../../../../shared/services/api/project-info/project-info.service';
@@ -13,14 +13,21 @@ import {
   catchError,
   distinctUntilChanged,
   EMPTY,
-  switchMap,
-  take,
+  firstValueFrom,
   tap
 } from 'rxjs';
 import { InstantErrorStateMatcher } from './helper';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
+import { form, readonly, required, validate } from '@angular/forms/signals';
 import slug from 'slug';
+
+export interface ProjectFormModel {
+  projectName: string;
+  projectSlug: string;
+  measurementId: string;
+  projectDescription: string;
+}
 
 /**
  * The new project form: suggests a slug from the project name, creates
@@ -30,12 +37,13 @@ import slug from 'slug';
   providedIn: 'root'
 })
 export class InitProjectFormFacadeService {
-  private readonly fb = inject(FormBuilder);
   private readonly projectService = inject(ProjectService);
   private readonly configurationService = inject(ConfigurationService);
   private readonly dialog = inject(MatDialog);
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
+  private readonly injector = inject(Injector);
+
   // #region form state
   errorDialogComponent: Promise<ComponentType<unknown> | null> =
     this.loadErrorDialogComponent();
@@ -50,26 +58,26 @@ export class InitProjectFormFacadeService {
     trim: true
   };
 
-  projectForm: FormGroup<{
-    projectName: FormControl<string>;
-    projectSlug: FormControl<string>;
-    measurementId: FormControl<string>;
-    projectDescription: FormControl<string>;
-  }> = this.fb.nonNullable.group({
-    projectName: [
-      '',
-      {
-        validators: [
-          Validators.required,
-          this.validProjectNameMatcher.allowedCharactersValidator(
-            this.allowedSymbolsPattern
-          )
-        ]
-      }
-    ],
-    projectSlug: ['', Validators.required],
+  readonly projectModel = signal<ProjectFormModel>({
+    projectName: '',
+    projectSlug: '',
     measurementId: '',
     projectDescription: ''
+  });
+
+  readonly projectForm = form(this.projectModel, (p) => {
+    required(p.projectName);
+    validate(p.projectName, ({ value }) => {
+      const v = value();
+      if (!v) {
+        return undefined;
+      }
+      return this.allowedSymbolsPattern.test(v)
+        ? undefined
+        : { kind: 'invalidCharacters' };
+    });
+    required(p.projectSlug);
+    readonly(p.projectSlug);
   });
   // #endregion
 
@@ -95,20 +103,22 @@ export class InitProjectFormFacadeService {
 
     this.hasProjectNameObserver = true;
 
-    this.projectForm.controls.projectName.valueChanges
+    toObservable(this.projectForm.projectName().value, {
+      injector: this.injector
+    })
       .pipe(
         distinctUntilChanged(),
         takeUntilDestroyed(this.destroyRef),
         tap((value) => {
           if (!value) {
-            this.projectForm.reset();
+            this.reset();
             return;
           }
           const formattedValue = this.formatProjectSlug(value);
           const fourRandomChars = Math.random().toString(36).substring(2, 6);
-          this.projectForm.controls.projectSlug.setValue(
-            formattedValue + '-' + fourRandomChars
-          );
+          this.projectForm
+            .projectSlug()
+            .value.set(formattedValue + '-' + fourRandomChars);
         }),
         catchError((error) => {
           console.error('Error observing project name changes:', error);
@@ -118,49 +128,50 @@ export class InitProjectFormFacadeService {
       .subscribe();
   }
 
+  reset(): void {
+    this.projectModel.set({
+      projectName: '',
+      projectSlug: '',
+      measurementId: '',
+      projectDescription: ''
+    });
+  }
+
   private formatProjectSlug(value: string): string {
     return slug(value, this.slugOptions);
   }
   // #endregion
 
-  submitProject() {
-    if (this.projectForm.invalid) {
-      void this.showErrorDialog('Please fill in the required fields.');
-      return EMPTY;
+  async submitProject(): Promise<void> {
+    if (!this.projectForm().valid()) {
+      await this.showErrorDialog('Please fill in the required fields.');
+      return;
     }
 
-    return this.configurationService.getConfiguration('rootProjectPath').pipe(
-      take(1),
-      switchMap((rootProjectPath) => {
-        if (!rootProjectPath || this.isEmptyObject(rootProjectPath)) {
-          void this.showErrorDialog('Please configure the root path first.');
-          return EMPTY;
-        }
+    try {
+      const rootProjectPath = await firstValueFrom(
+        this.configurationService.getConfiguration('rootProjectPath')
+      );
+      if (!rootProjectPath || this.isEmptyObject(rootProjectPath)) {
+        await this.showErrorDialog('Please configure the root path first.');
+        return;
+      }
 
-        return this.projectService
-          .initProject(this.projectForm.getRawValue())
-          .pipe(
-            tap((data) => {
-              // ProjectService logs a failed request and answers null.
-              if (!data) {
-                void this.showErrorDialog(
-                  'Could not create the project. Please try again.'
-                );
-                return;
-              }
-              void this.router
-                .navigate(['/', 'projects', data.projectSlug])
-                .then(() => {
-                  this.projectForm.reset();
-                });
-            })
-          );
-      }),
-      catchError((error) => {
-        console.error('Error initializing project:', error);
-        return EMPTY;
-      })
-    );
+      const data = await firstValueFrom(
+        this.projectService.initProject(this.projectModel())
+      );
+      // ProjectService logs a failed request and answers null.
+      if (!data) {
+        await this.showErrorDialog(
+          'Could not create the project. Please try again.'
+        );
+        return;
+      }
+      await this.router.navigate(['/', 'projects', data.projectSlug]);
+      this.reset();
+    } catch (error) {
+      console.error('Error initializing project:', error);
+    }
   }
 
   private async showErrorDialog(message: string): Promise<void> {
@@ -168,7 +179,7 @@ export class InitProjectFormFacadeService {
     if (errorComponent !== null) {
       this.dialog.open(errorComponent, {
         data: {
-          message: message
+          message
         }
       });
     }

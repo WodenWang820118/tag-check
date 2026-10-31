@@ -1,5 +1,5 @@
 <div class="init-project-form">
-  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+  <form (submit)="$event.preventDefault(); onSubmit()">
     <mat-card appearance="outlined">
       <mat-card-header>
         <mat-card-title>New Project</mat-card-title>
@@ -17,12 +17,12 @@
               data-testid="new-project-name"
               matInput
               placeholder="Corporate Website Project"
-              formControlName="projectName"
+              [formField]="form.projectName"
               [errorStateMatcher]="validProjectNameMatcher"
             />
             @if (
-              form.controls['projectName'].hasError('invalidCharacters') &&
-              form.controls['projectName'].touched
+              hasError(form.projectName, 'invalidCharacters') &&
+              form.projectName().touched()
             ) {
               <mat-error
                 >Can only have: <strong>-!'",</strong> and spaces</mat-error
@@ -35,8 +35,7 @@
               id="init-form-project-slug"
               data-testid="new-project-slug"
               matInput
-              formControlName="projectSlug"
-              readonly
+              [formField]="form.projectSlug"
             />
           </mat-form-field>
           <mat-form-field appearance="outline">
@@ -45,7 +44,7 @@
               id="init-form-measurement-id"
               data-testid="new-project-measurement-id"
               matInput
-              formControlName="measurementId"
+              [formField]="form.measurementId"
             />
           </mat-form-field>
           <mat-form-field appearance="outline">
@@ -54,7 +53,7 @@
               id="init-form-project-description"
               data-testid="new-project-description"
               matInput
-              formControlName="projectDescription"
+              [formField]="form.projectDescription"
             ></textarea>
           </mat-form-field>
         </div>
