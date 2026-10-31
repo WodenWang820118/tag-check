@@ -1,0 +1,152 @@
+<h2
+  i18n="@@planEditorDialogTitle"
+  mat-dialog-title
+  class="text-[1.8rem] font-semibold text-gray-900"
+>
+  Measurement plan
+</h2>
+
+<mat-dialog-content class="space-y-4 max-h-[70vh] overflow-y-auto">
+  <p i18n="@@planEditorDialogHint" class="text-[1.3rem] text-gray-600">
+    Rule forms: currency (any value), currency=TWD (exact value),
+    transaction_id=/^T\d+$/ (regex pattern). Comma separated.
+  </p>
+
+  <div class="overflow-x-auto border border-gray-200 rounded-md">
+    <table class="w-full text-left border-collapse">
+      <thead>
+        <tr class="bg-gray-50 border-b border-gray-200">
+          <th
+            i18n="@@planEditorDialogHeaderEventName"
+            class="p-3 text-[1.4rem] font-semibold text-gray-700 w-1/4"
+          >
+            event_name
+          </th>
+          <th
+            i18n="@@planEditorDialogHeaderEventParameters"
+            class="p-3 text-[1.4rem] font-semibold text-gray-700 w-1/3"
+          >
+            event_parameters
+          </th>
+          <th
+            i18n="@@planEditorDialogHeaderItemParameters"
+            class="p-3 text-[1.4rem] font-semibold text-gray-700 w-1/3"
+          >
+            item_parameters
+          </th>
+          <th
+            class="p-3 text-[1.4rem] font-semibold text-gray-700 w-16 text-center"
+          >
+            <span class="sr-only">Actions</span>
+          </th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200">
+        @for (row of rows(); track $index; let i = $index) {
+          <tr
+            [attr.data-testid]="'plan-editor-row-' + i"
+            class="hover:bg-gray-50/50"
+          >
+            <td class="p-2">
+              <input
+                type="text"
+                [attr.data-testid]="'plan-editor-event-name-' + i"
+                [value]="row.eventName"
+                (input)="onEventNameInput(i, $event)"
+                placeholder="purchase"
+                class="w-full text-[1.4rem] px-3 py-2 border border-gray-300 rounded bg-white text-gray-900 focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+              />
+            </td>
+            <td class="p-2">
+              <input
+                type="text"
+                [attr.data-testid]="'plan-editor-event-parameters-' + i"
+                [value]="row.eventParameters"
+                (input)="onEventParametersInput(i, $event)"
+                placeholder="currency=TWD, value"
+                class="w-full text-[1.4rem] px-3 py-2 border border-gray-300 rounded bg-white text-gray-900 focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+              />
+            </td>
+            <td class="p-2">
+              <input
+                type="text"
+                [attr.data-testid]="'plan-editor-item-parameters-' + i"
+                [value]="row.itemParameters"
+                (input)="onItemParametersInput(i, $event)"
+                placeholder="item_id, item_name, price"
+                class="w-full text-[1.4rem] px-3 py-2 border border-gray-300 rounded bg-white text-gray-900 focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+              />
+            </td>
+            <td class="p-2 text-center">
+              <button
+                type="button"
+                [attr.data-testid]="'plan-editor-delete-' + i"
+                (click)="deleteRow(i)"
+                i18n="@@planEditorDialogDeleteRow"
+                mat-button
+              >
+                Delete
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <div class="flex justify-start">
+    <button
+      type="button"
+      data-testid="plan-editor-add"
+      (click)="addEvent()"
+      i18n="@@planEditorDialogAddEvent"
+      mat-stroked-button
+    >
+      Add event
+    </button>
+  </div>
+
+  @if (issues().length > 0) {
+    <div
+      data-testid="plan-editor-issues"
+      class="p-3 bg-red-50 border border-red-200 rounded-md text-[1.3rem] text-red-700"
+    >
+      <ul class="list-disc list-inside space-y-1">
+        @for (issue of issues(); track issue) {
+          <li>{{ issue }}</li>
+        }
+      </ul>
+    </div>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="gap-2">
+  <button
+    type="button"
+    data-testid="plan-editor-download"
+    (click)="downloadCsv()"
+    i18n="@@planEditorDialogDownloadCsv"
+    mat-stroked-button
+  >
+    Download CSV
+  </button>
+  <button
+    type="button"
+    mat-button
+    mat-dialog-close
+    i18n="@@planEditorDialogClose"
+  >
+    Close
+  </button>
+  <button
+    type="button"
+    data-testid="plan-editor-use"
+    (click)="usePlan()"
+    [disabled]="!canUsePlan()"
+    i18n="@@planEditorDialogUsePlan"
+    mat-flat-button
+    color="primary"
+  >
+    Use plan
+  </button>
+</mat-dialog-actions>

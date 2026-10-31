@@ -146,7 +146,7 @@ export class FunctionalCardFacade {
         console.warn('Failed to parse ESV content');
       }
 
-      if (inputJsonEditor().state.doc.toString() === '') {
+      if (inputJsonEditor().state.doc.toString().trim() === '') {
         this.openDialog({ message: 'Please provide a valid JSON input.' });
         return;
       }

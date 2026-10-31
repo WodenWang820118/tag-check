@@ -1,8 +1,9 @@
 import { ElementRef } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { EditorTypeEnum } from '@utils';
+import { EditorView } from 'codemirror';
 
-import { EditorService } from './editor.service';
+import { EditorService, lintJsonUnlessBlank } from './editor.service';
 
 describe('EditorService', () => {
   let service: EditorService;
@@ -19,6 +20,18 @@ describe('EditorService', () => {
 
   it('should be created', () => {
     expect(service).toBeTruthy();
+  });
+
+  it('starts with empty input and sets placeholder on the empty input editor', () => {
+    expect(service.contents$.inputJson()).toBe('');
+    const host = document.createElement('div');
+    service.initEditorView(EditorTypeEnum.INPUT_JSON, new ElementRef(host));
+
+    expect(service.contents$.inputJson()).toBe('');
+    expect(service.editor$.inputJson().state.doc.toString()).toBe('');
+    expect(host.querySelector('.cm-placeholder')?.textContent).toBe(
+      'Upload or write a measurement plan, or paste dataLayer specs as JSON'
+    );
   });
 
   it('clears the output document and restores its placeholder when input is replaced', () => {
@@ -163,5 +176,29 @@ describe('EditorService', () => {
 
     expect(service.contents$.inputJson()).toBe(content);
     expect(service.editor$.inputJson().state.doc.toString()).toBe(content);
+  });
+});
+
+describe('lintJsonUnlessBlank', () => {
+  const lint = (doc: string) => {
+    const view = new EditorView({ doc });
+    try {
+      return lintJsonUnlessBlank(view);
+    } finally {
+      view.destroy();
+    }
+  };
+
+  it('reports nothing for a blank document', () => {
+    expect(lint('')).toEqual([]);
+    expect(lint('  \n ')).toEqual([]);
+  });
+
+  it('reports invalid JSON', () => {
+    expect(lint('[{"event": }]').length).toBeGreaterThan(0);
+  });
+
+  it('reports nothing for valid JSON', () => {
+    expect(lint('[{"event": "purchase"}]')).toEqual([]);
   });
 });

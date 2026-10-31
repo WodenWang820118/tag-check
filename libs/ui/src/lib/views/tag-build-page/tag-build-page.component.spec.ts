@@ -117,6 +117,24 @@ describe('TagBuildPageComponent', () => {
       })
     );
   });
+
+  it('opens the plan editor dialog when openPlanEditorDialog is called', async () => {
+    const { fixture } = await setupPage();
+    const dialog = TestBed.inject(MatDialog);
+    const dialogSpy = vi
+      .spyOn(dialog, 'open')
+      .mockReturnValue(null as unknown as MatDialogRef<unknown>);
+
+    await fixture.componentInstance.openPlanEditorDialog();
+
+    expect(dialogSpy).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        width: '900px',
+        maxWidth: '95vw'
+      })
+    );
+  });
 });
 
 async function setupPage(): Promise<{
