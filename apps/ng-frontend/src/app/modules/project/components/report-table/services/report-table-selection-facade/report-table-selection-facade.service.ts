@@ -2,6 +2,11 @@ import { Injectable } from '@angular/core';
 import { SelectionModel } from '@angular/cdk/collections';
 import { IReportDetails } from '@utils';
 import { ReportTableDataSourceModelService } from '../../../../services/report-table-data-source-model/report-table-data-source-model.service';
+import {
+  getCurrentPageRows,
+  togglePageSelection,
+  toggleRowSelection
+} from '../../../../../../shared/services/utils/table-selection';
 
 /**
  * Selection in the tests table. Select all acts on the rows of the
@@ -19,51 +24,16 @@ export class ReportTableSelectionFacadeService {
   toggleAllRows(): void {
     const ds = this.reportTableDataSourceModelService.dataSource();
     const sel = this.reportTableDataSourceModelService.selection();
-
-    // Determine working dataset: filtered first, otherwise full data
-    const working =
-      (ds as unknown as { filteredData?: IReportDetails[] }).filteredData ??
-      ds.data;
-    // Align order with displayed sort
-    const sorted = ds.sort ? ds.sortData(working, ds.sort) : working;
-
-    // Compute current page slice
-    const pageIndex = ds.paginator?.pageIndex ?? 0;
-    const pageSize = ds.paginator?.pageSize ?? sorted.length;
-    const start = pageIndex * pageSize;
-    const end = Math.min(start + pageSize, sorted.length);
-    const pageRows = sorted.slice(start, end);
-
-    const allPageSelected = pageRows.every((r: IReportDetails) =>
-      sel.isSelected(r)
-    );
-
-    let nextSelected: IReportDetails[];
-    if (allPageSelected) {
-      const pageSet = new Set(pageRows);
-      nextSelected = sel.selected.filter(
-        (r: IReportDetails) => !pageSet.has(r)
-      );
-    } else {
-      const set = new Set(sel.selected);
-      for (const r of pageRows) {
-        set.add(r as IReportDetails);
-      }
-      nextSelected = Array.from(set.values());
-    }
-
+    const pageRows = getCurrentPageRows(ds);
+    const nextSelected = togglePageSelection(sel.selected, pageRows);
     const newModel = new SelectionModel<IReportDetails>(true, nextSelected);
     this.reportTableDataSourceModelService.selection.set(newModel);
   }
 
   /** Toggle selection of a single row immutably */
-  toggleRow(row: IReportDetails) {
+  toggleRow(row: IReportDetails): void {
     const prevModel = this.reportTableDataSourceModelService.selection();
-    const prevSelected = prevModel.selected;
-    const isSelected = prevModel.isSelected(row);
-    const newSelected = isSelected
-      ? prevSelected.filter((r: IReportDetails) => r !== row)
-      : [...prevSelected, row];
+    const newSelected = toggleRowSelection(prevModel.selected, row);
     const newModel = new SelectionModel<IReportDetails>(true, newSelected);
     this.reportTableDataSourceModelService.selection.set(newModel);
   }
@@ -84,16 +54,7 @@ export class ReportTableSelectionFacadeService {
   isAllSelected(): boolean {
     const ds = this.reportTableDataSourceModelService.dataSource();
     const sel = this.reportTableDataSourceModelService.selection();
-
-    const working =
-      (ds as unknown as { filteredData?: IReportDetails[] }).filteredData ??
-      ds.data;
-    const sorted = ds.sort ? ds.sortData(working, ds.sort) : working;
-    const pageIndex = ds.paginator?.pageIndex ?? 0;
-    const pageSize = ds.paginator?.pageSize ?? sorted.length;
-    const start = pageIndex * pageSize;
-    const end = Math.min(start + pageSize, sorted.length);
-    const pageRows = sorted.slice(start, end);
+    const pageRows = getCurrentPageRows(ds);
     return (
       pageRows.length > 0 &&
       pageRows.every((r: IReportDetails) => sel.isSelected(r))

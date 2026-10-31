@@ -77,4 +77,131 @@ describe('ReportTableSelectionFacadeService', () => {
     const { service } = makeService([]);
     expect(service.isAllSelected()).toBe(false);
   });
+
+  it('applies filtering, sorting and pagination to select visible rows', () => {
+    const r1 = {
+      eventId: 'c',
+      testName: 'cherry'
+    } as Row;
+    const r2 = {
+      eventId: 'a',
+      testName: 'apple'
+    } as Row;
+    const r3 = {
+      eventId: 'b',
+      testName: 'banana'
+    } as Row;
+    const allRows = [r1, r2, r3];
+    const filtered = [r2, r3];
+    const dataSource = signal({
+      data: allRows,
+      filteredData: filtered,
+      sort: { active: 'testName' },
+      sortData: (d: Row[]) =>
+        [...d].sort((x, y) => x.testName.localeCompare(y.testName)),
+      paginator: { pageIndex: 0, pageSize: 1 }
+    });
+    const selection = signal(new SelectionModel<Row>(true, []));
+    const service = new ReportTableSelectionFacadeService({
+      dataSource,
+      selection
+    } as never);
+
+    expect(service.isAllSelected()).toBe(false);
+    service.toggleAllRows();
+    expect(selection().selected).toEqual([r2]);
+    expect(service.isAllSelected()).toBe(true);
+  });
+
+  it('falls back to data when filteredData and paginator are missing', () => {
+    const r1 = { eventId: '1' } as Row;
+    const r2 = { eventId: '2' } as Row;
+    const dataSource = signal({
+      data: [r1, r2]
+    });
+    const selection = signal(new SelectionModel<Row>(true, []));
+    const service = new ReportTableSelectionFacadeService({
+      dataSource,
+      selection
+    } as never);
+
+    service.toggleAllRows();
+    expect(selection().selected).toEqual([r1, r2]);
+    expect(service.isAllSelected()).toBe(true);
+  });
+
+  it('handles partial page selection and retains off-page rows on deselect', () => {
+    const p0 = { eventId: 'p0' } as Row;
+    const p1 = { eventId: 'p1' } as Row;
+    const p2 = { eventId: 'p2' } as Row;
+    const rows = [p0, p1, p2];
+    const dataSource = signal({
+      data: rows,
+      filteredData: rows,
+      sort: undefined,
+      sortData: (d: Row[]) => d,
+      paginator: { pageIndex: 1, pageSize: 2 }
+    });
+    const selection = signal(new SelectionModel<Row>(true, [p0, p1]));
+    const service = new ReportTableSelectionFacadeService({
+      dataSource,
+      selection
+    } as never);
+
+    expect(service.isAllSelected()).toBe(false);
+    service.toggleAllRows();
+    expect(selection().selected).toEqual([p0, p1, p2]);
+    expect(service.isAllSelected()).toBe(true);
+
+    service.toggleAllRows();
+    expect(selection().selected).toEqual([p0, p1]);
+    expect(service.isAllSelected()).toBe(false);
+  });
+
+  it('returns false for isAllSelected on out-of-range pages', () => {
+    const r1 = { eventId: '1' } as Row;
+    const dataSource = signal({
+      data: [r1],
+      filteredData: [r1],
+      sort: undefined,
+      sortData: (d: Row[]) => d,
+      paginator: { pageIndex: 5, pageSize: 10 }
+    });
+    const selection = signal(new SelectionModel<Row>(true, [r1]));
+    const service = new ReportTableSelectionFacadeService({
+      dataSource,
+      selection
+    } as never);
+
+    expect(service.isAllSelected()).toBe(false);
+  });
+
+  it('preserves equal-valued but distinct row objects by identity', () => {
+    const r1A: Row = { eventId: 'dup' } as Row;
+    const r1B: Row = { eventId: 'dup' } as Row;
+    const { service, selection } = makeService([]);
+
+    service.toggleRow(r1A);
+    expect(selection().selected).toEqual([r1A]);
+
+    service.toggleRow(r1B);
+    expect(selection().selected).toEqual([r1A, r1B]);
+
+    service.toggleRow(r1A);
+    expect(selection().selected).toEqual([r1B]);
+  });
+
+  it('publishes a fresh SelectionModel instance after each toggle', () => {
+    const rows = [{ eventId: '1' } as Row];
+    const { service, selection } = makeService(rows);
+
+    const initialModel = selection();
+    service.toggleAllRows();
+    const afterToggleAll = selection();
+    expect(afterToggleAll).not.toBe(initialModel);
+
+    service.toggleRow(rows[0]);
+    const afterToggleRow = selection();
+    expect(afterToggleRow).not.toBe(afterToggleAll);
+  });
 });

@@ -1,7 +1,10 @@
 import { TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { RUN_SUMMARY_SAMPLE } from '@utils';
-import { of } from 'rxjs';
+import { EMPTY, of } from 'rxjs';
+
+// MatTableDataSource subscribes to these on a paginator or sort.
+const noStreams = { page: EMPTY, initialized: EMPTY };
 import { FileReportService } from '../../../../shared/services/api/file-report/file-report.service';
 import { FileTableDataSourceService } from '../../../../shared/services/data-source/file-table-data-source.service';
 import { FileTableDataSourceFacadeService } from './file-table-data-source-facade.service';
@@ -183,5 +186,124 @@ describe('FileTableDataSourceFacadeService', () => {
 
     facade.toggleRow(older);
     expect(facade.selection.selected).toEqual([]);
+  });
+
+  it('applies filtering, sorting and pagination to select visible runs', () => {
+    const run1 = {
+      ...RUN_SUMMARY_SAMPLE,
+      runId: 101,
+      eventName: 'view_item'
+    };
+    const run2 = {
+      ...RUN_SUMMARY_SAMPLE,
+      runId: 102,
+      eventName: 'add_to_cart'
+    };
+    const run3 = {
+      ...RUN_SUMMARY_SAMPLE,
+      runId: 103,
+      eventName: 'begin_checkout'
+    };
+    const paginator = { pageIndex: 0, pageSize: 1, ...noStreams };
+    const sort = {
+      active: 'eventName',
+      direction: 'asc',
+      sortChange: EMPTY,
+      ...noStreams
+    };
+    facade.initializeData(paginator as never, sort as never, {
+      fileReports: [run1, run2, run3],
+      projectSlug: 'shop'
+    });
+    facade.dataSource.sortData = (data) =>
+      [...data].sort((a, b) => a.eventName.localeCompare(b.eventName));
+    facade.dataSource.filteredData = [run2, run3];
+
+    expect(facade.isAllSelected).toBe(false);
+    facade.toggleAllRows();
+    expect(facade.selection.selected).toEqual([run2]);
+    expect(facade.isAllSelected).toBe(true);
+  });
+
+  it('falls back to all data when paginator and filteredData are omitted', () => {
+    facade.initializeData(null as never, null as never, {
+      fileReports: [newer, older],
+      projectSlug: 'shop'
+    });
+    delete (facade.dataSource as { filteredData?: unknown }).filteredData;
+
+    facade.toggleAllRows();
+    expect(facade.selection.selected).toEqual([newer, older]);
+    expect(facade.isAllSelected).toBe(true);
+  });
+
+  it('handles partial page selection and retains off-page runs on deselect', () => {
+    const run1 = { ...RUN_SUMMARY_SAMPLE, runId: 1 };
+    const run2 = { ...RUN_SUMMARY_SAMPLE, runId: 2 };
+    const run3 = { ...RUN_SUMMARY_SAMPLE, runId: 3 };
+    const paginator = { pageIndex: 1, pageSize: 2, ...noStreams };
+    facade.initializeData(paginator as never, null as never, {
+      fileReports: [run1, run2, run3],
+      projectSlug: 'shop'
+    });
+    facade.selection.select(run1);
+
+    expect(facade.isAllSelected).toBe(false);
+    facade.toggleAllRows();
+    expect(facade.selection.selected).toEqual([run1, run3]);
+    expect(facade.isAllSelected).toBe(true);
+
+    facade.toggleAllRows();
+    expect(facade.selection.selected).toEqual([run1]);
+    expect(facade.isAllSelected).toBe(false);
+  });
+
+  it('returns false for isAllSelected when empty or out of range', () => {
+    facade.initializeData(null as never, null as never, {
+      fileReports: [],
+      projectSlug: 'empty'
+    });
+    expect(facade.isAllSelected).toBe(false);
+
+    const paginator = { pageIndex: 10, pageSize: 5, ...noStreams };
+    facade.initializeData(paginator as never, null as never, {
+      fileReports: [newer],
+      projectSlug: 'shop'
+    });
+    expect(facade.isAllSelected).toBe(false);
+  });
+
+  it('preserves equal-valued but distinct run objects by identity', () => {
+    const runA = { ...RUN_SUMMARY_SAMPLE };
+    const runB = { ...RUN_SUMMARY_SAMPLE };
+    facade.initializeData(null as never, null as never, {
+      fileReports: [],
+      projectSlug: 'shop'
+    });
+
+    facade.toggleRow(runA);
+    expect(facade.selection.selected).toEqual([runA]);
+
+    facade.toggleRow(runB);
+    expect(facade.selection.selected).toEqual([runA, runB]);
+
+    facade.toggleRow(runA);
+    expect(facade.selection.selected).toEqual([runB]);
+  });
+
+  it('publishes a fresh SelectionModel instance after each toggle', () => {
+    facade.initializeData(null as never, null as never, {
+      fileReports: [newer],
+      projectSlug: 'shop'
+    });
+
+    const initialModel = facade.selection;
+    facade.toggleAllRows();
+    const afterToggleAll = facade.selection;
+    expect(afterToggleAll).not.toBe(initialModel);
+
+    facade.toggleRow(newer);
+    const afterToggleRow = facade.selection;
+    expect(afterToggleRow).not.toBe(afterToggleAll);
   });
 });
