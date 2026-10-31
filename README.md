@@ -13,6 +13,19 @@ repeatable way to inspect GTM preview behavior, validate production analytics,
 and share verification evidence. The repo is broader than a single desktop app:
 the desktop shell is one delivery surface on top of a multi-project workspace.
 
+## Demo
+
+Watch the
+[walkthrough video](https://tag-check-documentation.vercel.app/media/tagcheck-demo.mp4)
+(3.5 minutes, captions in Traditional Chinese) before you change the
+verification flow. It starts from a new project and walks the whole user
+journey: set the website up, key in a measurement plan in Tag Build, save it
+as a CSV and upload it, convert it to a GTM container, import the specs as
+tests, upload a Chrome Recorder recording, run the test and read the result.
+The file is also in the repository at
+`apps/ng-product-doc/public/media/tagcheck-demo.mp4`.
+`pnpm run test-front:journey` walks the same journey as an e2e test.
+
 ## Workspace Topology
 
 - `apps/ng-frontend`: primary Angular frontend for the TagCheck verification
@@ -195,6 +208,7 @@ Browser e2e verification:
 
 ```bash
 pnpm run test-front:e2e
+pnpm run test-front:journey
 ```
 
 Workspace and Sonar coverage merge:
@@ -206,6 +220,10 @@ pnpm run test:cov
 Notes:
 
 - `pnpm run test:e2e` is an alias for the backend e2e path.
+- `test-front:e2e` mocks the backend. `test-front:journey` builds the
+  backend and starts it on port 7070 with an empty data folder, then walks
+  the demo's journey against https://ng-gtm-sample.vercel.app. It needs
+  network access and takes a few minutes. CI runs neither.
 - Backend e2e coverage writes to `coverage/apps/nest-backend-e2e` so it does
   not overwrite backend unit coverage.
 - `pnpm run coverage:merge` writes the merged Sonar report to
