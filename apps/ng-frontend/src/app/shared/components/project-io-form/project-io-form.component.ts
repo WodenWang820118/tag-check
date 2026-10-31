@@ -1,18 +1,19 @@
 import {
+  ChangeDetectionStrategy,
   Component,
-  ViewEncapsulation,
-  ChangeDetectionStrategy
+  inject,
+  ViewEncapsulation
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { catchError, EMPTY, map, mergeMap, switchMap, take, tap } from 'rxjs';
 import { MatCardModule } from '@angular/material/card';
+import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { ProjectIoService } from '../../services/api/project-io/project-io.service';
 import {
   InformationDialogComponent,
   InformationDialogData
 } from '../information-dialog/information-dialog.component';
-import { MatDialog } from '@angular/material/dialog';
 
 /** Settings > Export or delete: exports the project to a file or deletes it. */
 @Component({
@@ -25,70 +26,51 @@ import { MatDialog } from '@angular/material/dialog';
   encapsulation: ViewEncapsulation.None
 })
 export class ProjectIoFormComponent {
-  constructor(
-    private readonly route: ActivatedRoute,
-    private readonly projectIoService: ProjectIoService,
-    private readonly dialog: MatDialog,
-    private readonly router: Router
-  ) {}
+  private readonly route = inject(ActivatedRoute);
+  private readonly projectIoService = inject(ProjectIoService);
+  private readonly dialog = inject(MatDialog);
+  private readonly router = inject(Router);
 
-  exportProject() {
-    this.route.parent?.params
-      .pipe(
-        take(1),
-        tap((params) => {
-          const projectSlug = params['projectSlug'];
-          if (projectSlug) {
-            this.projectIoService.exportProject(projectSlug);
-          }
-          return EMPTY;
-        }),
-        catchError((err) => {
-          console.error(err);
-          return EMPTY;
-        })
-      )
-      .subscribe();
+  async exportProject(): Promise<void> {
+    try {
+      const params = this.route.parent?.params
+        ? await firstValueFrom(this.route.parent.params)
+        : undefined;
+      const projectSlug = params?.['projectSlug'];
+      if (projectSlug) {
+        this.projectIoService.exportProject(projectSlug);
+      }
+    } catch (err) {
+      console.error(err);
+    }
   }
 
-  deleteProject() {
-    this.route.parent?.params
-      .pipe(
-        take(1),
-        mergeMap((params) => {
-          const dialogRef = this.dialog.open<
-            InformationDialogComponent,
-            InformationDialogData
-          >(InformationDialogComponent, {
-            data: {
-              title: 'Delete project',
-              contents: 'Are you sure you want to delete this project?',
-              action: 'Delete'
-            }
-          });
+  async deleteProject(): Promise<void> {
+    try {
+      const params = this.route.parent?.params
+        ? await firstValueFrom(this.route.parent.params)
+        : undefined;
+      const projectSlug = params?.['projectSlug'];
+      if (!projectSlug) return;
 
-          return dialogRef.afterClosed().pipe(
-            take(1),
-            map((result) => {
-              return { params, dialogResult: result };
-            })
-          );
-        }),
-        switchMap(({ params, dialogResult }) => {
-          const projectSlug = params['projectSlug'];
-          if (dialogResult && projectSlug) {
-            return this.projectIoService.deleteProject(projectSlug);
-          }
-          return EMPTY;
-        }),
-        tap(() => {
-          void this.router.navigate(['/']);
-        }),
-        catchError((err) => {
-          console.error(err);
-          return EMPTY;
-        })
-      )
-      .subscribe();
+      const dialogRef = this.dialog.open<
+        InformationDialogComponent,
+        InformationDialogData
+      >(InformationDialogComponent, {
+        data: {
+          title: 'Delete project',
+          contents: 'Are you sure you want to delete this project?',
+          action: 'Delete'
+        }
+      });
+
+      const dialogResult = await firstValueFrom(dialogRef.afterClosed());
+      if (dialogResult) {
+        await firstValueFrom(this.projectIoService.deleteProject(projectSlug));
+        void this.router.navigate(['/']);
+      }
+    } catch (err) {
+      console.error(err);
+    }
   }
 }
