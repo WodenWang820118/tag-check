@@ -18,6 +18,12 @@ article {
   color: #a4231b;
 }
 
+// A check the run did not make: neutral, not a failure.
+.verdict-chip--not-checked {
+  background: #eef1f0;
+  color: #55605d;
+}
+
 .verdict-chip__icon {
   font-size: 1.8rem;
   height: 1.8rem;

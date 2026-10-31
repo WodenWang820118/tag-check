@@ -35,6 +35,15 @@ describe('RunStatusChipComponent', () => {
     );
   });
 
+  it('says the request check was not made when the run skipped it', () => {
+    const fixture = render('passed', true, false);
+    fixture.componentRef.setInput('requestChecked', false);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.checks()).toBe(
+      'Data layer: Passed · Request: Not checked'
+    );
+  });
+
   it('says a test has not run instead of listing checks', () => {
     expect(render('notRun').componentInstance.checks()).toBe('Not run yet');
   });

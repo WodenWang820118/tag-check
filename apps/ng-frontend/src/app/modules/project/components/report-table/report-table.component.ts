@@ -45,6 +45,28 @@ const STATUS_ORDER: Record<RunStatus, number> = {
   notRun: 0
 };
 
+/**
+ * The snackbar after a run: its status and each check, the request check
+ * as "not checked" when the run did not make it.
+ */
+export function runSnack(report: ReportDetailResponse): {
+  status: Exclude<RunStatus, 'notRun'>;
+  text: string;
+} {
+  const dl = report.testEventDetails?.passed === true;
+  const req = report.testEventDetails?.requestPassed === true;
+  const checked = report.testEventDetails?.requestChecked !== false;
+  const status = getCheckStatus(dl, req, checked);
+  let request = 'not checked';
+  if (checked) {
+    request = req ? '✓' : '✗';
+  }
+  return {
+    status,
+    text: `Test (${report.testEvent.eventName}) ${status}. DataLayer: ${dl ? '✓' : '✗'}, Request: ${request}`
+  };
+}
+
 const SNACKBAR_CLASSES: Record<Exclude<RunStatus, 'notRun'>, string> = {
   passed: 'snackbar-success',
   partial: 'snackbar-warn',
@@ -199,18 +221,12 @@ export class ReportTableComponent {
   }
 
   private showSnack(report: ReportDetailResponse) {
-    const dl = report.testEventDetails?.passed === true;
-    const req = report.testEventDetails?.requestPassed === true;
-    const status = getCheckStatus(dl, req);
-    this.snackBar.open(
-      `Test (${report.testEvent.eventName}) ${status}. DataLayer: ${dl ? '✓' : '✗'}, Request: ${req ? '✓' : '✗'}`,
-      'Close',
-      {
-        duration: 10000,
-        horizontalPosition: 'right',
-        verticalPosition: 'bottom',
-        panelClass: SNACKBAR_CLASSES[status]
-      }
-    );
+    const { status, text } = runSnack(report);
+    this.snackBar.open(text, 'Close', {
+      duration: 10000,
+      horizontalPosition: 'right',
+      verticalPosition: 'bottom',
+      panelClass: SNACKBAR_CLASSES[status]
+    });
   }
 }

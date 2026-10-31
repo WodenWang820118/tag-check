@@ -93,6 +93,7 @@ class ComparisonStub {
 class RequestStub {
   rawRequest = input<unknown>();
   requestPassed = input<unknown>();
+  requestChecked = input<unknown>();
   eventName = input<unknown>();
 }
 @Component({

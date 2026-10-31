@@ -37,7 +37,8 @@ export function toRunOutcome(
   }
   return getCheckStatus(
     first.dataLayerResult.passed,
-    first.requestCheckResult?.passed
+    first.requestCheckResult?.passed,
+    first.requestCheckResult !== null
   );
 }
 

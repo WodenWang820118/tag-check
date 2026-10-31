@@ -54,6 +54,11 @@ export class AbstractTestEventResponseDto implements AbstractTestEvent {
   @Transform(({ obj }) => obj.latestTestEventDetail?.requestPassed ?? false)
   requestPassed!: boolean;
 
+  /** Whether the latest run made the request check; true without a run. */
+  @Expose()
+  @Transform(({ obj }) => obj.latestTestEventDetail?.requestChecked ?? true)
+  requestChecked!: boolean;
+
   /** When the latest run ran; null when the test has no run. */
   @Expose()
   @Transform(({ obj }) => obj.latestTestEventDetail?.createdAt ?? null)

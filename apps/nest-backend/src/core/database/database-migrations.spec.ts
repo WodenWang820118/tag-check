@@ -208,10 +208,38 @@ describe('migrateDatabase', () => {
     ]);
   });
 
+  it('reads the runs saved before request_checked as checked, and undoes the column', async () => {
+    const database = await openDatabase();
+    await migrateDatabase(database);
+    await database.undoLastMigration();
+    await database.query(
+      `INSERT INTO "test_event_detail" ("passed", "request_passed", "destination_url") VALUES (1, 0, 'https://example.com')`
+    );
+
+    await migrateDatabase(database);
+
+    expect(
+      await database.query(
+        'SELECT "request_checked" AS requestChecked FROM "test_event_detail"'
+      )
+    ).toEqual([{ requestChecked: 1 }]);
+    await database.undoLastMigration();
+    const columns: { name: string }[] = await database.query(
+      `PRAGMA table_info("test_event_detail")`
+    );
+    expect(columns.map((column) => column.name)).not.toContain(
+      'request_checked'
+    );
+    expect(
+      await database.query('SELECT COUNT(*) AS runs FROM "test_event_detail"')
+    ).toEqual([{ runs: 1 }]);
+  });
+
   it('undoes the run media columns, keeping the runs', async () => {
     const database = await openDatabase();
     await migrateDatabase(database);
 
+    await database.undoLastMigration();
     await database.undoLastMigration();
 
     expect(await appliedMigrations(database)).toEqual([
@@ -232,6 +260,7 @@ describe('migrateDatabase', () => {
     const database = await openDatabase();
     await migrateDatabase(database);
 
+    await database.undoLastMigration();
     await database.undoLastMigration();
     await database.undoLastMigration();
 

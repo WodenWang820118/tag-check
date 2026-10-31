@@ -42,6 +42,7 @@ export class ReportTableDataSourceModelService {
             ...event,
             passed: result.testEventDetails?.passed ?? false,
             requestPassed: result.testEventDetails?.requestPassed ?? false,
+            requestChecked: result.testEventDetails?.requestChecked ?? true,
             message: result.testEvent?.message ?? event.message,
             updatedAt,
             lastRunAt: result.testEvent?.lastRunAt ?? updatedAt

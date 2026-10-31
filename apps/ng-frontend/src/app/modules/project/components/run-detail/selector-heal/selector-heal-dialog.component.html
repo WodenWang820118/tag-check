@@ -122,20 +122,32 @@
           @case ('done') {
             <p
               [class]="
-                current.result.passed && current.result.requestPassed
+                trialPassed(current.result)
                   ? 'm-0! text-[#1e6b34]'
                   : 'm-0! text-[#b3261e]'
               "
               role="status"
               data-testid="heal-trial-result"
             >
-              @if (current.result.passed && current.result.requestPassed) {
-                Both checks passed (run #{{ current.result.runId }}).
+              @if (trialPassed(current.result)) {
+                @if (current.result.requestChecked === false) {
+                  The dataLayer check passed; Request Check is off (run #{{
+                    current.result.runId
+                  }}).
+                } @else {
+                  Both checks passed (run #{{ current.result.runId }}).
+                }
               } @else {
                 The trial did not pass: dataLayer check
                 {{ current.result.passed ? 'passed' : 'failed' }}, request check
-                {{ current.result.requestPassed ? 'passed' : 'failed' }} (run
-                #{{ current.result.runId }}).
+                {{
+                  current.result.requestChecked === false
+                    ? 'not made'
+                    : current.result.requestPassed
+                      ? 'passed'
+                      : 'failed'
+                }}
+                (run #{{ current.result.runId }}).
               }
             </p>
           }

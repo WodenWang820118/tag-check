@@ -3,12 +3,16 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ActivatedRoute, provideRouter } from '@angular/router';
-import { REPORT_LIST_ITEM_SAMPLE } from '@utils';
+import {
+  REPORT_DETAIL_SAMPLE,
+  REPORT_LIST_ITEM_SAMPLE,
+  type ReportDetailResponse
+} from '@utils';
 import { BehaviorSubject, of } from 'rxjs';
 import { describe, expect, it } from 'vitest';
 import { TestRunningFacadeService } from '../../../../shared/services/facade/test-running-facade.service';
 import { ReportTableDataSourceModelService } from '../../services/report-table-data-source-model/report-table-data-source-model.service';
-import { ReportTableComponent } from './report-table.component';
+import { ReportTableComponent, runSnack } from './report-table.component';
 
 /** Items of GET /reports/:projectSlug as they arrive over HTTP. */
 const ran = JSON.parse(JSON.stringify(REPORT_LIST_ITEM_SAMPLE));
@@ -105,5 +109,43 @@ describe('ReportTableComponent', () => {
       null
     );
     expect(model.selection().hasValue()).toBe(false);
+  });
+});
+
+describe('runSnack', () => {
+  /** POST /datalayer's report, as JSON, with the run's checks set. */
+  function report(checks: {
+    passed: boolean;
+    requestPassed: boolean;
+    requestChecked?: boolean;
+  }): ReportDetailResponse {
+    const sample = JSON.parse(
+      JSON.stringify(REPORT_DETAIL_SAMPLE)
+    ) as ReportDetailResponse;
+    return {
+      ...sample,
+      testEventDetails: { ...sample.testEventDetails, ...checks }
+    } as ReportDetailResponse;
+  }
+
+  it('lists both checks of a run that made the request check', () => {
+    expect(runSnack(report({ passed: true, requestPassed: false }))).toEqual({
+      status: 'partial',
+      text: 'Test (add_to_cart) partial. DataLayer: ✓, Request: ✗'
+    });
+    expect(
+      runSnack(report({ passed: true, requestPassed: true })).text
+    ).toContain('Request: ✓');
+  });
+
+  it('says the request check was not made when Request Check was off', () => {
+    expect(
+      runSnack(
+        report({ passed: true, requestPassed: false, requestChecked: false })
+      )
+    ).toEqual({
+      status: 'passed',
+      text: 'Test (add_to_cart) passed. DataLayer: ✓, Request: not checked'
+    });
   });
 });

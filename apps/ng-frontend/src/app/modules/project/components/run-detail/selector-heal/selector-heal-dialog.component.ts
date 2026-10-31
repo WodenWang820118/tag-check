@@ -158,6 +158,16 @@ export class SelectorHealDialogComponent implements OnInit {
     }
   });
 
+  /**
+   * A trial passes on both checks, or on the dataLayer check alone when it
+   * made no request check (Request Check off).
+   */
+  trialPassed(result: SelectorTrialResponse): boolean {
+    return (
+      result.passed && (result.requestPassed || result.requestChecked === false)
+    );
+  }
+
   ngOnInit(): void {
     this.dialogRef
       .backdropClick()

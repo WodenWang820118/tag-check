@@ -15,7 +15,7 @@ TagCheck 的目標是在追蹤問題進入 Google Analytics 報表之前就把�
 
 正確的推送並不保證 GA4 中的資料正確。代碼可能沒有觸發、可能傳送到其他資源，也可能以 GA4 不會收集的形式傳送參數。請求檢查會查看實際離開瀏覽器的內容：它會攔截該事件傳送到專案評估 ID 的 GA4 請求，將請求參數重組成形狀類似 `dataLayer` 推送的物件，再將這個物件與同一份規格比對。如果沒有送出這樣的請求，或其參數不符，就會判定為失敗。
 
-請求檢查需要在 **Project Information** 中填寫評估 ID，並在 **Google Tag Manager** 設定中開啟 **Activate Request Check**。沒有請求檢查時，執行只會進行資料層檢查，測試最多只能達到 Partial。
+請求檢查需要在 **Project Information** 中填寫評估 ID，並在 **Google Tag Manager** 設定中開啟 **Activate Request Check**。沒有請求檢查時，執行只會進行資料層檢查：該次執行的請求檢查會顯示為 **Not checked**，狀態只依資料層檢查決定（Passed 或 Failed）。
 
 ## 解讀狀態
 

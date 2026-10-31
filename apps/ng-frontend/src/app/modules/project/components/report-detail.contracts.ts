@@ -62,6 +62,8 @@ export function toReportDetails(
     passed: testEventDetails?.passed ?? testEvent.passed ?? false,
     requestPassed:
       testEventDetails?.requestPassed ?? testEvent.requestPassed ?? false,
+    requestChecked:
+      testEventDetails?.requestChecked ?? testEvent.requestChecked ?? true,
     rawRequest: testEventDetails?.rawRequest,
     destinationUrl: testEventDetails?.destinationUrl ?? '',
     dataLayer: testEventDetails?.dataLayer,
@@ -141,20 +143,30 @@ export function getLastRunAt(
 
 /**
  * A test that has run passes when both the data layer and the request check
- * passed, and is partial when only one did.
+ * passed, and is partial when only one did. A run without the request check
+ * (Request Check off) is judged by its data layer check alone.
  */
 export function getRunStatus(
   report:
     | Pick<
         IReportDetails,
-        'createdAt' | 'updatedAt' | 'lastRunAt' | 'passed' | 'requestPassed'
+        | 'createdAt'
+        | 'updatedAt'
+        | 'lastRunAt'
+        | 'passed'
+        | 'requestPassed'
+        | 'requestChecked'
       >
     | undefined
 ): RunStatus {
   if (!report || !hasRun(report)) {
     return 'notRun';
   }
-  return getCheckStatus(report.passed, report.requestPassed);
+  return getCheckStatus(
+    report.passed,
+    report.requestPassed,
+    report.requestChecked
+  );
 }
 
 /** A status chip's label, icon and Material color. */

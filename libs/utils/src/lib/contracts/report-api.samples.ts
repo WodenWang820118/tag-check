@@ -28,6 +28,7 @@ export const REPORT_LIST_ITEM_SAMPLE = {
   hasRecording: true,
   passed: true,
   requestPassed: true,
+  requestChecked: true,
   lastRunAt: '2026-10-20T06:21:19.000Z'
 } satisfies Jsonified<AbstractTestEvent>;
 
@@ -44,11 +45,13 @@ export const REPORT_DETAIL_SAMPLE = {
     updatedAt: '2026-10-20T06:21:19.000Z',
     passed: true,
     requestPassed: true,
+    requestChecked: true,
     lastRunAt: '2026-10-20T06:21:19.000Z'
   },
   testEventDetails: {
     id: 7,
     requestPassed: true,
+    requestChecked: true,
     passed: true,
     message: 'Valid',
     requestMessage: 'Valid',
@@ -98,6 +101,7 @@ export const REPORT_DETAIL_SAMPLE = {
       runId: 7,
       passed: true,
       requestPassed: true,
+      requestChecked: true,
       runAt: '2026-10-20T06:21:19.000Z',
       hasRecording: true
     },
@@ -105,6 +109,7 @@ export const REPORT_DETAIL_SAMPLE = {
       runId: 5,
       passed: true,
       requestPassed: false,
+      requestChecked: true,
       runAt: '2026-10-20T06:18:52.000Z',
       hasRecording: true
     }
@@ -121,6 +126,7 @@ export const RUN_SUMMARY_SAMPLE = {
   testName: 'GA4 event - add_to_cart',
   passed: true,
   requestPassed: true,
+  requestChecked: true,
   runAt: '2026-10-20T06:21:19.000Z'
 } satisfies Jsonified<RunSummary>;
 

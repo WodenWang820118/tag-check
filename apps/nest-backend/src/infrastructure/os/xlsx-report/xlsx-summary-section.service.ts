@@ -31,7 +31,13 @@ export class XlsxSummarySectionService {
     const latest = report.latestTestEventDetail;
     const result =
       RESULT_CELLS[
-        latest ? getCheckStatus(latest.passed, latest.requestPassed) : 'notRun'
+        latest
+          ? getCheckStatus(
+              latest.passed,
+              latest.requestPassed,
+              latest.requestChecked
+            )
+          : 'notRun'
       ];
     const resultRow = worksheet.addRow(['Test Result:', result.text]);
 

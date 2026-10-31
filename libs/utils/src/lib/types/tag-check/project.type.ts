@@ -41,6 +41,8 @@ export type AbstractTestEvent = {
   // (AbstractTestEventResponseDto); it does not send latestTestEventDetail.
   passed?: boolean;
   requestPassed?: boolean;
+  /** Whether the latest run made the request check; missing reads as true. */
+  requestChecked?: boolean;
   /** When the latest run ran; null when the test has no run. */
   lastRunAt?: Date | null;
 } & TestEventSchema;

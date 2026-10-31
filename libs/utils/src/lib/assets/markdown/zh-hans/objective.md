@@ -15,7 +15,7 @@ TagCheck 旨在让追踪问题在进入 Google Analytics 报告之前就被发�
 
 推送正确并不能保证 GA4 中的数据正确。标签可能没有触发，可能发送到了另一个媒体资源，也可能以 GA4 不会收集的形式发送参数。请求检查关注的是实际离开浏览器的内容：它拦截发送到项目测量 ID 的该事件的 GA4 请求，将其参数重建为一个结构与 `dataLayer` 推送相同的对象，并将该对象与同一规格进行比较。如果没有发送此类请求，或者请求的参数不匹配，检查失败。
 
-请求检查需要在 **Project Information** 中填写测量 ID，并在 **Google Tag Manager** 设置中开启 **Activate Request Check**。否则，运行只会进行数据层检查，测试最多只能达到 Partial。
+请求检查需要在 **Project Information** 中填写测量 ID，并在 **Google Tag Manager** 设置中开启 **Activate Request Check**。否则，运行只会进行数据层检查：该次运行的请求检查显示为 **Not checked**，状态只由数据层检查决定（Passed 或 Failed）。
 
 ## 解读状态
 
