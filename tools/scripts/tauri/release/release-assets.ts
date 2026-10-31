@@ -35,6 +35,7 @@ import {
   releaseAssetsRoot,
   releaseManifestFileName,
   releasePlatformOrder,
+  stagedBackendResourcesDirectory,
   tauriConfigRelativePath,
   type ReleaseManifest,
   type ReleasePlatform
@@ -129,6 +130,10 @@ function cleanRawBundleDirectory(platform: ReleasePlatform) {
     force: true,
     recursive: true
   });
+}
+
+function cleanStagedBackendResources() {
+  rmSync(stagedBackendResourcesDirectory, { force: true, recursive: true });
 }
 
 function copyFileWithMode(sourcePath: string, targetPath: string) {
@@ -369,6 +374,7 @@ export async function bundleReleaseArtifact(
 ) {
   validateHostForPlatform(platform);
   cleanRawBundleDirectory(platform);
+  cleanStagedBackendResources();
 
   const releaseDirectory = resolveReleaseDirectory(platform);
   removeAndRecreateDirectory(releaseDirectory);

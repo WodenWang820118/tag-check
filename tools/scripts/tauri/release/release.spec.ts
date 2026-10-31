@@ -256,6 +256,7 @@ async function loadBundleReleaseTestModule(
   });
   const rawBundleDirectory = createFixtureDirectory();
   const releaseAssetsRoot = createFixtureDirectory();
+  const stagedBackendResourcesDirectory = createFixtureDirectory();
   const runSyncCommandOrThrow = vi.fn((input: unknown) => {
     if (options.buildError) {
       throw options.buildError;
@@ -303,6 +304,7 @@ async function loadBundleReleaseTestModule(
     return {
       ...actual,
       releaseAssetsRoot,
+      stagedBackendResourcesDirectory,
       releaseArtifactDefinitions: {
         ...actual.releaseArtifactDefinitions,
         windows: {
@@ -319,7 +321,8 @@ async function loadBundleReleaseTestModule(
     ...module,
     rawBundleDirectory,
     releaseAssetsRoot,
-    runSyncCommandOrThrow
+    runSyncCommandOrThrow,
+    stagedBackendResourcesDirectory
   };
 }
 
@@ -568,6 +571,25 @@ describe('release helper', () => {
     expect(readFileSync(manifestPath, 'utf8')).toContain(
       `"artifactName": "${buildArtifactName(fixtureVersion, 'windows')}"`
     );
+  });
+
+  it('removes the staged backend copy an earlier build left before bundling', async () => {
+    const { bundleReleaseArtifact, stagedBackendResourcesDirectory } =
+      await loadBundleReleaseTestModule();
+    const staleFile = join(
+      stagedBackendResourcesDirectory,
+      'node_modules',
+      'readdir-glob',
+      'node_modules',
+      'minimatch',
+      'package.json'
+    );
+    mkdirSync(join(staleFile, '..'), { recursive: true });
+    writeFileSync(staleFile, '{"version":"5.1.9"}', 'utf8');
+
+    await bundleReleaseArtifact('windows', fixtureVersion);
+
+    expect(existsSync(stagedBackendResourcesDirectory)).toBe(false);
   });
 
   it('validates a built release artifact and checksum', async () => {
