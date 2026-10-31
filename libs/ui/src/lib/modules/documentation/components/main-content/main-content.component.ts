@@ -3,14 +3,12 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  DestroyRef,
   inject,
-  PLATFORM_ID,
-  OnInit,
-  signal
+  linkedSignal,
+  PLATFORM_ID
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { MarkdownComponent } from 'ngx-markdown';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -41,29 +39,33 @@ import { buildHeadingIds } from './heading-ids';
   styleUrls: ['./main-content.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MainContentComponent implements OnInit {
+export class MainContentComponent {
   public route = inject(ActivatedRoute);
-  private readonly destroyedRef = inject(DestroyRef);
   private readonly platformId = inject(PLATFORM_ID);
   private readonly document = inject(DOCUMENT);
 
-  private readonly contentSignal = signal<string>('');
-  private readonly tocSignal = signal<{ id: string; text: string }[]>([]);
+  private readonly routeData = toSignal(this.route.data);
+
+  private readonly contentSignal = computed(() => {
+    const data = this.routeData();
+    const fullData = data
+      ? (data['data'] as { content?: string } | undefined)
+      : undefined;
+    return fullData?.content ?? '';
+  });
+
+  private readonly tocSignal = linkedSignal<
+    string,
+    { id: string; text: string }[]
+  >({
+    source: this.contentSignal,
+    computation: () => []
+  });
 
   readonly content = computed(() => this.contentSignal());
   readonly toc = computed(() => this.tocSignal());
 
   activeSection: string | null = null;
-
-  ngOnInit() {
-    this.route.data
-      .pipe(takeUntilDestroyed(this.destroyedRef))
-      .subscribe((data) => {
-        const fullData = data['data'];
-        this.contentSignal.set((fullData['content'] as string) ?? '');
-        this.tocSignal.set([]);
-      });
-  }
 
   scrollToSection(sectionId: string) {
     if (!isPlatformBrowser(this.platformId)) {

@@ -5,7 +5,6 @@ import {
   signal,
   ChangeDetectionStrategy
 } from '@angular/core';
-import { from } from 'rxjs';
 import { MatDialog, MatDialogContent } from '@angular/material/dialog';
 import { ErrorDialogComponent } from '../error-dialog/error-dialog.component';
 import { EditorFacadeService } from '@data-access';
@@ -123,7 +122,7 @@ export class FileUploadDialogComponent {
 
       if (fileExtension === 'json') {
         this.selectedFile = file;
-        this.handleJsonFile(file);
+        await this.handleJsonFile(file);
       } else if (fileExtension === 'csv') {
         this.selectedFile = file;
         await this.handleMeasurementPlanFile(file);
@@ -268,34 +267,35 @@ export class FileUploadDialogComponent {
     return true;
   }
 
-  handleJsonFile(file: File): void {
-    this.readJsonFileContent(file);
+  async handleJsonFile(file: File): Promise<void> {
+    await this.readJsonFileContent(file);
   }
 
-  readJsonFileContent(file: File): void {
-    from(file.text()).subscribe({
-      next: (fileContentString: string) => {
-        try {
-          this.fileContent.set(
-            JSON.parse(fileContentString) as Record<string, unknown>
-          );
-        } catch (error) {
-          console.error('Error parsing JSON file:', error);
-          this.dialog.open(ErrorDialogComponent, {
-            data: {
-              message: 'Error parsing JSON file. Please try again.'
-            }
-          });
+  async readJsonFileContent(file: File): Promise<void> {
+    let fileContentString: string;
+    try {
+      fileContentString = await file.text();
+    } catch (err) {
+      console.error('Error reading file:', err);
+      this.dialog.open(ErrorDialogComponent, {
+        data: {
+          message: 'Error reading file. Please try again.'
         }
-      },
-      error: (err) => {
-        console.error('Error reading file:', err);
-        this.dialog.open(ErrorDialogComponent, {
-          data: {
-            message: 'Error reading file. Please try again.'
-          }
-        });
-      }
-    });
+      });
+      return;
+    }
+
+    try {
+      this.fileContent.set(
+        JSON.parse(fileContentString) as Record<string, unknown>
+      );
+    } catch (error) {
+      console.error('Error parsing JSON file:', error);
+      this.dialog.open(ErrorDialogComponent, {
+        data: {
+          message: 'Error parsing JSON file. Please try again.'
+        }
+      });
+    }
   }
 }
