@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { createWriteStream } from 'fs';
-import archiver from 'archiver';
+import { ZipArchive } from 'archiver';
 
 export interface ExtraFileDescriptor {
   path: string;
@@ -22,7 +22,7 @@ export class ProjectCompressor {
       `Compressing project '${projectSlug}' at ${projectFolderPath} to ${outputPath}`
     );
     const output = createWriteStream(outputPath);
-    const archive = archiver('zip', { zlib: { level: 9 } });
+    const archive = new ZipArchive({ zlib: { level: 9 } });
 
     archive.pipe(output);
 

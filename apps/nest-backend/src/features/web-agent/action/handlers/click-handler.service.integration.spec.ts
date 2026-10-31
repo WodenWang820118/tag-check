@@ -17,13 +17,9 @@ import { EvaluateClickService } from '../strategies/click-strategies/evaluate-cl
 import { ActionUtilsService } from '../action-utils/action-utils.service';
 import type { Step } from '@utils';
 
-const chromeAvailable = (() => {
-  try {
-    return existsSync(puppeteer.executablePath());
-  } catch {
-    return false;
-  }
-})();
+const chromeAvailable = await puppeteer
+  .executablePath()
+  .then(existsSync, () => false);
 
 const fixture = `<!doctype html><title>Bookmark fixture</title>
 <a id="next" href="/next"><span>Next page</span></a>

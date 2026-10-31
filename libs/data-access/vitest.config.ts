@@ -3,6 +3,7 @@ import { defineConfig } from 'vitest/config';
 
 // Mirror the Angular-friendly settings from vite.config.mts so TestBed is initialized.
 export default defineConfig({
+  root: import.meta.dirname,
   resolve: {
     tsconfigPaths: true
   },

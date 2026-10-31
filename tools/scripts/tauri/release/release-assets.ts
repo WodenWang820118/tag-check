@@ -14,7 +14,7 @@ import {
 } from 'node:fs';
 import { basename, dirname, join, relative } from 'node:path';
 
-import archiver from 'archiver';
+import { TarArchive } from 'archiver';
 
 import {
   getShellSafePackageManagerCommand,
@@ -150,7 +150,7 @@ async function hashFile(targetPath: string) {
 async function archiveDirectoryAsTarGz(sourcePath: string, targetPath: string) {
   await new Promise<void>((resolve, reject) => {
     const output = createWriteStream(targetPath);
-    const archive = archiver('tar', {
+    const archive = new TarArchive({
       gzip: true,
       gzipOptions: { level: 9 }
     });
