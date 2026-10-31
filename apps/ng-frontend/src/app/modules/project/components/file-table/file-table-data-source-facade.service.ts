@@ -1,7 +1,7 @@
-import { effect, inject, Injectable, signal } from '@angular/core';
+import { effect, inject, Injectable, signal, untracked } from '@angular/core';
 import { FileTableDataSourceService } from '../../../../shared/services/data-source/file-table-data-source.service';
 import { FileReportService } from '../../../../shared/services/api/file-report/file-report.service';
-import { take } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { MatTableDataSource } from '@angular/material/table';
 import { Jsonified, RunSummary } from '@utils';
 import { MatPaginator } from '@angular/material/paginator';
@@ -46,50 +46,55 @@ export class FileTableDataSourceFacadeService {
       }
     });
     effect(() => {
-      const deletedSignal = this.fileTableDataSourceService.getDeletedSignal();
-      if (deletedSignal) {
-        const dialogRef = this.dialog.open(InformationDialogComponent, {
-          data: {
-            title: 'Delete runs',
-            contents:
-              'Delete the selected runs and their screenshots? The tests stay, and a test whose latest run is deleted shows its previous run.',
-            action: 'Delete',
-            actionColor: 'warn',
-            consent: false
-          }
-        });
-        dialogRef.afterClosed().subscribe((result) => {
-          if (result) {
-            this.handleReportDeletion();
-          }
-          this.fileTableDataSourceService.setDeletedSignal(false);
-        });
+      if (this.fileTableDataSourceService.getDeletedSignal()) {
+        untracked(() => void this.confirmRunDeletion());
       }
     });
     effect(() => {
-      const downloadSignal =
-        this.fileTableDataSourceService.getDownloadSignal();
-      if (downloadSignal) {
-        const dialogRef = this.dialog.open(InformationDialogComponent, {
-          data: {
-            title: 'Download Reports',
-            contents: 'Are you sure you want to download the selected reports?',
-            action: 'Download',
-            actionColor: 'primary',
-            consent: false
-          }
-        });
-        dialogRef.afterClosed().subscribe((result) => {
-          if (result) {
-            this.handleReportDownload(
-              this.projectSlug(),
-              this.fileTableDataSourceModelService.selection().selected
-            );
-          }
-          this.fileTableDataSourceService.setDownloadSignal(false);
-        });
+      if (this.fileTableDataSourceService.getDownloadSignal()) {
+        untracked(() => void this.confirmReportDownload());
       }
     });
+  }
+
+  /** Asks before deleting the selected runs; the request flag resets on close. */
+  private async confirmRunDeletion(): Promise<void> {
+    const dialogRef = this.dialog.open(InformationDialogComponent, {
+      data: {
+        title: 'Delete runs',
+        contents:
+          'Delete the selected runs and their screenshots? The tests stay, and a test whose latest run is deleted shows its previous run.',
+        action: 'Delete',
+        actionColor: 'warn',
+        consent: false
+      }
+    });
+    const result = await firstValueFrom(dialogRef.afterClosed());
+    this.fileTableDataSourceService.setDeletedSignal(false);
+    if (result) {
+      await this.handleReportDeletion();
+    }
+  }
+
+  /** Asks before downloading the selected reports; the flag resets on close. */
+  private async confirmReportDownload(): Promise<void> {
+    const dialogRef = this.dialog.open(InformationDialogComponent, {
+      data: {
+        title: 'Download Reports',
+        contents: 'Are you sure you want to download the selected reports?',
+        action: 'Download',
+        actionColor: 'primary',
+        consent: false
+      }
+    });
+    const result = await firstValueFrom(dialogRef.afterClosed());
+    this.fileTableDataSourceService.setDownloadSignal(false);
+    if (result) {
+      await this.handleReportDownload(
+        this.projectSlug(),
+        this.fileTableDataSourceModelService.selection().selected
+      );
+    }
   }
 
   /**
@@ -112,37 +117,42 @@ export class FileTableDataSourceFacadeService {
   }
 
   /** Deletes the selected runs, then drops the rows the server deleted. */
-  private handleReportDeletion() {
+  private async handleReportDeletion(): Promise<void> {
     const selection = this.fileTableDataSourceModelService.selection();
     const runIds = selection.selected.map((run) => run.runId);
     if (runIds.length === 0) {
       return;
     }
-    this.fileReportService
-      .deleteRuns(this.projectSlug(), runIds)
-      .pipe(take(1))
-      .subscribe(({ deletedRunIds }) => {
-        const deleted = new Set(deletedRunIds);
-        const dataSource = this.fileTableDataSourceModelService.dataSource();
-        const remaining = dataSource.data.filter(
-          (run) => !deleted.has(run.runId)
-        );
-        dataSource.data = remaining;
-        this.fileTableDataSourceService.setData(remaining);
-        selection.clear();
-      });
+    try {
+      const { deletedRunIds } = await firstValueFrom(
+        this.fileReportService.deleteRuns(this.projectSlug(), runIds)
+      );
+      const deleted = new Set(deletedRunIds);
+      const dataSource = this.fileTableDataSourceModelService.dataSource();
+      const remaining = dataSource.data.filter(
+        (run) => !deleted.has(run.runId)
+      );
+      dataSource.data = remaining;
+      this.fileTableDataSourceService.setData(remaining);
+      selection.clear();
+    } catch {
+      // error handled in service
+    }
   }
 
-  private handleReportDownload(
+  private async handleReportDownload(
     projectSlug: string,
     selected: Jsonified<RunSummary>[]
-  ) {
+  ): Promise<void> {
     // The spreadsheet covers whole tests, so each test is listed once.
     const eventIds = [...new Set(selected.map((item) => item.eventId))];
-    this.fileReportService
-      .downloadFileReports(projectSlug, eventIds)
-      .pipe(take(1))
-      .subscribe();
+    try {
+      await firstValueFrom(
+        this.fileReportService.downloadFileReports(projectSlug, eventIds)
+      );
+    } catch {
+      // error handled in service
+    }
   }
 
   toggleAllRows() {
