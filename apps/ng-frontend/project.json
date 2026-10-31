@@ -10,6 +10,7 @@
     "build": {
       "executor": "@angular/build:application",
       "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
       "options": {
         "outputPath": "dist/apps/ng-frontend",
         "index": "apps/ng-frontend/src/index.html",
@@ -137,11 +138,11 @@
             }
           ]
         }
-      },
-      "defaultConfiguration": "production"
+      }
     },
     "serve": {
       "executor": "@angular/build:dev-server",
+      "defaultConfiguration": "development",
       "configurations": {
         "production": {
           "buildTarget": "ng-frontend:build:production"
@@ -161,11 +162,11 @@
         "staging": {
           "buildTarget": "ng-frontend:build:staging"
         }
-      },
-      "defaultConfiguration": "development"
+      }
     },
     "mock": {
       "executor": "@angular/build:dev-server",
+      "defaultConfiguration": "development",
       "configurations": {
         "development": {
           "buildTarget": "ng-frontend:build:development",
@@ -176,11 +177,11 @@
             }
           ]
         }
-      },
-      "defaultConfiguration": "development"
+      }
     },
     "staging": {
       "executor": "@angular/build:dev-server",
+      "defaultConfiguration": "development",
       "configurations": {
         "development": {
           "buildTarget": "ng-frontend:build:development",
@@ -191,8 +192,7 @@
             }
           ]
         }
-      },
-      "defaultConfiguration": "development"
+      }
     },
     "extract-i18n": {
       "executor": "@angular/build:extract-i18n",
@@ -214,7 +214,11 @@
       "options": {
         "buildTarget": "ng-frontend:build",
         "staticFilePath": "dist/apps/ng-frontend/browser"
-      }
+      },
+      "readyWhen": {
+        "signal": true
+      },
+      "dependsOn": ["build"]
     },
     "storybook": {
       "executor": "@storybook/angular:start-storybook",

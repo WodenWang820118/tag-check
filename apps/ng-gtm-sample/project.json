@@ -10,6 +10,7 @@
     "build": {
       "executor": "@angular-devkit/build-angular:application",
       "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
       "options": {
         "outputPath": "dist/apps/ng-gtm-sample",
         "index": "apps/ng-gtm-sample/src/index.html",
@@ -61,12 +62,12 @@
           "extractLicenses": false,
           "sourceMap": true
         }
-      },
-      "defaultConfiguration": "production"
+      }
     },
     "serve": {
       "continuous": true,
       "executor": "@angular-devkit/build-angular:dev-server",
+      "defaultConfiguration": "development",
       "configurations": {
         "production": {
           "buildTarget": "ng-gtm-sample:build:production"
@@ -74,8 +75,7 @@
         "development": {
           "buildTarget": "ng-gtm-sample:build:development"
         }
-      },
-      "defaultConfiguration": "development"
+      }
     },
     "extract-i18n": {
       "executor": "@angular-devkit/build-angular:extract-i18n",
@@ -139,7 +139,11 @@
         "port": 4200,
         "staticFilePath": "dist/apps/ng-gtm-sample/browser",
         "spa": false
-      }
+      },
+      "readyWhen": {
+        "signal": true
+      },
+      "dependsOn": ["build"]
     }
   }
 }
