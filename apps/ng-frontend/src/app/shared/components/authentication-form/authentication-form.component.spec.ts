@@ -19,7 +19,7 @@ describe('AuthenticationFormComponent', () => {
       projectName: 'Demo',
       authenticationSettings: {
         username: 'admin',
-        password: 'secret-password'
+        password: 'pw'
       }
     };
     await TestBed.configureTestingModule({
@@ -44,10 +44,10 @@ describe('AuthenticationFormComponent', () => {
     const comp = fixture.componentInstance;
 
     expect(comp.f.username().value()).toBe('admin');
-    expect(comp.f.password().value()).toBe('secret-password');
+    expect(comp.f.password().value()).toBe('pw');
 
     comp.f.username().value.set('new-admin');
-    comp.f.password().value.set('new-pass');
+    comp.f.password().value.set('pw2');
     const saving = comp.onSubmit();
     const save = await vi.waitFor(() =>
       http.expectOne(`${environment.settingsApiUrl}/demo/authentication`)
@@ -55,13 +55,13 @@ describe('AuthenticationFormComponent', () => {
     expect(save.request.method).toBe('PUT');
     expect(save.request.body).toEqual({
       username: 'new-admin',
-      password: 'new-pass'
+      password: 'pw2'
     });
     save.flush({
       ...projectInfo,
       authenticationSettings: {
         username: 'new-admin',
-        password: 'new-pass'
+        password: 'pw2'
       }
     });
     await saving;
