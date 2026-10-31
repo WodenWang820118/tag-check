@@ -203,4 +203,88 @@ describe('PlanEditorDialogComponent', () => {
       );
     expect(nameInput?.value).toBe('custom_conversion');
   });
+
+  it('keeps every typed cell in the service', () => {
+    const type = (testId: string, value: string) => {
+      const input: HTMLInputElement | null =
+        fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+      if (!input) throw new Error(`${testId} not found`);
+      input.value = value;
+      input.dispatchEvent(new Event('input'));
+    };
+
+    type('plan-editor-event-name-0', 'add_to_cart');
+    type('plan-editor-event-parameters-0', 'currency=USD, value');
+    type('plan-editor-item-parameters-0', 'item_id, price');
+
+    expect(planEditorService.rows()).toEqual([
+      {
+        eventName: 'add_to_cart',
+        eventParameters: 'currency=USD, value',
+        itemParameters: 'item_id, price'
+      }
+    ]);
+  });
+
+  it('adds an empty row when opened with no rows', () => {
+    planEditorService.setRows([]);
+
+    const reopened = TestBed.createComponent(PlanEditorDialogComponent);
+    reopened.detectChanges();
+
+    expect(planEditorService.rows()).toHaveLength(1);
+  });
+
+  it('does not use a plan that has issues', () => {
+    planEditorService.setRows([
+      { eventName: 'Bad Name!', eventParameters: '', itemParameters: '' }
+    ]);
+
+    component.usePlan();
+
+    expect(editorFacade.inputJsonContent).toBeNull();
+    expect(dialogRef.close).not.toHaveBeenCalled();
+  });
+
+  it('leaves blank rows out of the downloaded CSV', () => {
+    let capturedCsv = '';
+    vi.spyOn(spreadsheet, 'downloadCsv').mockImplementation((csv: string) => {
+      capturedCsv = csv;
+    });
+    planEditorService.setRows([
+      { eventName: '', eventParameters: '', itemParameters: '' },
+      { eventName: 'login', eventParameters: 'method', itemParameters: '' },
+      { eventName: ' ', eventParameters: '', itemParameters: '' }
+    ]);
+
+    component.downloadCsv();
+
+    expect(parseCsvToTable(capturedCsv)).toEqual([
+      ['event_name', 'event_parameters', 'item_parameters'],
+      ['login', 'method', '']
+    ]);
+  });
+});
+
+describe('PlanEditorService', () => {
+  it('ignores updates to a row that does not exist', () => {
+    const service = new PlanEditorService();
+    const before = service.rows();
+
+    service.updateRow(3, 'eventName', 'purchase');
+
+    expect(service.rows()).toBe(before);
+  });
+
+  it('appends a given row', () => {
+    const service = new PlanEditorService();
+    const row = { eventName: 'login', eventParameters: '', itemParameters: '' };
+
+    service.addRow(row);
+
+    expect(service.rows()).toEqual([
+      { eventName: '', eventParameters: '', itemParameters: '' },
+      row
+    ]);
+  });
 });

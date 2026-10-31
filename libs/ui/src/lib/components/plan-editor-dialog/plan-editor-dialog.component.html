@@ -52,7 +52,7 @@
                 type="text"
                 [attr.data-testid]="'plan-editor-event-name-' + i"
                 [value]="row.eventName"
-                (input)="onEventNameInput(i, $event)"
+                (input)="onCellInput(i, 'eventName', $event)"
                 placeholder="purchase"
                 class="w-full text-[1.4rem] px-3 py-2 border border-gray-300 rounded bg-white text-gray-900 focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
               />
@@ -62,7 +62,7 @@
                 type="text"
                 [attr.data-testid]="'plan-editor-event-parameters-' + i"
                 [value]="row.eventParameters"
-                (input)="onEventParametersInput(i, $event)"
+                (input)="onCellInput(i, 'eventParameters', $event)"
                 placeholder="currency=TWD, value"
                 class="w-full text-[1.4rem] px-3 py-2 border border-gray-300 rounded bg-white text-gray-900 focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
               />
@@ -72,7 +72,7 @@
                 type="text"
                 [attr.data-testid]="'plan-editor-item-parameters-' + i"
                 [value]="row.itemParameters"
-                (input)="onItemParametersInput(i, $event)"
+                (input)="onCellInput(i, 'itemParameters', $event)"
                 placeholder="item_id, item_name, price"
                 class="w-full text-[1.4rem] px-3 py-2 border border-gray-300 rounded bg-white text-gray-900 focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
               />

@@ -23,7 +23,10 @@ import {
   downloadCsv,
   MEASUREMENT_PLAN_FILE_NAME
 } from '../file-upload-dialog/measurement-plan-spreadsheet';
-import { PlanEditorService } from './plan-editor.service';
+import {
+  PlanEditorService,
+  type PlanEditorTableRow
+} from './plan-editor.service';
 
 /**
  * An in-app measurement plan editor table: allows keying in event rows
@@ -96,24 +99,13 @@ export class PlanEditorDialogComponent implements OnInit {
     this.planEditorService.deleteRow(index);
   }
 
-  onEventNameInput(index: number, event: Event): void {
-    const target = event.target as HTMLInputElement | null;
-    if (target) {
-      this.planEditorService.updateRow(index, 'eventName', target.value);
-    }
-  }
-
-  onEventParametersInput(index: number, event: Event): void {
-    const target = event.target as HTMLInputElement | null;
-    if (target) {
-      this.planEditorService.updateRow(index, 'eventParameters', target.value);
-    }
-  }
-
-  onItemParametersInput(index: number, event: Event): void {
-    const target = event.target as HTMLInputElement | null;
-    if (target) {
-      this.planEditorService.updateRow(index, 'itemParameters', target.value);
+  onCellInput(
+    index: number,
+    field: keyof PlanEditorTableRow,
+    event: Event
+  ): void {
+    if (event.target instanceof HTMLInputElement) {
+      this.planEditorService.updateRow(index, field, event.target.value);
     }
   }
 
@@ -128,15 +120,12 @@ export class PlanEditorDialogComponent implements OnInit {
   }
 
   downloadCsv(): void {
-    const currentRows = this.rows();
-    const nonBlank = currentRows.filter(
+    const filled = this.rows().filter(
       (r) =>
         r.eventName.trim() !== '' ||
         r.eventParameters.trim() !== '' ||
         r.itemParameters.trim() !== ''
     );
-    const toExport = nonBlank.length > 0 ? nonBlank : currentRows;
-    const csv = buildMeasurementPlanCsv(toExport);
-    downloadCsv(csv, MEASUREMENT_PLAN_FILE_NAME);
+    downloadCsv(buildMeasurementPlanCsv(filled), MEASUREMENT_PLAN_FILE_NAME);
   }
 }
