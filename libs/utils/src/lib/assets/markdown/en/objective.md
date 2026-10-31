@@ -15,7 +15,7 @@ The site pushes data into `window.dataLayer`, and GTM reads it to fill its tags.
 
 A correct push does not guarantee correct data in GA4. The tag may not fire, may send to another property, or may send parameters in a form GA4 does not collect. The request check looks at what actually leaves the browser: it intercepts the GA4 request for the event sent to the project's measurement ID, rebuilds its parameters into an object shaped like a `dataLayer` push, and compares that object with the same spec. It fails when no such request is sent or when its parameters do not match.
 
-The request check needs a measurement ID in **Project Information** and **Activate Request Check** turned on in the **Google Tag Manager** settings. Without it, runs make only the data layer check, and a test can reach Partial at best.
+The request check needs a measurement ID in **Project Information** and **Activate Request Check** turned on in the **Google Tag Manager** settings. Without it, runs make only the data layer check: a run then shows its request check as **Not checked**, and its status follows the data layer check alone (Passed or Failed).
 
 ## Reading the status
 

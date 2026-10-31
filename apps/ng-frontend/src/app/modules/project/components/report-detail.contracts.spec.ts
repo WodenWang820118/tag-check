@@ -48,6 +48,20 @@ describe('getRunStatus', () => {
     expect(getRunStatus(report(false, false))).toBe('failed');
   });
 
+  it('judges a test whose latest run made no request check by its data layer check', () => {
+    // An item of GET /reports/:projectSlug for a project with Request Check off.
+    const item = JSON.parse(
+      JSON.stringify({
+        ...REPORT_LIST_ITEM_SAMPLE,
+        requestPassed: false,
+        requestChecked: false
+      })
+    );
+
+    expect(getRunStatus(item)).toBe('passed');
+    expect(getRunStatus({ ...item, passed: false })).toBe('failed');
+  });
+
   it('follows lastRunAt from GET /reports when the API sends it', () => {
     // An item of GET /reports/:projectSlug as it arrives over HTTP.
     const item = JSON.parse(JSON.stringify(REPORT_LIST_ITEM_SAMPLE));

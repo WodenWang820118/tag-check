@@ -12,7 +12,7 @@ import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { DatePipe, CommonModule } from '@angular/common';
 import { MatSort, Sort, MatSortModule } from '@angular/material/sort';
-import { getCheckStatus, Jsonified, RunSummary } from '@utils';
+import { getCheckStatus, Jsonified, RunStatus, RunSummary } from '@utils';
 import { MatInputModule } from '@angular/material/input';
 import { FileTableDataSourceFacadeService } from './file-table-data-source-facade.service';
 import { ActivatedRoute } from '@angular/router';
@@ -22,6 +22,13 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RunStatusChipComponent } from '../run-status-chip/run-status-chip.component';
 import { FileTableDataSourceService } from '../../../../shared/services/data-source/file-table-data-source.service';
+
+/** Sorting by status puts Passed above Partial above Failed. */
+const STATUS_SORT_ORDER: Record<Exclude<RunStatus, 'notRun'>, number> = {
+  passed: 3,
+  partial: 2,
+  failed: 1
+};
 
 /**
  * The Reports page's table: one row per run with its status, sortable
@@ -92,13 +99,8 @@ export class FileTableComponent implements OnInit {
         {
           name: 'status',
           type: 'number',
-          accessor: (row: Jsonified<RunSummary>) => {
-            const dl = row?.passed === true;
-            const req = row?.requestPassed === true;
-            if (dl && req) return 3; // Passed
-            if (dl || req) return 2; // Partial
-            return 1; // Failed
-          }
+          accessor: (row: Jsonified<RunSummary>) =>
+            STATUS_SORT_ORDER[this.runStatus(row)]
         },
         {
           name: 'completedTime',
@@ -111,7 +113,7 @@ export class FileTableComponent implements OnInit {
 
   /** Every listed run finished, so its status follows from its two checks. */
   runStatus(run: Jsonified<RunSummary>) {
-    return getCheckStatus(run.passed, run.requestPassed);
+    return getCheckStatus(run.passed, run.requestPassed, run.requestChecked);
   }
 
   // The following getters make it easier to use signals in the template:

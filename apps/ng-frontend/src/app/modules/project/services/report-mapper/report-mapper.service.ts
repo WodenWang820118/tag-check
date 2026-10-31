@@ -34,6 +34,7 @@ export class ReportMapperService {
         // latestTestEventDetail is only a fallback for nested payloads.
         passed: e.passed ?? d?.passed ?? false,
         requestPassed: e.requestPassed ?? d?.requestPassed ?? false,
+        requestChecked: e.requestChecked ?? d?.requestChecked ?? true,
         hasRecording: e.hasRecording ?? false,
         // Null once every run is deleted; the row's status needs it.
         lastRunAt: e.lastRunAt,

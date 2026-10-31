@@ -77,4 +77,24 @@ describe('Ga4RequestComponent', () => {
       fixture.nativeElement.querySelector('[data-testid="ga4-request-copy"]')
     ).toBeNull();
   });
+
+  it('says the request was not checked, without hints, when the run skipped the check', () => {
+    TestBed.configureTestingModule({ imports: [Ga4RequestComponent] });
+    const fixture = TestBed.createComponent(Ga4RequestComponent);
+    fixture.componentRef.setInput('rawRequest', '');
+    fixture.componentRef.setInput('requestPassed', false);
+    fixture.componentRef.setInput('requestChecked', false);
+    fixture.componentRef.setInput('eventName', 'add_to_cart');
+    fixture.detectChanges();
+    const element: HTMLElement = fixture.nativeElement;
+
+    expect(
+      element.querySelector('[data-testid="ga4-request-not-checked"]')
+        ?.textContent
+    ).toContain('Not checked');
+    expect(
+      element.querySelector('[data-testid="ga4-request-missing"]')
+    ).toBeNull();
+    expect(element.textContent).not.toContain('Where to look');
+  });
 });

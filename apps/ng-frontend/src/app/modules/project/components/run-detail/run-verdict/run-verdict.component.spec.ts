@@ -78,6 +78,25 @@ describe('RunVerdictComponent', () => {
     ).toHaveLength(2);
   });
 
+  it('shows a run without the request check as passed, with the request check not checked', () => {
+    const run = {
+      ...sample().testEventDetails,
+      requestPassed: false,
+      requestChecked: false,
+      rawRequest: ''
+    } as TestEventDetailSchema;
+    const { fixture, text } = render(run);
+
+    expect(fixture.componentInstance.status()).toBe('passed');
+    expect(text('run-check-request')).toContain('Not checked');
+    expect(text('run-check-request-text')).toBe(
+      'Request Check was off for this run, so it made no GA4 request check.'
+    );
+    expect(
+      fixture.nativeElement.querySelectorAll('.verdict-card--failed')
+    ).toHaveLength(0);
+  });
+
   it('links each recent run, oldest first, and marks the shown one', () => {
     const { fixture, text } = render(sample().testEventDetails);
 

@@ -23,6 +23,11 @@ export class CreateTestEventDetailDto implements TestEventDetail {
   @Expose({ name: 'request_passed' })
   requestPassed!: boolean;
 
+  /** Whether the run made the GA4 request check; true when left out. */
+  @IsOptional()
+  @IsBoolean()
+  requestChecked?: boolean;
+
   @IsNotEmpty()
   @IsBoolean()
   passed!: boolean;

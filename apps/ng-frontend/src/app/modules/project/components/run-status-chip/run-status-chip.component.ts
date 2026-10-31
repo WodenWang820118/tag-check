@@ -10,8 +10,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { RunStatus } from '@utils';
 import { STATUS_BADGES } from '../report-detail.contracts';
 
-const checkLabel = (passed: boolean | undefined) =>
-  passed === true ? 'Passed' : 'Failed';
+const checkLabel = (passed: boolean | undefined, checked = true) =>
+  !checked ? 'Not checked' : passed === true ? 'Passed' : 'Failed';
 
 /**
  * One chip for the status of a test or a run: Passed, Partial, Failed,
@@ -64,6 +64,8 @@ export class RunStatusChipComponent {
   passed = input<boolean | undefined>();
   /** The request check, for the tooltip of a run that finished. */
   requestPassed = input<boolean | undefined>();
+  /** Whether the run made the request check; missing reads as true. */
+  requestChecked = input<boolean | undefined>();
 
   readonly badge = computed(() => STATUS_BADGES[this.status()]);
   readonly checks = computed(() => {
@@ -73,7 +75,7 @@ export class RunStatusChipComponent {
       case 'running':
         return 'Running';
       default:
-        return `Data layer: ${checkLabel(this.passed())} · Request: ${checkLabel(this.requestPassed())}`;
+        return `Data layer: ${checkLabel(this.passed())} · Request: ${checkLabel(this.requestPassed(), this.requestChecked() !== false)}`;
     }
   });
 }

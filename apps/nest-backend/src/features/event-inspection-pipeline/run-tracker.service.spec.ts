@@ -51,9 +51,13 @@ describe('toRunOutcome', () => {
   it('reads the two checks as they are saved', () => {
     expect(toRunOutcome(checks(true, true))).toBe('passed');
     expect(toRunOutcome(checks(true, false))).toBe('partial');
-    expect(toRunOutcome(checks(true, null))).toBe('partial');
     expect(toRunOutcome(checks(false, true))).toBe('partial');
     expect(toRunOutcome(checks(false, false))).toBe('failed');
+  });
+
+  it('judges a run without the request check (null) by its data layer check alone', () => {
+    expect(toRunOutcome(checks(true, null))).toBe('passed');
+    expect(toRunOutcome(checks(false, null))).toBe('failed');
   });
 
   it('reads a run saved as failed (no data) as failed', () => {

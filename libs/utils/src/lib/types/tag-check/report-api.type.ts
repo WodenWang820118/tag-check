@@ -37,6 +37,8 @@ export type RunSummary = {
   testName: string;
   passed: boolean;
   requestPassed: boolean;
+  /** Whether the run made the request check; missing reads as true. */
+  requestChecked?: boolean;
   /** When the run's result was saved. */
   runAt: Date;
 };
@@ -79,6 +81,8 @@ export type RunHistoryEntry = {
   runId: number;
   passed: boolean;
   requestPassed: boolean;
+  /** Whether the run made the request check; missing reads as true. */
+  requestChecked?: boolean;
   /** When the run's result was saved. */
   runAt: Date;
   /**

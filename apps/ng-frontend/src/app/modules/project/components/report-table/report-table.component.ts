@@ -201,9 +201,11 @@ export class ReportTableComponent {
   private showSnack(report: ReportDetailResponse) {
     const dl = report.testEventDetails?.passed === true;
     const req = report.testEventDetails?.requestPassed === true;
-    const status = getCheckStatus(dl, req);
+    const checked = report.testEventDetails?.requestChecked !== false;
+    const status = getCheckStatus(dl, req, checked);
+    const request = !checked ? 'not checked' : req ? '✓' : '✗';
     this.snackBar.open(
-      `Test (${report.testEvent.eventName}) ${status}. DataLayer: ${dl ? '✓' : '✗'}, Request: ${req ? '✓' : '✗'}`,
+      `Test (${report.testEvent.eventName}) ${status}. DataLayer: ${dl ? '✓' : '✗'}, Request: ${request}`,
       'Close',
       {
         duration: 10000,

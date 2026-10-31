@@ -23,6 +23,8 @@ import { summarizeGa4Collect } from '@utils';
 export class Ga4RequestComponent {
   rawRequest = input<string | undefined>(undefined);
   requestPassed = input(false);
+  /** False when the run made no request check (Request Check off). */
+  requestChecked = input(true);
   eventName = input('');
 
   readonly summary = computed(() => {
