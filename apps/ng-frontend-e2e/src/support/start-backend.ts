@@ -9,11 +9,16 @@ const workspaceRoot = resolve(
   fileURLToPath(new URL('../../../..', import.meta.url))
 );
 
-const buildResult = spawnSync('pnpm exec nx run nest-backend:build', {
-  cwd: workspaceRoot,
-  shell: true,
-  stdio: 'inherit'
-});
+// Node and Nx by absolute path: no shell, no PATH lookup.
+const buildResult = spawnSync(
+  process.execPath,
+  [
+    resolve(workspaceRoot, 'node_modules/nx/dist/bin/nx.js'),
+    'run',
+    'nest-backend:build'
+  ],
+  { cwd: workspaceRoot, stdio: 'inherit' }
+);
 
 if (buildResult.status !== 0) {
   process.exit(buildResult.status ?? 1);
