@@ -14,6 +14,13 @@ import { jsonParseLinter } from '@codemirror/lang-json';
 import { EditorTypeEnum } from '@utils';
 import { Extension } from '@codemirror/state';
 
+const parseJson = jsonParseLinter();
+
+/** The input starts empty: a blank document is not a JSON error. */
+export function lintJsonUnlessBlank(view: EditorView) {
+  return view.state.doc.toString().trim() === '' ? [] : parseJson(view);
+}
+
 /**
  * Owns tag-build's two CodeMirror editors (input specs and output
  * container) and mirrors their text in signals. Content set before an
@@ -30,7 +37,7 @@ export class EditorService {
 
   // Mirror document text; the empty output uses a placeholder.
   private readonly contents = {
-    inputJson: signal('[]'),
+    inputJson: signal(''),
     outputJson: signal('')
   };
 
@@ -76,13 +83,16 @@ export class EditorService {
 
     // Initialize default content for input JSON
     if (extension === EditorTypeEnum.INPUT_JSON) {
-      editorView.dispatch({
-        changes: {
-          from: 0,
-          insert: content || '[]',
-          to: editorView.state.doc.length
-        }
-      });
+      const initial = content || this.contents[extension]();
+      if (initial) {
+        editorView.dispatch({
+          changes: {
+            from: 0,
+            insert: initial,
+            to: editorView.state.doc.length
+          }
+        });
+      }
     }
 
     this.editors[extension].set(editorView);
@@ -122,11 +132,13 @@ export class EditorService {
       return new EditorView({
         extensions: [
           ...this.editorExtensions[extension],
-          linter(jsonParseLinter()),
+          linter(lintJsonUnlessBlank),
           lintGutter(),
           this.syncContentOnDocChange(extension),
           EditorView.theme(editorStyles),
-          placeholder(content || this.contents[extension]())
+          placeholder(
+            'Upload or write a measurement plan, or paste dataLayer specs as JSON'
+          )
         ],
         parent: host
       });

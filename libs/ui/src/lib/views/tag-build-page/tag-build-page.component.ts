@@ -2,6 +2,7 @@ import { EditorComponent } from '../../components/editor/editor.component';
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { FunctionalCardComponent } from '../../components/functional-card/functional-card.component';
 import { UploadActionComponent } from '../../components/upload-action/upload-action.component';
+import { PlanEditorActionComponent } from '../../components/plan-editor-action/plan-editor-action.component';
 import { DeveloperGuideActionComponent } from '../../components/developer-guide-action/developer-guide-action.component';
 import { FileUploadDialogComponent } from '../../components/file-upload-dialog/file-upload-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
@@ -35,6 +36,7 @@ import { TagExtractComponent } from '../../components/tag-extract/tag-extract.co
     EditorComponent,
     MatTabsModule,
     UploadActionComponent,
+    PlanEditorActionComponent,
     DeveloperGuideActionComponent,
     TagExtractComponent
   ],
@@ -82,6 +84,15 @@ export class TagBuildPageComponent {
 
   openFileUploadDialog() {
     this.dialog.open(FileUploadDialogComponent);
+  }
+
+  async openPlanEditorDialog(): Promise<void> {
+    const { PlanEditorDialogComponent } =
+      await import('../../components/plan-editor-dialog/plan-editor-dialog.component');
+    this.dialog.open(PlanEditorDialogComponent, {
+      width: '900px',
+      maxWidth: '95vw'
+    });
   }
 
   async openDeveloperGuideDialog(): Promise<void> {

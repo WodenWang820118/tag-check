@@ -8,7 +8,6 @@ import { of, throwError } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import type { GTMConfiguration, GtmImportSummary } from '@utils';
 import { ProjectService } from '../../../shared/services/api/project-info/project-info.service';
-import { SpecService } from '../../../shared/services/api/spec/spec.service';
 import { UploadCardFacadeService } from '../../project/components/upload-card/upload-card-facade.service';
 import { TagBuildImportSnackbarComponent } from '../components/tag-build-import-snackbar.component';
 import { TagBuildViewComponent } from './tag-build-view.component';
@@ -44,20 +43,17 @@ const importedMessage =
   'Created 2 · Updated 1 · Renamed 0 · Kept both 2 · Unchanged 1 · Skipped 1';
 
 describe('TagBuildViewComponent', () => {
-  it.each([false, true])(
-    'passes the project slug, container and import hook when the project has specs: %s',
-    async (hasSpecs) => {
-      const { page } = await render({ hasSpecs, container: projectContainer });
+  it('passes empty specs, the project slug, container and import hook', async () => {
+    const { page } = await render({ container: projectContainer });
 
-      expect(page.projectSlug()).toBe('demo-shop');
-      expect(page.projectContainer()).toEqual(projectContainer);
-      expect(page.projectImport()?.label).toBe('Import into this project');
-    }
-  );
+    expect(page.specs()).toEqual([]);
+    expect(page.projectSlug()).toBe('demo-shop');
+    expect(page.projectContainer()).toEqual(projectContainer);
+    expect(page.projectImport()?.label).toBe('Import into this project');
+  });
 
   it('imports the built container and links the result to Tests', async () => {
     const { page, uploadCardFacade, snackBar } = await render({
-      hasSpecs: true,
       container: projectContainer
     });
     uploadCardFacade.importContainerIntoProject.mockReturnValue(of(summary));
@@ -85,7 +81,7 @@ describe('TagBuildViewComponent', () => {
   });
 
   it('passes no container when the project has not imported one', async () => {
-    const { page } = await render({ hasSpecs: false, container: null });
+    const { page } = await render({ container: null });
 
     expect(page.projectContainer()).toBeNull();
     expect(page.projectImport()?.label).toBe('Import into this project');
@@ -93,7 +89,6 @@ describe('TagBuildViewComponent', () => {
 
   it('reports nothing when the import is cancelled', async () => {
     const { page, uploadCardFacade, snackBar } = await render({
-      hasSpecs: true,
       container: projectContainer
     });
     uploadCardFacade.importContainerIntoProject.mockReturnValue(of(null));
@@ -110,7 +105,6 @@ describe('TagBuildViewComponent', () => {
 
   it('shows the reason an import failed and leaves the dialog open', async () => {
     const { page, uploadCardFacade, snackBar } = await render({
-      hasSpecs: true,
       container: projectContainer
     });
     uploadCardFacade.importContainerIntoProject.mockReturnValue(
@@ -137,10 +131,7 @@ describe('TagBuildViewComponent', () => {
   });
 });
 
-async function render(options: {
-  hasSpecs: boolean;
-  container: GTMConfiguration | null;
-}) {
+async function render(options: { container: GTMConfiguration | null }) {
   const uploadCardFacade = {
     importContainerIntoProject: vi.fn()
   };
@@ -159,14 +150,6 @@ async function render(options: {
           parent: {
             parent: { snapshot: { params: { projectSlug: 'demo-shop' } } }
           }
-        }
-      },
-      {
-        provide: SpecService,
-        useValue: {
-          getProjectSpec: vi.fn(() =>
-            of({ specs: options.hasSpecs ? [{ event: 'login' }] : [] })
-          )
         }
       },
       {
