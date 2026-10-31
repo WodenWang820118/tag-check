@@ -1,20 +1,15 @@
 import {
-  DestroyRef,
   Component,
   computed,
   effect,
-  OnInit,
+  inject,
+  linkedSignal,
   signal,
   viewChild,
   ChangeDetectionStrategy
 } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import {
-  FormControl,
-  FormGroup,
-  FormsModule,
-  ReactiveFormsModule
-} from '@angular/forms';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { FormField, form } from '@angular/forms/signals';
 import { DomSanitizer } from '@angular/platform-browser';
 import { YouTubePlayer, YouTubePlayerModule } from '@angular/youtube-player';
 import { ActivatedRoute } from '@angular/router';
@@ -46,13 +41,16 @@ import {
   PublicDestination
 } from '../../../../shared/services/destination/destination-catalog';
 
+export interface SearchFormModel {
+  searchTerm: string;
+}
+
 @Component({
   standalone: true,
   selector: 'app-destination',
   imports: [
     YouTubePlayerModule,
-    ReactiveFormsModule,
-    FormsModule,
+    FormField,
     HlmAlertImports,
     HlmButton,
     HlmDialogImports,
@@ -72,10 +70,17 @@ import {
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './destination.component.html'
 })
-export class DestinationComponent implements OnInit {
-  readonly searchForm = new FormGroup({
-    searchTerm: new FormControl('')
+export class DestinationComponent {
+  private readonly activatedRoute = inject(ActivatedRoute);
+  private readonly queryParamMap = toSignal(this.activatedRoute.queryParamMap, {
+    initialValue: this.activatedRoute.snapshot.queryParamMap
   });
+
+  readonly searchModel = linkedSignal<SearchFormModel>(() => ({
+    searchTerm: this.queryParamMap()?.get('search_term') ?? ''
+  }));
+
+  readonly searchForm = form(this.searchModel);
 
   private readonly pageIndex = signal(0);
   private readonly filteredDestinations = computed(() =>
@@ -105,9 +110,7 @@ export class DestinationComponent implements OnInit {
     public readonly searchService: SearchService,
     private readonly youtubeService: YoutubeService,
     private readonly sanitizer: DomSanitizer,
-    private readonly activatedRoute: ActivatedRoute,
-    private readonly analyticsService: AnalyticsService,
-    private readonly destroyRef: DestroyRef
+    private readonly analyticsService: AnalyticsService
   ) {
     effect(() => {
       const visibleDestinations = this.destinations$();
@@ -117,6 +120,22 @@ export class DestinationComponent implements OnInit {
 
       this.trackViewItemList(visibleDestinations);
     });
+
+    effect(() => {
+      const params = this.queryParamMap();
+      if (!params) {
+        return;
+      }
+      const searchTerm = params.get('search_term') ?? '';
+      this.pageIndex.set(0);
+
+      if (searchTerm) {
+        this.searchService.search(searchTerm);
+        return;
+      }
+
+      this.searchService.resetSearch();
+    });
   }
 
   get videoDialogVisible(): boolean {
@@ -125,28 +144,6 @@ export class DestinationComponent implements OnInit {
 
   set videoDialogVisible(value: boolean) {
     this.showVideoPlayer.set(value);
-  }
-
-  ngOnInit() {
-    this.activatedRoute.queryParamMap
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((params) => {
-        const searchTerm = params.get('search_term') ?? '';
-        this.pageIndex.set(0);
-        this.searchForm.patchValue(
-          { searchTerm },
-          {
-            emitEvent: false
-          }
-        );
-
-        if (searchTerm) {
-          this.searchService.search(searchTerm);
-          return;
-        }
-
-        this.searchService.resetSearch();
-      });
   }
 
   getNextDestinations() {
@@ -203,7 +200,7 @@ export class DestinationComponent implements OnInit {
   }
 
   onSubmit(): void {
-    const query = this.searchForm.value.searchTerm ?? '';
+    const query = this.searchForm.searchTerm().value() ?? '';
     this.navigateToSearchResults(query);
   }
 

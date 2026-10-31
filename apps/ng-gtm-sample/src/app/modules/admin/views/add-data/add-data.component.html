@@ -31,7 +31,7 @@
     </div>
   }
 
-  <form [formGroup]="destinationForm" (ngSubmit)="addDestination()">
+  <form (submit)="$event.preventDefault(); addDestination()">
     <div class="grid gap-6 xl:grid-cols-[1.2fr_0.9fr]">
       <section hlmCard class="gap-0 rounded-[1.75rem] pt-0 text-base shadow-sm">
         <div class="border-b border-slate-200 px-6 py-5">
@@ -55,7 +55,7 @@
             </label>
             <hlm-native-select
               selectId="country"
-              formControlName="country"
+              [formField]="destinationForm.country"
               class="w-full"
               selectClass="bg-white"
             >
@@ -82,7 +82,7 @@
             <input
               hlmInput
               id="city"
-              formControlName="city"
+              [formField]="destinationForm.city"
               class="w-full bg-white"
             />
             @if (hasError('city')) {
@@ -101,7 +101,7 @@
             <input
               hlmInput
               id="title"
-              formControlName="title"
+              [formField]="destinationForm.title"
               class="w-full bg-white"
             />
             @if (hasError('title')) {
@@ -120,7 +120,7 @@
             <input
               hlmInput
               id="smallTitle"
-              formControlName="smallTitle"
+              [formField]="destinationForm.smallTitle"
               class="w-full bg-white"
             />
             @if (hasError('smallTitle')) {
@@ -142,7 +142,7 @@
               type="number"
               inputmode="decimal"
               step="any"
-              formControlName="latitude"
+              [formField]="destinationForm.latitude"
               class="w-full bg-white"
             />
             @if (hasError('latitude', 'required')) {
@@ -168,7 +168,7 @@
               type="number"
               inputmode="decimal"
               step="any"
-              formControlName="longitude"
+              [formField]="destinationForm.longitude"
               class="w-full bg-white"
             />
             @if (hasError('longitude', 'required')) {
@@ -194,7 +194,7 @@
               type="number"
               inputmode="decimal"
               step="0.01"
-              formControlName="price"
+              [formField]="destinationForm.price"
               class="w-full bg-white"
             />
             @if (hasError('price', 'required')) {
@@ -217,7 +217,7 @@
             <input
               hlmInput
               id="video"
-              formControlName="video"
+              [formField]="destinationForm.video"
               class="w-full bg-white"
             />
             <div class="text-xs text-slate-400">
@@ -236,7 +236,7 @@
             <textarea
               hlmTextarea
               id="description"
-              formControlName="description"
+              [formField]="destinationForm.description"
               rows="6"
               class="min-h-36 bg-white"
             ></textarea>
@@ -297,7 +297,7 @@
                     hlmInput
                     class="w-full bg-white"
                     [id]="mediaField.authorControl"
-                    [formControlName]="mediaField.authorControl"
+                    [formField]="destinationForm[mediaField.authorControl]"
                   />
                 </div>
               </div>
