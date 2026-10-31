@@ -16,7 +16,6 @@ import {
   firstValueFrom,
   tap
 } from 'rxjs';
-import { InstantErrorStateMatcher } from './helper';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { form, readonly, required, validate } from '@angular/forms/signals';
@@ -47,7 +46,6 @@ export class InitProjectFormFacadeService {
   // #region form state
   errorDialogComponent: Promise<ComponentType<unknown> | null> =
     this.loadErrorDialogComponent();
-  validProjectNameMatcher = new InstantErrorStateMatcher();
   allowedSymbolsPattern = /^[a-zA-Z0-9-!'",\s]+$/;
   private hasProjectNameObserver = false;
   private readonly slugOptions: slug.Options = {
