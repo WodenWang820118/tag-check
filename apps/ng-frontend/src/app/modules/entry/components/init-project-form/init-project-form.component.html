@@ -18,7 +18,6 @@
               matInput
               placeholder="Corporate Website Project"
               [formField]="form.projectName"
-              [errorStateMatcher]="validProjectNameMatcher"
             />
             @if (
               hasError(form.projectName, 'invalidCharacters') &&

@@ -35,10 +35,6 @@ export class InitProjectFormComponent {
     return this.initProjectFormFacadeService.projectForm;
   }
 
-  get validProjectNameMatcher() {
-    return this.initProjectFormFacadeService.validProjectNameMatcher;
-  }
-
   hasError(field: FieldTree<unknown>, kind: string): boolean {
     return field()
       .errors()
