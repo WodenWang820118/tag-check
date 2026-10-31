@@ -4,6 +4,7 @@ import {
   viewChild,
   signal,
   computed,
+  inject,
   ChangeDetectionStrategy
 } from '@angular/core';
 import {
@@ -15,7 +16,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { FileTableDataSourceService } from '../../../../shared/services/data-source/file-table-data-source.service';
 import { FileTableDataSourceModelService } from '../../services/file-table-data-source-model/file-table-data-source-model.service';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -37,8 +37,6 @@ import { ActivatedRoute, Router } from '@angular/router';
     MatTooltipModule,
     MatInputModule,
     MatFormFieldModule,
-    FormsModule,
-    ReactiveFormsModule,
     MatButtonToggleModule,
     MatChipsModule
   ],
@@ -47,6 +45,15 @@ import { ActivatedRoute, Router } from '@angular/router';
   styleUrls: ['./file-table-toolbar.component.scss']
 })
 export class FileTableToolbarComponent implements OnDestroy {
+  private readonly fileTableDataSourceService = inject(
+    FileTableDataSourceService
+  );
+  private readonly fileTableDataSourceModelService = inject(
+    FileTableDataSourceModelService
+  );
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+
   isSearchVisible = signal(false);
   filterValue = signal('');
   searchInput = viewChild<HTMLInputElement>('searchInput');
@@ -64,13 +71,6 @@ export class FileTableToolbarComponent implements OnDestroy {
   eventFilter = computed(() =>
     this.fileTableDataSourceService.getEventFilterSignal()
   );
-
-  constructor(
-    private readonly fileTableDataSourceService: FileTableDataSourceService,
-    private readonly fileTableDataSourceModelService: FileTableDataSourceModelService,
-    private readonly router: Router,
-    private readonly route: ActivatedRoute
-  ) {}
 
   /** Drops `?event=`, which lists every run again. */
   clearEventFilter() {
@@ -99,6 +99,7 @@ export class FileTableToolbarComponent implements OnDestroy {
   downloadSelected() {
     this.fileTableDataSourceService.setDownloadSignal(true);
   }
+
   private setSearchInputValue(value: string) {
     const input = this.searchInput();
     if (input) {

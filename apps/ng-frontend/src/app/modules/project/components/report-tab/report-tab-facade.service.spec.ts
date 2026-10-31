@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { FileReportService } from '../../../../shared/services/api/file-report/file-report.service';
 import { VideosService } from '../../../../shared/services/api/videos/videos.service';
@@ -111,8 +111,8 @@ describe('ReportTabFacade', () => {
     });
   });
 
-  it('shows a message when spreadsheet export is unavailable for the run', () => {
-    service.shareSpreadsheet('storybook-project', undefined);
+  it('shows a message when spreadsheet export is unavailable for the run', async () => {
+    await service.shareSpreadsheet('storybook-project', undefined);
 
     expect(snackBar.open).toHaveBeenCalledWith(
       'Spreadsheet not available for this run',
@@ -125,8 +125,8 @@ describe('ReportTabFacade', () => {
     );
   });
 
-  it('shows an error when spreadsheet export is missing project or event context', () => {
-    service.shareSpreadsheet(undefined, {
+  it('shows an error when spreadsheet export is missing project or event context', async () => {
+    await service.shareSpreadsheet(undefined, {
       eventId: undefined
     } as never);
 
@@ -141,10 +141,10 @@ describe('ReportTabFacade', () => {
     );
   });
 
-  it('uses the file report service when exporting a spreadsheet without a direct url', () => {
+  it('uses the file report service when exporting a spreadsheet without a direct url', async () => {
     fileReportService.downloadFileReports.mockReturnValue(of({ ok: true }));
 
-    service.shareSpreadsheet('storybook-project', {
+    await service.shareSpreadsheet('storybook-project', {
       eventId: 'evt-1'
     } as never);
 
@@ -164,7 +164,7 @@ describe('ReportTabFacade', () => {
     );
   });
 
-  it('downloads a recording immediately when a local blob is already available', () => {
+  it('downloads a recording immediately when a local blob is already available', async () => {
     const createElement = vi.spyOn(document, 'createElement');
     const click = vi.fn();
     const originalCreateElement = document.createElement.bind(document);
@@ -183,7 +183,7 @@ describe('ReportTabFacade', () => {
       return originalCreateElement(tagName);
     }) as typeof document.createElement);
 
-    service.exportRecording(
+    await service.exportRecording(
       'storybook-project',
       {
         eventId: 'evt-1',
@@ -205,8 +205,8 @@ describe('ReportTabFacade', () => {
     );
   });
 
-  it('shows an error when recording export is missing project or event context', () => {
-    service.exportRecording(
+  it('shows an error when recording export is missing project or event context', async () => {
+    await service.exportRecording(
       undefined,
       { eventId: undefined } as never,
       undefined
@@ -223,7 +223,7 @@ describe('ReportTabFacade', () => {
     );
   });
 
-  it('falls back to the videos service when exporting a recording without a local blob', () => {
+  it('falls back to the videos service when exporting a recording without a local blob', async () => {
     const createElement = vi.spyOn(document, 'createElement');
     const click = vi.fn();
     const originalCreateElement = document.createElement.bind(document);
@@ -247,7 +247,7 @@ describe('ReportTabFacade', () => {
       return originalCreateElement(tagName);
     }) as typeof document.createElement);
 
-    service.exportRecording(
+    await service.exportRecording(
       'storybook-project',
       {
         eventId: 'evt-1',
@@ -274,14 +274,14 @@ describe('ReportTabFacade', () => {
     );
   });
 
-  it('shows a no-recording message when the videos service returns an empty blob', () => {
+  it('shows a no-recording message when the videos service returns an empty blob', async () => {
     videosService.getVideo.mockReturnValue(
       of({
         blob: new Blob([])
       })
     );
 
-    service.exportRecording(
+    await service.exportRecording(
       'storybook-project',
       {
         eventId: 'evt-1',
@@ -301,14 +301,12 @@ describe('ReportTabFacade', () => {
     );
   });
 
-  it('shows an error when the videos service fails to export a recording', () => {
-    videosService.getVideo.mockReturnValue({
-      pipe: () => ({
-        subscribe: ({ error }: { error: () => void }) => error()
-      })
-    } as never);
+  it('shows an error when the videos service fails to export a recording', async () => {
+    videosService.getVideo.mockReturnValue(
+      throwError(() => new Error('Unable to download recording'))
+    );
 
-    service.exportRecording(
+    await service.exportRecording(
       'storybook-project',
       {
         eventId: 'evt-1',
@@ -328,10 +326,10 @@ describe('ReportTabFacade', () => {
     );
   });
 
-  it('shows an error when the file report service cannot download the spreadsheet', () => {
+  it('shows an error when the file report service cannot download the spreadsheet', async () => {
     fileReportService.downloadFileReports.mockReturnValue(of(null));
 
-    service.shareSpreadsheet('storybook-project', {
+    await service.shareSpreadsheet('storybook-project', {
       eventId: 'evt-1'
     } as never);
 
@@ -346,15 +344,15 @@ describe('ReportTabFacade', () => {
     );
   });
 
-  it('fans out event export to spreadsheet and recording exports', () => {
+  it('fans out event export to spreadsheet and recording exports', async () => {
     const shareSpreadsheetSpy = vi
       .spyOn(service, 'shareSpreadsheet')
-      .mockImplementation(() => undefined);
+      .mockResolvedValue(undefined);
     const exportRecordingSpy = vi
       .spyOn(service, 'exportRecording')
-      .mockImplementation(() => undefined);
+      .mockResolvedValue(undefined);
 
-    service.exportEvent(
+    await service.exportEvent(
       'storybook-project',
       {
         eventId: 'evt-1',
@@ -388,7 +386,7 @@ describe('ReportTabFacade', () => {
     );
   });
 
-  it('exports only the shown older run in both spreadsheet and uncached video downloads', () => {
+  it('exports only the shown older run in both spreadsheet and uncached video downloads', async () => {
     const response = JSON.parse(
       JSON.stringify({
         ...REPORT_DETAIL_SAMPLE,
@@ -399,7 +397,7 @@ describe('ReportTabFacade', () => {
     fileReportService.downloadFileReports.mockReturnValue(of({ ok: true }));
     videosService.getVideo.mockReturnValue(of({ blob: new Blob() }));
 
-    service.exportEvent('demo', details, new Blob(), 5);
+    await service.exportEvent('demo', details, new Blob(), 5);
 
     expect(fileReportService.downloadFileReports).toHaveBeenCalledWith(
       'demo',

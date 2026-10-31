@@ -16,9 +16,9 @@
           {{ message }}
         </p>
       }
-      <form class="ai-assist__form" [formGroup]="form" (ngSubmit)="save()">
+      <form class="ai-assist__form" (submit)="$event.preventDefault(); save()">
         <mat-slide-toggle
-          formControlName="enabled"
+          [formField]="f.enabled"
           data-testid="ai-assist-enabled"
           >Suggest replacements when a step cannot find its
           element</mat-slide-toggle
@@ -28,7 +28,7 @@
             <mat-label>Ollama address</mat-label>
             <input
               matInput
-              formControlName="ollamaUrl"
+              [formField]="f.ollamaUrl"
               autocomplete="off"
               spellcheck="false"
               data-testid="ai-assist-url"
@@ -43,7 +43,7 @@
             <mat-label>Model</mat-label>
             <input
               matInput
-              formControlName="model"
+              [formField]="f.model"
               autocomplete="off"
               spellcheck="false"
               [matAutocomplete]="models"
@@ -96,7 +96,7 @@
             [checking]="checking()"
             (recheck)="check()"
           ></app-ai-model-notice>
-          @if (form.dirty) {
+          @if (f().dirty()) {
             <p class="ai-assist__hint">
               The status is for the saved settings. Save to check your changes.
             </p>
