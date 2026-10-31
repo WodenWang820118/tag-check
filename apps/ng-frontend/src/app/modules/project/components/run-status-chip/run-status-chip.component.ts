@@ -10,8 +10,12 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { RunStatus } from '@utils';
 import { STATUS_BADGES } from '../report-detail.contracts';
 
-const checkLabel = (passed: boolean | undefined, checked = true) =>
-  !checked ? 'Not checked' : passed === true ? 'Passed' : 'Failed';
+function checkLabel(passed: boolean | undefined, checked = true): string {
+  if (!checked) {
+    return 'Not checked';
+  }
+  return passed === true ? 'Passed' : 'Failed';
+}
 
 /**
  * One chip for the status of a test or a run: Passed, Partial, Failed,
