@@ -61,7 +61,8 @@ export function parseLegacySpecsTable(table: string[][]): TableImportResult {
 
   for (let rowIndex = 1; rowIndex < table.length; rowIndex++) {
     const row = table[rowIndex];
-    if (row.length === 0 || row.every((cell) => !cell || cell.trim() === '')) {
+    // every() is also true for an empty row.
+    if (row.every((cell) => !cell || cell.trim() === '')) {
       continue;
     }
     const cellText = row[colIndex] ?? '';
