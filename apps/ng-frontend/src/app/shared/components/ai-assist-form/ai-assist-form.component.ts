@@ -6,13 +6,6 @@ import {
   OnInit,
   signal
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import {
-  AbstractControl,
-  NonNullableFormBuilder,
-  ReactiveFormsModule,
-  ValidationErrors
-} from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -20,27 +13,17 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { firstValueFrom, map } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
+import { form, FormField, validate } from '@angular/forms/signals';
 import {
   isOllamaModelName,
   normalizeOllamaUrl,
-  type AiAssistResponse
+  type AiAssistResponse,
+  type AiAssistSettings
 } from '@utils';
 import { AiAssistService } from '../../services/api/ai-assist/ai-assist.service';
 import { apiErrorMessage } from '../../services/api/http-error.utils';
 import { AiModelNoticeComponent } from '../ai-model-notice/ai-model-notice.component';
-
-function ollamaUrlValidator(control: AbstractControl): ValidationErrors | null {
-  return normalizeOllamaUrl(String(control.value)) === null
-    ? { ollamaUrl: true }
-    : null;
-}
-
-function modelValidator(control: AbstractControl): ValidationErrors | null {
-  return isOllamaModelName(String(control.value).trim())
-    ? null
-    : { model: true };
-}
 
 /**
  * Settings > AI assist, for every project on this computer: whether a model
@@ -51,7 +34,7 @@ function modelValidator(control: AbstractControl): ValidationErrors | null {
   selector: 'app-ai-assist-form',
   standalone: true,
   imports: [
-    ReactiveFormsModule,
+    FormField,
     MatAutocompleteModule,
     MatButtonModule,
     MatCardModule,
@@ -68,10 +51,19 @@ export class AiAssistFormComponent implements OnInit {
   private readonly aiAssist = inject(AiAssistService);
   private readonly snackBar = inject(MatSnackBar);
 
-  readonly form = inject(NonNullableFormBuilder).group({
-    enabled: [false],
-    ollamaUrl: ['', ollamaUrlValidator],
-    model: ['', modelValidator]
+  readonly model = signal<AiAssistSettings>({
+    enabled: false,
+    ollamaUrl: '',
+    model: ''
+  });
+
+  readonly f = form(this.model, (p) => {
+    validate(p.ollamaUrl, ({ value }) =>
+      normalizeOllamaUrl(value()) === null ? { kind: 'ollamaUrl' } : null
+    );
+    validate(p.model, ({ value }) =>
+      isOllamaModelName(value().trim()) ? null : { kind: 'model' }
+    );
   });
 
   /** The saved settings and whether Ollama can serve their model. */
@@ -80,11 +72,8 @@ export class AiAssistFormComponent implements OnInit {
   readonly saving = signal(false);
   readonly loadError = signal<string | null>(null);
 
-  private readonly typedModel = toSignal(
-    this.form.controls.model.valueChanges.pipe(
-      map((value) => value.trim().toLowerCase())
-    ),
-    { initialValue: '' }
+  private readonly typedModel = computed(() =>
+    this.f.model().value().trim().toLowerCase()
   );
 
   /**
@@ -116,7 +105,8 @@ export class AiAssistFormComponent implements OnInit {
       this.state.set(state);
       this.loadError.set(null);
       if (fill) {
-        this.form.reset(state.settings);
+        this.model.set(state.settings);
+        this.f().reset(state.settings);
       }
     } catch (error) {
       this.loadError.set(
@@ -128,18 +118,19 @@ export class AiAssistFormComponent implements OnInit {
   }
 
   async save(): Promise<void> {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
+    if (this.f().invalid()) {
+      this.f().markAsTouched();
       return;
     }
-    const { enabled, ollamaUrl, model } = this.form.getRawValue();
+    const { enabled, ollamaUrl, model } = this.f().value();
     this.saving.set(true);
     try {
       const state = await firstValueFrom(
         this.aiAssist.update({ enabled, ollamaUrl, model: model.trim() })
       );
       this.state.set(state);
-      this.form.reset(state.settings);
+      this.model.set(state.settings);
+      this.f().reset(state.settings);
       this.notify('AI assist settings saved.');
     } catch (error) {
       this.notify(apiErrorMessage(error, 'The settings could not be saved.'));

@@ -7,7 +7,7 @@ import {
 import { ProjectInfoFormComponent } from './project-info-form.component';
 
 import { provideHttpClient, withXhr } from '@angular/common/http';
-import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { FormField } from '@angular/forms/signals';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -22,15 +22,13 @@ const meta: Meta<ProjectInfoFormComponent> = {
   title: 'Shared/Components/ProjectInfoFormComponent',
   decorators: [
     moduleMetadata({
-      //👇 Imports both components to allow component composition with Storybook
       imports: [
         MatIconModule,
         MatButtonModule,
         MatCardModule,
         MatFormFieldModule,
         MatInputModule,
-        ReactiveFormsModule,
-        FormsModule
+        FormField
       ],
       providers: [SettingsService]
     }),
