@@ -46,59 +46,55 @@ export class FileTableDataSourceFacadeService {
       }
     });
     effect(() => {
-      const deletedSignal = this.fileTableDataSourceService.getDeletedSignal();
-      if (deletedSignal) {
-        untracked(async () => {
-          const dialogRef = this.dialog.open(InformationDialogComponent, {
-            data: {
-              title: 'Delete runs',
-              contents:
-                'Delete the selected runs and their screenshots? The tests stay, and a test whose latest run is deleted shows its previous run.',
-              action: 'Delete',
-              actionColor: 'warn',
-              consent: false
-            }
-          });
-          try {
-            const result = await firstValueFrom(dialogRef.afterClosed());
-            if (result) {
-              await this.handleReportDeletion();
-            }
-          } finally {
-            this.fileTableDataSourceService.setDeletedSignal(false);
-          }
-        });
+      if (this.fileTableDataSourceService.getDeletedSignal()) {
+        untracked(() => void this.confirmRunDeletion());
       }
     });
     effect(() => {
-      const downloadSignal =
-        this.fileTableDataSourceService.getDownloadSignal();
-      if (downloadSignal) {
-        untracked(async () => {
-          const dialogRef = this.dialog.open(InformationDialogComponent, {
-            data: {
-              title: 'Download Reports',
-              contents:
-                'Are you sure you want to download the selected reports?',
-              action: 'Download',
-              actionColor: 'primary',
-              consent: false
-            }
-          });
-          try {
-            const result = await firstValueFrom(dialogRef.afterClosed());
-            if (result) {
-              await this.handleReportDownload(
-                this.projectSlug(),
-                this.fileTableDataSourceModelService.selection().selected
-              );
-            }
-          } finally {
-            this.fileTableDataSourceService.setDownloadSignal(false);
-          }
-        });
+      if (this.fileTableDataSourceService.getDownloadSignal()) {
+        untracked(() => void this.confirmReportDownload());
       }
     });
+  }
+
+  /** Asks before deleting the selected runs; the request flag resets on close. */
+  private async confirmRunDeletion(): Promise<void> {
+    const dialogRef = this.dialog.open(InformationDialogComponent, {
+      data: {
+        title: 'Delete runs',
+        contents:
+          'Delete the selected runs and their screenshots? The tests stay, and a test whose latest run is deleted shows its previous run.',
+        action: 'Delete',
+        actionColor: 'warn',
+        consent: false
+      }
+    });
+    const result = await firstValueFrom(dialogRef.afterClosed());
+    this.fileTableDataSourceService.setDeletedSignal(false);
+    if (result) {
+      await this.handleReportDeletion();
+    }
+  }
+
+  /** Asks before downloading the selected reports; the flag resets on close. */
+  private async confirmReportDownload(): Promise<void> {
+    const dialogRef = this.dialog.open(InformationDialogComponent, {
+      data: {
+        title: 'Download Reports',
+        contents: 'Are you sure you want to download the selected reports?',
+        action: 'Download',
+        actionColor: 'primary',
+        consent: false
+      }
+    });
+    const result = await firstValueFrom(dialogRef.afterClosed());
+    this.fileTableDataSourceService.setDownloadSignal(false);
+    if (result) {
+      await this.handleReportDownload(
+        this.projectSlug(),
+        this.fileTableDataSourceModelService.selection().selected
+      );
+    }
   }
 
   /**

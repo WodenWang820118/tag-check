@@ -3,6 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { RUN_SUMMARY_SAMPLE } from '@utils';
 import { of } from 'rxjs';
 import { FileReportService } from '../../../../shared/services/api/file-report/file-report.service';
+import { FileTableDataSourceService } from '../../../../shared/services/data-source/file-table-data-source.service';
 import { FileTableDataSourceFacadeService } from './file-table-data-source-facade.service';
 
 /** Runs as GET /file-reports returns them: newest first. */
@@ -15,6 +16,7 @@ const older = RUN_SUMMARY_SAMPLE;
 
 describe('FileTableDataSourceFacadeService', () => {
   let facade: FileTableDataSourceFacadeService;
+  const dialog = { open: vi.fn() };
   const fileReportService = {
     downloadFileReports: vi.fn(() => of(null)),
     // As DELETE /file-reports/:projectSlug answers: only the runs it deleted.
@@ -24,10 +26,11 @@ describe('FileTableDataSourceFacadeService', () => {
   beforeEach(() => {
     fileReportService.downloadFileReports.mockClear();
     fileReportService.deleteRuns.mockClear();
+    dialog.open.mockReset();
     TestBed.configureTestingModule({
       providers: [
         { provide: FileReportService, useValue: fileReportService },
-        { provide: MatDialog, useValue: { open: vi.fn() } }
+        { provide: MatDialog, useValue: dialog }
       ]
     });
     facade = TestBed.inject(FileTableDataSourceFacadeService);
@@ -83,6 +86,59 @@ describe('FileTableDataSourceFacadeService', () => {
 
     expect(fileReportService.deleteRuns).not.toHaveBeenCalled();
     expect(facade.dataSource.data).toEqual([newer]);
+  });
+
+  it('asks before deleting, resets the request, then deletes the selected runs', async () => {
+    dialog.open.mockReturnValue({ afterClosed: () => of(true) });
+    facade.initializeData(null as never, null as never, {
+      fileReports: [newer, older],
+      projectSlug: 'shop'
+    });
+    facade.selection.select(newer);
+    const requests = TestBed.inject(FileTableDataSourceService);
+
+    requests.setDeletedSignal(true);
+    TestBed.tick();
+
+    await vi.waitFor(() =>
+      expect(fileReportService.deleteRuns).toHaveBeenCalledWith('shop', [
+        newer.runId
+      ])
+    );
+    expect(dialog.open).toHaveBeenCalledOnce();
+    expect(requests.getDeletedSignal()).toBe(false);
+  });
+
+  it('deletes nothing when the delete dialog is cancelled', async () => {
+    dialog.open.mockReturnValue({ afterClosed: () => of(false) });
+    const requests = TestBed.inject(FileTableDataSourceService);
+
+    requests.setDeletedSignal(true);
+    TestBed.tick();
+
+    await vi.waitFor(() => expect(requests.getDeletedSignal()).toBe(false));
+    expect(fileReportService.deleteRuns).not.toHaveBeenCalled();
+  });
+
+  it('asks before downloading, then downloads the selected tests', async () => {
+    dialog.open.mockReturnValue({ afterClosed: () => of(true) });
+    facade.initializeData(null as never, null as never, {
+      fileReports: [newer],
+      projectSlug: 'shop'
+    });
+    facade.selection.select(newer);
+    const requests = TestBed.inject(FileTableDataSourceService);
+
+    requests.setDownloadSignal(true);
+    TestBed.tick();
+
+    await vi.waitFor(() =>
+      expect(fileReportService.downloadFileReports).toHaveBeenCalledWith(
+        'shop',
+        [RUN_SUMMARY_SAMPLE.eventId]
+      )
+    );
+    expect(requests.getDownloadSignal()).toBe(false);
   });
 
   it('downloads each selected test once, however many of its runs are selected', async () => {
