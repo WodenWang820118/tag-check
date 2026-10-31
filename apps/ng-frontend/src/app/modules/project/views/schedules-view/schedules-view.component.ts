@@ -238,7 +238,9 @@ export class SchedulesViewComponent {
     effect(() => {
       const projectSlug = this.projectSlug();
       if (projectSlug) {
-        untracked(() => this.load(projectSlug));
+        untracked(() => {
+          void this.load(projectSlug);
+        });
       }
     });
     // Once the earliest schedule has run, read the list again so that its
@@ -263,7 +265,10 @@ export class SchedulesViewComponent {
       // Outside Angular's zone, so that a pending timer of up to an hour
       // does not keep the app from becoming stable.
       const timer = this.ngZone.runOutsideAngular(() =>
-        setTimeout(() => this.ngZone.run(() => this.load(projectSlug)), delay)
+        setTimeout(
+          () => this.ngZone.run(() => void this.load(projectSlug)),
+          delay
+        )
       );
       onCleanup(() => clearTimeout(timer));
     });
@@ -301,41 +306,41 @@ export class SchedulesViewComponent {
     }
   }
 
-  protected edit(schedule: ScheduleJson): void {
+  protected async edit(schedule: ScheduleJson): Promise<void> {
     const data: ScheduleDialogData = {
       projectSlug: schedule.projectSlug,
       eventIds: schedule.eventIds,
       schedule
     };
-    this.dialog
-      .open<ScheduleDialogComponent, ScheduleDialogData, ScheduleJson>(
-        ScheduleDialogComponent,
-        { data }
-      )
-      .afterClosed()
-      .subscribe((saved) => {
-        if (saved) {
-          this.replace(saved);
-        }
-      });
+    const saved = await firstValueFrom(
+      this.dialog
+        .open<ScheduleDialogComponent, ScheduleDialogData, ScheduleJson>(
+          ScheduleDialogComponent,
+          { data }
+        )
+        .afterClosed()
+    );
+    if (saved) {
+      this.replace(saved);
+    }
   }
 
-  protected remove(schedule: ScheduleJson): void {
-    this.dialog
-      .open(InformationDialogComponent, {
-        data: {
-          title: 'Delete schedule',
-          contents: `Delete the schedule "${schedule.name}"? Its past runs stay in Reports.`,
-          action: 'Delete',
-          actionColor: 'warn'
-        }
-      })
-      .afterClosed()
-      .subscribe((confirmed: unknown) => {
-        if (confirmed === true) {
-          void this.delete(schedule);
-        }
-      });
+  protected async remove(schedule: ScheduleJson): Promise<void> {
+    const confirmed = await firstValueFrom(
+      this.dialog
+        .open(InformationDialogComponent, {
+          data: {
+            title: 'Delete schedule',
+            contents: `Delete the schedule "${schedule.name}"? Its past runs stay in Reports.`,
+            action: 'Delete',
+            actionColor: 'warn'
+          }
+        })
+        .afterClosed()
+    );
+    if (confirmed === true) {
+      await this.delete(schedule);
+    }
   }
 
   private async delete(schedule: ScheduleJson): Promise<void> {
@@ -352,19 +357,19 @@ export class SchedulesViewComponent {
     }
   }
 
-  private load(projectSlug: string): void {
-    this.schedulesService.list(projectSlug).subscribe({
-      next: (rows) => {
-        this.loadError.set(null);
-        this.schedules.set(rows);
-      },
-      error: (error: unknown) => {
-        console.error(error);
-        this.loadError.set(
-          apiErrorMessage(error, 'The schedules could not be read.')
-        );
-      }
-    });
+  private async load(projectSlug: string): Promise<void> {
+    try {
+      const rows = await firstValueFrom(
+        this.schedulesService.list(projectSlug)
+      );
+      this.loadError.set(null);
+      this.schedules.set(rows);
+    } catch (error: unknown) {
+      console.error(error);
+      this.loadError.set(
+        apiErrorMessage(error, 'The schedules could not be read.')
+      );
+    }
   }
 
   private async save(

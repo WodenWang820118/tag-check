@@ -1,4 +1,9 @@
-import { Component, input, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  input,
+  ChangeDetectionStrategy,
+  inject
+} from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { Project } from '@utils';
 import { MatButtonModule } from '@angular/material/button';
@@ -10,16 +15,7 @@ import {
   InformationDialogData
 } from '../../../../shared/components/information-dialog/information-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
-import {
-  take,
-  map,
-  switchMap,
-  EMPTY,
-  tap,
-  catchError,
-  Observable,
-  forkJoin
-} from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { ProjectIoService } from '../../../../shared/services/api/project-io/project-io.service';
 import { MetadataSourceService } from '../../../../shared/services/data-source/metadata-source.service';
 
@@ -90,14 +86,13 @@ import { MetadataSourceService } from '../../../../shared/services/data-source/m
   `
 })
 export class ProjectItemComponent {
-  project = input.required<Project>();
-  constructor(
-    private readonly dialog: MatDialog,
-    private readonly projectIoService: ProjectIoService,
-    private readonly metadataSourceService: MetadataSourceService
-  ) {}
+  private readonly dialog = inject(MatDialog);
+  private readonly projectIoService = inject(ProjectIoService);
+  private readonly metadataSourceService = inject(MetadataSourceService);
 
-  deleteProject() {
+  readonly project = input.required<Project>();
+
+  async deleteProject(): Promise<void> {
     const dialogRef = this.dialog.open<
       InformationDialogComponent,
       InformationDialogData
@@ -109,40 +104,26 @@ export class ProjectItemComponent {
       }
     });
 
-    dialogRef
-      .afterClosed()
-      .pipe(
-        take(1),
-        switchMap((result) => {
-          if (result) {
-            return forkJoin({
-              metadataUpdate: this.updateMetadata(),
-              projectDeletion: this.projectIoService.deleteProject(
-                this.project().projectSlug
-              )
-            });
-          }
-          return EMPTY;
-        }),
-        catchError((err) => {
-          console.error(err);
-          return EMPTY;
-        })
-      )
-      .subscribe();
+    try {
+      const result = await firstValueFrom(dialogRef.afterClosed());
+      if (result) {
+        await Promise.all([
+          this.updateMetadata(),
+          firstValueFrom(
+            this.projectIoService.deleteProject(this.project().projectSlug)
+          )
+        ]);
+      }
+    } catch (err) {
+      console.error(err);
+    }
   }
 
-  private updateMetadata(): Observable<Project[]> {
-    return this.metadataSourceService.getData().pipe(
-      take(1),
-      map((data) =>
-        data.filter(
-          (project) => project.projectSlug !== this.project().projectSlug
-        )
-      ),
-      tap((filteredData) => {
-        this.metadataSourceService.setData(filteredData);
-      })
+  private async updateMetadata(): Promise<void> {
+    const data = await firstValueFrom(this.metadataSourceService.getData());
+    const filteredData = data.filter(
+      (project) => project.projectSlug !== this.project().projectSlug
     );
+    this.metadataSourceService.setData(filteredData);
   }
 }

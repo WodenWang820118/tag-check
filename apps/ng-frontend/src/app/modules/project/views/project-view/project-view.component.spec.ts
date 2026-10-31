@@ -15,7 +15,10 @@ function create(wide: boolean) {
   TestBed.configureTestingModule({
     providers: [
       { provide: BreakpointObserver, useValue: observer },
-      { provide: ActivatedRoute, useValue: { data: of({}) } },
+      {
+        provide: ActivatedRoute,
+        useValue: { data: of({}), snapshot: { data: {} } }
+      },
       { provide: Router, useValue: router }
     ]
   });

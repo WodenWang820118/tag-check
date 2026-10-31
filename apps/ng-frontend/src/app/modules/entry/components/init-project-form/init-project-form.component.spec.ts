@@ -1,24 +1,31 @@
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { TestBed } from '@angular/core/testing';
-import { FormBuilder } from '@angular/forms';
+import { FieldTree, form } from '@angular/forms/signals';
 import { provideRouter } from '@angular/router';
-import { EMPTY } from 'rxjs';
+import { signal } from '@angular/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { InitProjectFormComponent } from './init-project-form.component';
-import { InitProjectFormFacadeService } from './init-project-form-facade.service';
+import {
+  InitProjectFormFacadeService,
+  ProjectFormModel
+} from './init-project-form-facade.service';
 import { InstantErrorStateMatcher } from './helper';
 
 describe('InitProjectFormComponent', () => {
-  const formBuilder = new FormBuilder();
+  const model = signal<ProjectFormModel>({
+    projectName: '',
+    projectSlug: '',
+    measurementId: '',
+    projectDescription: ''
+  });
+  let projectForm: FieldTree<ProjectFormModel>;
   const facade = {
     observeProjectNameChanges: vi.fn(),
-    projectForm: formBuilder.nonNullable.group({
-      projectName: [''],
-      projectSlug: [''],
-      measurementId: [''],
-      projectDescription: ['']
-    }),
-    submitProject: vi.fn(() => EMPTY),
+    // form() needs an injection context: created in beforeEach.
+    get projectForm(): FieldTree<ProjectFormModel> {
+      return projectForm;
+    },
+    submitProject: vi.fn().mockResolvedValue(undefined),
     validProjectNameMatcher: new InstantErrorStateMatcher()
   };
 
@@ -37,6 +44,7 @@ describe('InitProjectFormComponent', () => {
         }
       ]
     }).compileComponents();
+    projectForm = TestBed.runInInjectionContext(() => form(model));
   });
 
   it('does not register another project-name observer during initialization', () => {
@@ -47,12 +55,12 @@ describe('InitProjectFormComponent', () => {
     expect(facade.observeProjectNameChanges).not.toHaveBeenCalled();
   });
 
-  it('delegates submit actions to the facade', () => {
+  it('delegates submit actions to the facade', async () => {
     const fixture = TestBed.createComponent(InitProjectFormComponent);
     const component = fixture.componentInstance;
 
     fixture.detectChanges();
-    component.onSubmit();
+    await component.onSubmit();
 
     expect(facade.submitProject).toHaveBeenCalled();
   });
