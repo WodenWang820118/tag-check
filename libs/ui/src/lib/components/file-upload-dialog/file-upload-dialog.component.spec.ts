@@ -365,6 +365,43 @@ describe('FileUploadDialogComponent', () => {
       expect(editorFacade.inputJsonContent).toEqual([{ event: 'page_view' }]);
       expect(dialog.closeAll).toHaveBeenCalled();
     });
+
+    it('shows error dialog when reading JSON file content fails', async () => {
+      const file = new File([''], 'broken.json', { type: 'application/json' });
+      vi.spyOn(file, 'text').mockRejectedValueOnce(
+        new Error('Disk read failure')
+      );
+      const errSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => undefined);
+
+      await select(file);
+
+      expect(dialog.open).toHaveBeenCalledWith(ErrorDialogComponent, {
+        data: {
+          message: 'Error reading file. Please try again.'
+        }
+      });
+      errSpy.mockRestore();
+    });
+
+    it('shows error dialog when JSON file content cannot be parsed', async () => {
+      const file = new File(['{ invalid json :::'], 'broken.json', {
+        type: 'application/json'
+      });
+      const errSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => undefined);
+
+      await select(file);
+
+      expect(dialog.open).toHaveBeenCalledWith(ErrorDialogComponent, {
+        data: {
+          message: 'Error parsing JSON file. Please try again.'
+        }
+      });
+      errSpy.mockRestore();
+    });
   });
 });
 
