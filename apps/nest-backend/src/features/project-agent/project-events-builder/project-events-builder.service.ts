@@ -24,6 +24,11 @@ import { ProjectDataLayerSpecBuilderService } from '../project-data-layer-spec-b
 import { TestEventRepositoryService } from '../../../core/repository/test-event/test-event-repository.service';
 import { SpecRepositoryService } from '../../../core/repository/spec/spec-repository.service';
 import { ProjectGtmContainerService } from '../project-gtm-container/project-gtm-container.service';
+import {
+  findGtmImportConflicts,
+  matchImportedEvent,
+  type ImportedEventMatch
+} from './gtm-import-matching';
 
 export type BuildEventInput = {
   eventName: string;
@@ -237,22 +242,9 @@ export class ProjectEventsBuilderService {
     inputs: readonly BuildEventInput[],
     variables: readonly VariableConfig[]
   ): GtmImportConflict[] {
-    const conflicts: GtmImportConflict[] = [];
-    const seen = new Set<string>();
-    for (const input of inputs) {
-      const match = this.matchExisting(existingEvents, input);
-      if (match.kind !== 'conflict' || seen.has(input.testName)) {
-        continue;
-      }
-      seen.add(input.testName);
-      conflicts.push({
-        tagName: input.testName,
-        existingEventName: match.event.eventName,
-        newEventName: input.eventName,
-        specEdited: this.specWasEdited(match.event, variables)
-      });
-    }
-    return conflicts;
+    return findGtmImportConflicts(existingEvents, inputs, (event) =>
+      this.specWasEdited(event, variables)
+    );
   }
 
   /**
@@ -263,24 +255,8 @@ export class ProjectEventsBuilderService {
   private matchExisting(
     existingEvents: readonly TestEventEntity[],
     input: BuildEventInput
-  ):
-    | { kind: 'same'; event: TestEventEntity }
-    | { kind: 'conflict'; event: TestEventEntity }
-    | { kind: 'new' } {
-    const same = existingEvents.find(
-      (event) =>
-        event.testName === input.testName && event.eventName === input.eventName
-    );
-    if (same) {
-      return { kind: 'same', event: same };
-    }
-    const conflict = existingEvents.find(
-      (event) => event.testName === input.testName
-    );
-    if (conflict) {
-      return { kind: 'conflict', event: conflict };
-    }
-    return { kind: 'new' };
+  ): ImportedEventMatch<TestEventEntity> {
+    return matchImportedEvent(existingEvents, input);
   }
 
   private specWasEdited(
