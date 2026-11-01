@@ -17,16 +17,7 @@ export {
   executeReviewFlow,
   getReviewExecutionPlan
 } from './review-flow/review-flow.ts';
-export {
-  type ConcreteReviewProvider,
-  type ParsedCliArgs,
-  type ReviewCheckpoint,
-  type ReviewExecution,
-  type ReviewFlowDependencies,
-  type ReviewProvider,
-  type ReviewRiskLevel
-} from './shared/shared.ts';
-export { main } from './main/main.ts';
+export { type ReviewExecution } from './shared/shared.ts';
 
 if (isDirectEntrypoint(import.meta.url)) {
   main().catch((error) => {

@@ -1,76 +1,20 @@
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { runLocalReviewerReview } from '../env-bootstrap/env-bootstrap.ts';
 import {
-  collectChangedFiles,
-  collectDiffText,
-  collectRepoCommitCandidates,
-  resolveEvaluationRepoTarget
-} from '../git-utils/git-utils.ts';
-import {
-  buildPrefilterContext,
-  getEscalationReasons,
-  selectPaidReviewContext
-} from '../prefilter-artifacts/prefilter-artifacts.ts';
-import {
-  DEFAULT_EVALUATION_REPO_NAMES,
   DEFAULT_EVALUATION_ROUNDS,
-  DEFAULT_SAMPLE_SEED,
   type EvaluationLocalResult,
   EVALUATION_ARTIFACT_DIR,
-  type EvaluationRepoTarget,
   type EvaluationReviewerResult,
   type EvaluationSample,
   EVALUATION_KIND_ORDER,
   EVALUATION_KIND_WEIGHTS,
-  type LocalReviewerDependencies,
   type LocalReviewerEvaluationConfig,
-  LOCAL_REVIEWER_COMMAND_TIMEOUT_MS,
   median,
   normalizeHybridPath,
   shortHash,
   shuffleWithSeed
 } from '../shared/shared.ts';
-import { getPnpmCommand } from '../shared/shared.ts';
-
-export function resolveEvaluationRepoTargets(
-  currentRepoRoot: string,
-  requestedRepos: ReadonlyArray<string> = []
-): EvaluationRepoTarget[] {
-  const repoInputs =
-    requestedRepos.length > 0
-      ? requestedRepos
-      : [...DEFAULT_EVALUATION_REPO_NAMES];
-  const resolvedTargets: EvaluationRepoTarget[] = [];
-  const seenRoots = new Set<string>();
-
-  for (const repoInput of repoInputs) {
-    const target = resolveEvaluationRepoTarget(
-      currentRepoRoot,
-      repoInput,
-      DEFAULT_EVALUATION_REPO_NAMES as readonly string[]
-    );
-    const normalizedRoot = target.root.toLowerCase();
-    if (seenRoots.has(normalizedRoot)) {
-      continue;
-    }
-    if (
-      !existsSync(target.root) ||
-      (!existsSync(resolve(target.root, '.git')) &&
-        !existsSync(resolve(target.root, 'package.json')))
-    ) {
-      throw new Error(
-        `Unable to find an evaluation repository at ${target.root}.`
-      );
-    }
-
-    resolvedTargets.push(target);
-    seenRoots.add(normalizedRoot);
-  }
-
-  return resolvedTargets;
-}
 
 export function buildCheckpointReviewContext(input: {
   changedFiles: ReadonlyArray<string>;
@@ -91,30 +35,6 @@ export function buildCheckpointReviewContext(input: {
     'Diff to review:',
     input.diffText.trim()
   ].join('\n');
-}
-
-export function collectEvaluationSamples(input: {
-  dependencies: LocalReviewerDependencies;
-  repoTargets: ReadonlyArray<EvaluationRepoTarget>;
-  rounds?: number;
-  seed?: number;
-}): EvaluationSample[] {
-  const rounds = input.rounds ?? DEFAULT_EVALUATION_ROUNDS;
-  const seed = input.seed ?? DEFAULT_SAMPLE_SEED;
-  const candidates = input.repoTargets.flatMap((repo, index) =>
-    collectRepoCommitCandidates({
-      dependencies: input.dependencies,
-      repoName: repo.name,
-      repoRoot: repo.root,
-      seed: seed + index + 1
-    })
-  );
-
-  return selectEvaluationSamples({
-    candidates,
-    rounds,
-    seed
-  });
 }
 
 export function selectAbSamples(
@@ -202,141 +122,6 @@ export function summarizeEvaluation(input: {
       summaryPath
     },
     summaryMarkdown
-  };
-}
-
-export function evaluateSampleWithLocalReviewer(input: {
-  dependencies: LocalReviewerDependencies;
-  env?: NodeJS.ProcessEnv;
-  sample: EvaluationSample;
-  smallDiffThresholdChars?: number;
-  toolRepoRoot: string;
-}): EvaluationLocalResult {
-  const startedAt = Date.now();
-  const diffText = collectDiffText({
-    baseRef: input.sample.baseRef,
-    dependencies: input.dependencies,
-    headRef: input.sample.commit,
-    repoRoot: input.sample.repoRoot,
-    staged: false
-  });
-  const diffLength = diffText.length;
-
-  try {
-    const report = runLocalReviewerReview({
-      baseRef: input.sample.baseRef,
-      dependencies: input.dependencies,
-      env: input.env,
-      headRef: input.sample.commit,
-      staged: false,
-      targetRepoRoot: input.sample.repoRoot,
-      toolRepoRoot: input.toolRepoRoot
-    });
-    const escalationReasons = getEscalationReasons({
-      diffText,
-      fileCount: input.sample.fileCount,
-      findings: report.findings,
-      changedFiles: report.context.files.map((file) => file.path)
-    });
-    const contextMarkdown = buildPrefilterContext({
-      diffText,
-      escalationReasons,
-      findings: report.findings,
-      report
-    });
-    const reviewContextSelection = selectPaidReviewContext({
-      diffText,
-      prefilterContext: contextMarkdown,
-      smallDiffThresholdChars: input.smallDiffThresholdChars
-    });
-
-    return {
-      durationMs: Date.now() - startedAt,
-      diffLength,
-      findingsCount: report.findings.length,
-      jsonParseable: true,
-      paidReviewContextLength:
-        escalationReasons.length > 0 ? reviewContextSelection.contextLength : 0,
-      prefilterContextLength: contextMarkdown.length,
-      recommendedEscalation: escalationReasons.length > 0,
-      escalationReasons,
-      report,
-      reviewContextLength: reviewContextSelection.contextLength,
-      reviewContextMode: reviewContextSelection.mode,
-      sample: input.sample,
-      success: true,
-      summaryLength: contextMarkdown.length
-    };
-  } catch (error) {
-    const errorText = error instanceof Error ? error.message : String(error);
-    return {
-      durationMs: Date.now() - startedAt,
-      diffLength,
-      error: errorText,
-      findingsCount: 0,
-      jsonParseable: false,
-      paidReviewContextLength: diffLength,
-      prefilterContextLength: 0,
-      recommendedEscalation: true,
-      escalationReasons: getEscalationReasons({
-        diffText,
-        fileCount: input.sample.fileCount,
-        findings: [],
-        changedFiles: [],
-        localReviewError: errorText
-      }),
-      reviewContextLength: diffLength,
-      reviewContextMode: 'full-diff',
-      sample: input.sample,
-      success: false,
-      summaryLength: 0
-    };
-  }
-}
-
-export function evaluateSampleWithCheckpointReview(input: {
-  dependencies: LocalReviewerDependencies;
-  sample: EvaluationSample;
-}): EvaluationReviewerResult {
-  const startedAt = Date.now();
-  const changedFiles = collectChangedFiles({
-    baseRef: input.sample.baseRef,
-    dependencies: input.dependencies,
-    headRef: input.sample.commit,
-    repoRoot: input.sample.repoRoot,
-    staged: false
-  });
-  const context = buildCheckpointReviewContext({
-    changedFiles,
-    diffText: collectDiffText({
-      baseRef: input.sample.baseRef,
-      dependencies: input.dependencies,
-      headRef: input.sample.commit,
-      repoRoot: input.sample.repoRoot,
-      staged: false
-    }),
-    sample: input.sample
-  });
-
-  const result = input.dependencies.runProcess({
-    command: getPnpmCommand(),
-    args: ['review:implementation', '--', '--focus', 'general'],
-    cwd: input.sample.repoRoot,
-    input: context,
-    timeoutMs: LOCAL_REVIEWER_COMMAND_TIMEOUT_MS
-  });
-
-  return {
-    durationMs: Date.now() - startedAt,
-    error:
-      result.error?.message ||
-      (result.status === 0
-        ? undefined
-        : result.stderr.trim() || result.stdout.trim()),
-    output: result.stdout.trim(),
-    providerAvailable: result.status === 0,
-    sample: input.sample,
-    success: result.status === 0
   };
 }
 

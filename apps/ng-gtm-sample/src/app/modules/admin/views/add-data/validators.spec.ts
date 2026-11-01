@@ -1,47 +1,34 @@
-import { FormControl } from '@angular/forms';
 import { describe, expect, it } from 'vitest';
-import { latitudeValidator, longitudeValidator } from './validators';
+import { isValidLatitude, isValidLongitude } from './validators';
 
 describe('add-data validators', () => {
   it('accepts empty and null latitude and longitude values until required validation runs', () => {
-    expect(latitudeValidator()(new FormControl(''))).toBeNull();
-    expect(latitudeValidator()(new FormControl(null))).toBeNull();
-    expect(latitudeValidator()(new FormControl(undefined))).toBeNull();
-    expect(longitudeValidator()(new FormControl(''))).toBeNull();
-    expect(longitudeValidator()(new FormControl(null))).toBeNull();
-    expect(longitudeValidator()(new FormControl(undefined))).toBeNull();
+    expect(isValidLatitude('')).toBe(true);
+    expect(isValidLatitude(null)).toBe(true);
+    expect(isValidLatitude(undefined)).toBe(true);
+    expect(isValidLongitude('')).toBe(true);
+    expect(isValidLongitude(null)).toBe(true);
+    expect(isValidLongitude(undefined)).toBe(true);
   });
 
   it('accepts boundary latitude and longitude values', () => {
-    expect(latitudeValidator()(new FormControl('90'))).toBeNull();
-    expect(latitudeValidator()(new FormControl('-90'))).toBeNull();
-    expect(latitudeValidator()(new FormControl('0'))).toBeNull();
-    expect(longitudeValidator()(new FormControl('180'))).toBeNull();
-    expect(longitudeValidator()(new FormControl('-180'))).toBeNull();
-    expect(longitudeValidator()(new FormControl('0'))).toBeNull();
+    expect(isValidLatitude('90')).toBe(true);
+    expect(isValidLatitude('-90')).toBe(true);
+    expect(isValidLatitude('0')).toBe(true);
+    expect(isValidLongitude('180')).toBe(true);
+    expect(isValidLongitude('-180')).toBe(true);
+    expect(isValidLongitude('0')).toBe(true);
   });
 
   it('rejects invalid latitude values', () => {
-    expect(latitudeValidator()(new FormControl('91'))).toEqual({
-      invalidLatitude: true
-    });
-    expect(latitudeValidator()(new FormControl('-91'))).toEqual({
-      invalidLatitude: true
-    });
-    expect(latitudeValidator()(new FormControl('north'))).toEqual({
-      invalidLatitude: true
-    });
+    expect(isValidLatitude('91')).toBe(false);
+    expect(isValidLatitude('-91')).toBe(false);
+    expect(isValidLatitude('north')).toBe(false);
   });
 
   it('rejects invalid longitude values', () => {
-    expect(longitudeValidator()(new FormControl('181'))).toEqual({
-      invalidLongitude: true
-    });
-    expect(longitudeValidator()(new FormControl('-181'))).toEqual({
-      invalidLongitude: true
-    });
-    expect(longitudeValidator()(new FormControl('east'))).toEqual({
-      invalidLongitude: true
-    });
+    expect(isValidLongitude('181')).toBe(false);
+    expect(isValidLongitude('-181')).toBe(false);
+    expect(isValidLongitude('east')).toBe(false);
   });
 });

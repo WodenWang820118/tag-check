@@ -3,11 +3,8 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ActivatedRoute, provideRouter } from '@angular/router';
-import {
-  REPORT_DETAIL_SAMPLE,
-  REPORT_LIST_ITEM_SAMPLE,
-  type ReportDetailResponse
-} from '@utils';
+import { type ReportDetailResponse } from '@utils';
+import { REPORT_DETAIL_SAMPLE, REPORT_LIST_ITEM_SAMPLE } from '@utils/testing';
 import { BehaviorSubject, of } from 'rxjs';
 import { describe, expect, it } from 'vitest';
 import { TestRunningFacadeService } from '../../../../shared/services/facade/test-running-facade.service';

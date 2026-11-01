@@ -4,7 +4,8 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
-import { Jsonified, RunSummary, RUN_SUMMARY_SAMPLE } from '@utils';
+import { Jsonified, RunSummary } from '@utils';
+import { RUN_SUMMARY_SAMPLE } from '@utils/testing';
 import { BucketsViewComponent } from './buckets-view.component';
 
 /** GET /file-reports/:projectSlug: one row per run, newest first. */

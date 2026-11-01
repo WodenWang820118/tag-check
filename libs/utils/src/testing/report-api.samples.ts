@@ -1,9 +1,9 @@
+import type { AbstractTestEvent } from '../lib/types/tag-check/project.type';
 import type {
-  AbstractTestEvent,
   Jsonified,
   ReportDetailResponse,
   RunSummary
-} from '../types/tag-check';
+} from '../lib/types/tag-check/report-api.type';
 
 /**
  * Responses of the reports API as they arrive over HTTP (dates are ISO

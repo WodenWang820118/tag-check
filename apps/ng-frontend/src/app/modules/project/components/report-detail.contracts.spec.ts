@@ -1,9 +1,5 @@
-import {
-  DataLayerSpec,
-  REPORT_DETAIL_SAMPLE,
-  REPORT_LIST_ITEM_SAMPLE,
-  ReportDetailResponse
-} from '@utils';
+import { DataLayerSpec, ReportDetailResponse } from '@utils';
+import { REPORT_DETAIL_SAMPLE, REPORT_LIST_ITEM_SAMPLE } from '@utils/testing';
 import {
   buildReportPage,
   getLastRunAt,

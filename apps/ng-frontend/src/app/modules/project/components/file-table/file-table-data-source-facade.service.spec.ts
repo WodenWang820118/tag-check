@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
-import { RUN_SUMMARY_SAMPLE } from '@utils';
+import { RUN_SUMMARY_SAMPLE } from '@utils/testing';
 import { EMPTY, of } from 'rxjs';
 
 // MatTableDataSource subscribes to these on a paginator or sort.

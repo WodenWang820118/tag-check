@@ -1,16 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import {
   GA4_MAX_EVENT_PARAMETERS_PER_EVENT,
-  getGa4MeasurementPlanTemplateRows,
   isMeasurementPlanHeader,
   measurementPlanToDataLayerSpecs,
   parseMeasurementPlanRows,
   type MeasurementPlanRow
 } from './measurement-plan';
-import {
-  GA4_ECOMMERCE_EVENT_PARAMETERS,
-  GA4_EVENT_NAME_MAX_LENGTH
-} from './ga4-reference';
+import { GA4_EVENT_NAME_MAX_LENGTH } from './ga4-reference';
 
 describe('measurement-plan', () => {
   describe('isMeasurementPlanHeader', () => {
@@ -767,82 +763,6 @@ describe('measurement-plan', () => {
           }
         }
       ]);
-    });
-  });
-
-  describe('getGa4MeasurementPlanTemplateRows()', () => {
-    it('parses every template row without any issues', () => {
-      const header = ['event_name', 'event_parameters', 'item_parameters'];
-      const dataRows = getGa4MeasurementPlanTemplateRows().map((row) => [
-        row.eventName,
-        row.eventParameters.join(', '),
-        row.itemParameters.join(', ')
-      ]);
-      const table = [header, ...dataRows];
-
-      const { rows, issues } = parseMeasurementPlanRows(table);
-      expect(issues).toEqual([]);
-      expect(rows).toEqual(getGa4MeasurementPlanTemplateRows());
-    });
-
-    it('contains all documented recommended ecommerce events with common item parameters and standard events', () => {
-      const eventNames = getGa4MeasurementPlanTemplateRows().map(
-        (r) => r.eventName
-      );
-      // Ecommerce events
-      expect(eventNames).toContain('add_to_cart');
-      expect(eventNames).toContain('purchase');
-      expect(eventNames).toContain('refund');
-      expect(eventNames).toContain('begin_checkout');
-      // Standard events
-      expect(eventNames).toContain('login');
-      expect(eventNames).toContain('sign_up');
-      expect(eventNames).toContain('search');
-      expect(eventNames).toContain('share');
-      expect(eventNames).toContain('select_content');
-      expect(eventNames).toContain('generate_lead');
-
-      const addToCart = getGa4MeasurementPlanTemplateRows().find(
-        (r) => r.eventName === 'add_to_cart'
-      );
-      expect(addToCart?.eventParameters).toEqual(['currency', 'value']);
-      expect(addToCart?.itemParameters).toEqual([
-        'item_id',
-        'item_name',
-        'item_brand',
-        'item_category',
-        'item_variant',
-        'price',
-        'quantity'
-      ]);
-
-      const login = getGa4MeasurementPlanTemplateRows().find(
-        (r) => r.eventName === 'login'
-      );
-      expect(login?.eventParameters).toEqual(['method']);
-      expect(login?.itemParameters).toEqual([]);
-    });
-
-    // Each event's parameters as listed in Google's recommended events
-    // reference (checked 2026-10-25):
-    // https://developers.google.com/analytics/devguides/collection/ga4/reference/events?client_type=gtm
-    it('lists the documented parameters of every non-ecommerce event', () => {
-      const rows = getGa4MeasurementPlanTemplateRows().filter(
-        (row) => !Object.hasOwn(GA4_ECOMMERCE_EVENT_PARAMETERS, row.eventName)
-      );
-      expect(
-        Object.fromEntries(
-          rows.map((row) => [row.eventName, row.eventParameters])
-        )
-      ).toEqual({
-        login: ['method'],
-        sign_up: ['method'],
-        search: ['search_term'],
-        share: ['method', 'content_type', 'item_id'],
-        select_content: ['content_type', 'content_id'],
-        generate_lead: ['currency', 'value', 'lead_source']
-      });
-      expect(rows.every((row) => row.itemParameters.length === 0)).toBe(true);
     });
   });
 });
