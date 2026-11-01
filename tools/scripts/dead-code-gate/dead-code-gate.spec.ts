@@ -6,6 +6,7 @@ import {
   flattenKnipReport,
   formatKey,
   mergeModes,
+  parseHookPayload,
   parseRustAllows,
   parseVultureOutput,
   touchesCode
@@ -116,4 +117,13 @@ test('formatKey labels test-only, python and rust findings', () => {
     '  - [allow-dead-code] (rust; remove the attribute and the dead code it hides) src/a.rs :: allow(dead_code)'
   );
   assert.equal(formatKey('default|files|a.ts|a.ts'), '  - [files] a.ts');
+});
+
+test('parseHookPayload reads stop_hook_active and treats bad input as a normal stop', () => {
+  assert.deepEqual(parseHookPayload('{"stop_hook_active":true}'), {
+    stop_hook_active: true
+  });
+  assert.deepEqual(parseHookPayload(''), {});
+  assert.deepEqual(parseHookPayload('not json'), {});
+  assert.deepEqual(parseHookPayload('null'), {});
 });
