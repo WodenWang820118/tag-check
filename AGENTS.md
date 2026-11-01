@@ -96,6 +96,17 @@ module that provides any other: a second provider creates a second instance.
 - `any`, non-null assertions (`x!`) and unused variables are lint errors
   everywhere, specs and `tools/scripts` included. Narrow or guard values
   instead of asserting them.
+- Dead code is gated by knip (`knip.json`) as a ratchet:
+  `tools/quality/dead-code-baseline.json` lists the known findings, and
+  `pnpm run dead-code:check` fails only on new ones. CI runs it with `--ci`,
+  which also fails when a baseline entry is gone, so run
+  `pnpm run dead-code:update` after deleting dead code. A `production` entry
+  means only tests still use that code. When you replace a design, delete
+  the old path instead of keeping it "for compatibility". When knip cannot
+  see a real use (a CLI entry, DI by string), add an entry to `knip.json`;
+  never add new dead code to the baseline. A Stop hook in
+  `.claude/settings.json` runs the check before Claude Code ends a turn that
+  changed code.
 - `data-testid` hooks are kebab-case, area first, with the GA4 event name or
   project slug as the per-row suffix (`run-test-add_to_cart`,
   `project-open-<slug>`).

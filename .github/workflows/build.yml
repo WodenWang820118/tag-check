@@ -45,6 +45,9 @@ jobs:
       - name: Lint
         run: pnpm run lint
         shell: bash
+      - name: Dead-code gate (knip ratchet)
+        run: node tools/scripts/dead-code-gate/dead-code-gate.ts --ci
+        shell: bash
       - name: Update sitemap lastmod
         run: node tools/scripts/update-sitemap-lastmod.ts
         shell: bash
