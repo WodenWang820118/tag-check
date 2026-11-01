@@ -1,0 +1,26 @@
+# Normalize all text files to LF in the repo and in every checkout, whatever
+# the OS. eol=lf overrides core.autocrlf, so Git for Windows checks out LF and
+# no longer warns "LF will be replaced by CRLF". Formatters (oxfmt) write LF.
+* text=auto eol=lf
+
+# Binary formats: never convert line endings or diff them as text.
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.gif    binary
+*.webp   binary
+*.ico    binary
+*.icns   binary
+*.woff   binary
+*.woff2  binary
+*.ttf    binary
+*.otf    binary
+*.pdf    binary
+*.mp4    binary
+*.webm   binary
+*.zip    binary
+*.sqlite binary
+*.db     binary
+*.xlsx   binary
+*.exe    binary
+*.dll    binary
