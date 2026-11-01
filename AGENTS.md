@@ -96,7 +96,11 @@ module that provides any other: a second provider creates a second instance.
 - `any`, non-null assertions (`x!`) and unused variables are lint errors
   everywhere, specs and `tools/scripts` included. Narrow or guard values
   instead of asserting them.
-- Dead code is gated by knip (`knip.json`) as a ratchet:
+- Dead code is gated by knip (`knip.json`) and a Rust `#[allow(dead_code)]`
+  freeze (rustc already reports dead code; the attribute is how it gets
+  hidden) as a ratchet. Keep production (`!`) and non-production project
+  globs in `knip.json` disjoint, or knip silently drops the overlap from the
+  production pass:
   `tools/quality/dead-code-baseline.json` lists the known findings, and
   `pnpm run dead-code:check` fails only on new ones. CI runs it with `--ci`,
   which also fails when a baseline entry is gone, so run
