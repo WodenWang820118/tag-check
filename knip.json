@@ -34,5 +34,5 @@
     "@spartan-ng/cli",
     "@storybook/.*"
   ],
-  "ignoreBinaries": ["where.exe"]
+  "ignoreBinaries": ["uv", "where.exe"]
 }
