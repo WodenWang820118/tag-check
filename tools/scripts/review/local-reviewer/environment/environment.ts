@@ -13,6 +13,11 @@ import {
   type LocalReviewerDependencies,
   type WindowsProcessBridgePayload
 } from '../shared/shared.ts';
+import {
+  encodePowerShellCommand,
+  resolveWindowsPowerShellPath,
+  sanitizeEnv
+} from '../../../shared/process.ts';
 
 export function createLocalReviewerDependencies(): LocalReviewerDependencies {
   return {
@@ -172,38 +177,4 @@ export function buildWindowsProcessBridgePayload(input: {
     command: input.command,
     cwd: input.cwd ?? process.cwd()
   };
-}
-
-export function getPnpmCommand(): string {
-  return process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm';
-}
-
-export function sanitizeEnv(
-  env: NodeJS.ProcessEnv | undefined
-): NodeJS.ProcessEnv | undefined {
-  if (!env) {
-    return undefined;
-  }
-
-  const sanitizedEntries = Object.entries(env).filter(
-    (entry): entry is [string, string] => typeof entry[1] === 'string'
-  );
-  return Object.fromEntries(sanitizedEntries);
-}
-
-export function resolveWindowsPowerShellPath(): string | null {
-  if (process.platform !== 'win32') {
-    return null;
-  }
-
-  const candidates = [
-    'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe',
-    'C:\\Program Files\\PowerShell\\7\\pwsh.exe'
-  ];
-
-  return candidates.find((candidate) => existsSync(candidate)) ?? null;
-}
-
-export function encodePowerShellCommand(command: string): string {
-  return Buffer.from(command, 'utf16le').toString('base64');
 }

@@ -1,6 +1,6 @@
 import { resolve } from 'node:path';
 
-import { getPnpmCommand } from '../environment/environment.ts';
+import { getPnpmCommand } from '../../../shared/process.ts';
 import {
   LOCAL_REVIEWER_BUILD_TIMEOUT_MS,
   LOCAL_REVIEWER_COMMAND_TIMEOUT_MS,

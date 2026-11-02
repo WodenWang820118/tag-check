@@ -24,7 +24,6 @@ export type {
   LocalReviewerEvaluationConfig,
   LocalReviewFinding,
   LocalReviewReport,
-  LocalReviewSeverity,
   PaidReviewContextSelection,
   WindowsProcessBridgePayload
 } from './types.ts';
@@ -58,10 +57,10 @@ export {
   WINDOWS_PROCESS_BRIDGE_ENV,
   WINDOWS_PROCESS_BRIDGE_SCRIPT
 } from './constants.ts';
-export { normalizeHybridPath } from './normalizers.ts';
-export { shuffleWithSeed, shortHash, median } from './sampling-utils.ts';
 export {
-  encodePowerShellCommand,
-  resolveWindowsPowerShellPath,
-  sanitizeEnv
-} from '../../../shared/process.ts';
+  normalizeHybridPath,
+  normalizeLocalReviewSeverity,
+  normalizeOptionalLineNumber,
+  normalizeOptionalText
+} from './normalizers.ts';
+export { shuffleWithSeed, shortHash, median } from './sampling-utils.ts';
