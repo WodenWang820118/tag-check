@@ -23,7 +23,6 @@ import { inferAutoReviewRisk } from '../risk-policy/risk-policy.ts';
 import {
   type ConcreteReviewProvider,
   DEFAULT_COPILOT_CLAUDE_MODEL,
-  DEFAULT_COPILOT_GPT5_MINI_MODEL,
   getDefaultGeminiModel,
   type ReviewCheckpoint,
   type ReviewExecution,
@@ -78,12 +77,6 @@ export function getReviewExecutionPlan(input: {
         provider: 'copilot',
         focus: input.focus,
         model: DEFAULT_COPILOT_CLAUDE_MODEL
-      }),
-      createReviewExecution({
-        checkpoint: input.checkpoint,
-        provider: 'copilot',
-        focus: input.focus,
-        model: DEFAULT_COPILOT_GPT5_MINI_MODEL
       })
     ];
   }
@@ -141,12 +134,6 @@ export function getReviewExecutionPlan(input: {
         provider: 'copilot',
         focus: input.focus,
         model: DEFAULT_COPILOT_CLAUDE_MODEL
-      }),
-      createReviewExecution({
-        checkpoint: input.checkpoint,
-        provider: 'copilot',
-        focus: input.focus,
-        model: DEFAULT_COPILOT_GPT5_MINI_MODEL
       })
     ];
   }
@@ -167,12 +154,6 @@ export function getReviewExecutionPlan(input: {
         provider: 'copilot',
         focus: input.focus,
         model: DEFAULT_COPILOT_CLAUDE_MODEL
-      }),
-      createReviewExecution({
-        checkpoint: input.checkpoint,
-        provider: 'copilot',
-        focus: input.focus,
-        model: DEFAULT_COPILOT_GPT5_MINI_MODEL
       }),
       createReviewExecution({
         checkpoint: input.checkpoint,
@@ -198,12 +179,6 @@ export function getReviewExecutionPlan(input: {
       }),
       createReviewExecution({
         checkpoint: input.checkpoint,
-        provider: 'copilot',
-        focus: input.focus,
-        model: DEFAULT_COPILOT_GPT5_MINI_MODEL
-      }),
-      createReviewExecution({
-        checkpoint: input.checkpoint,
         provider: 'codex',
         focus: input.focus
       })
@@ -222,12 +197,6 @@ export function getReviewExecutionPlan(input: {
       provider: 'gemini',
       focus: input.focus,
       model: getDefaultGeminiModel()
-    }),
-    createReviewExecution({
-      checkpoint: input.checkpoint,
-      provider: 'copilot',
-      focus: input.focus,
-      model: DEFAULT_COPILOT_GPT5_MINI_MODEL
     }),
     createReviewExecution({
       checkpoint: input.checkpoint,

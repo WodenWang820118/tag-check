@@ -6,30 +6,40 @@ export function normalizeReviewPath(candidate: string): string {
     .replace(/^\.\//, '')
     .trim();
 
+  // Bare anchors match anywhere in the path; slash-prefixed ones (after the
+  // bare ones) match whole segments and drop the leading slash.
   const workspaceAnchors = [
+    'tools/scripts/',
+    'scripts/',
     'apps/',
     'libs/',
     'packages/',
-    'tools/scripts/',
-    'tools/',
-    'scripts/',
     'docs/',
     '.agents/',
     '.github/',
     '.codex/',
     '.gemini/',
     'AGENTS.md',
-    'sync-skills.ps1'
+    'sync-skills.ps1',
+    '/tools/scripts/',
+    '/apps/',
+    '/libs/',
+    '/packages/',
+    '/scripts/',
+    '/tools/',
+    '/docs/',
+    '/.agents/',
+    '/.github/',
+    '/.codex/',
+    '/.gemini/',
+    '/AGENTS.md',
+    '/sync-skills.ps1'
   ];
 
   for (const anchor of workspaceAnchors) {
-    if (normalized.startsWith(anchor)) {
-      return normalized;
-    }
-
-    const index = normalized.indexOf(`/${anchor}`);
+    const index = normalized.indexOf(anchor);
     if (index >= 0) {
-      return normalized.slice(index + 1);
+      return normalized.slice(index + (anchor.startsWith('/') ? 1 : 0));
     }
   }
 
