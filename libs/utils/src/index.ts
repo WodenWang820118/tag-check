@@ -7,9 +7,6 @@ export * from './lib/types/tag-check';
 export * from './lib/enums/tag-build';
 export * from './lib/enums/tag-check';
 
-// API contract samples
-export * from './lib/contracts/report-api.samples';
-
 // DTOs
 export * from './lib/dtos/event-inspect-preset.dto';
 export * from './lib/dtos/report-details.dto';

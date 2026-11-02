@@ -5,7 +5,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { FileReportService } from '../../../../shared/services/api/file-report/file-report.service';
 import { VideosService } from '../../../../shared/services/api/videos/videos.service';
 import { ReportTabFacade } from './report-tab-facade.service';
-import { REPORT_DETAIL_SAMPLE, type ReportDetailResponse } from '@utils';
+import { type ReportDetailResponse } from '@utils';
+import { REPORT_DETAIL_SAMPLE } from '@utils/testing';
 import { toReportDetails } from '../report-detail.contracts';
 
 describe('ReportTabFacade', () => {

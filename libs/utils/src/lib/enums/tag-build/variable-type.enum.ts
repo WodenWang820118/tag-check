@@ -1,7 +1,6 @@
 export enum VariableTypeEnum {
   CONSTANT = 'c',
   DATA_LAYER = 'v',
-  REGEX = 'remm',
   EVENT_SETTINGS = 'gtes',
   SCROLL_DEPTH_THRESHOLD = 'SCROLL_DEPTH_THRESHOLD',
   VIDEO_PROVIDER = 'VIDEO_PROVIDER',

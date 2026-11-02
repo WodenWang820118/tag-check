@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { plainToInstance } from 'class-transformer';
-import { REPORT_DETAIL_SAMPLE } from '@utils';
+import { REPORT_DETAIL_SAMPLE } from '@utils/testing';
 import { FullTestEventResponseDto } from '../../../shared';
 import { ProjectFileReportService } from './project-file-report.service';
 

@@ -16,14 +16,6 @@ import {
 import { ruleToSpecValue } from './tag-check-rules';
 import type { BaseECommerce, StrictDataLayerEvent } from '../types/tag-check';
 
-/**
- * The kind of rule to apply to a parameter in TagCheck data layer validation.
- * - `any`: the parameter only needs to exist (any value);
- * - `equals`: the parameter value must strictly equal the literal string, number, or boolean;
- * - `pattern`: the parameter value must match the regular expression pattern.
- */
-export type ParameterRuleKind = 'any' | 'equals' | 'pattern';
-
 /** Rule specifying that a parameter must exist, regardless of its value. */
 export type AnyParameterRule = {
   kind: 'any';
@@ -78,76 +70,6 @@ const EVENT_PARAMETER_CONFLICT =
  * Maximum number of event parameters allowed per GA4 event (Google: https://support.google.com/analytics/answer/9267744).
  */
 export const GA4_MAX_EVENT_PARAMETERS_PER_EVENT = 25;
-
-/**
- * Common GA4 item parameters transcribed from Google's recommended ecommerce events reference.
- * @see https://developers.google.com/analytics/devguides/collection/ga4/reference/events?client_type=gtm
- */
-const COMMON_ITEM_PARAMETERS: readonly string[] = [
-  'item_id',
-  'item_name',
-  'item_brand',
-  'item_category',
-  'item_variant',
-  'price',
-  'quantity'
-];
-
-/**
- * The template's pre-filled rows, built from Google's recommended events reference:
- * - every event in GA4_ECOMMERCE_EVENT_PARAMETERS with its documented event parameters (excluding items)
- *   and the common item parameters (item_id, item_name, item_brand, item_category, item_variant, price, quantity)
- * - login (method)
- * - sign_up (method)
- * - search (search_term)
- * - share (method, content_type, item_id)
- * - select_content (content_type, content_id)
- * - generate_lead (currency, value, lead_source)
- *
- * @see https://developers.google.com/analytics/devguides/collection/ga4/reference/events?client_type=gtm
- * @see https://developers.google.com/analytics/devguides/collection/ga4/ecommerce?client_type=gtm
- */
-export function getGa4MeasurementPlanTemplateRows(): MeasurementPlanRow[] {
-  return [
-    ...Object.entries(GA4_ECOMMERCE_EVENT_PARAMETERS).map(
-      ([eventName, params]) => ({
-        eventName,
-        eventParameters: params.filter((p) => p !== 'items'),
-        itemParameters: [...COMMON_ITEM_PARAMETERS]
-      })
-    ),
-    {
-      eventName: 'login',
-      eventParameters: ['method'],
-      itemParameters: []
-    },
-    {
-      eventName: 'sign_up',
-      eventParameters: ['method'],
-      itemParameters: []
-    },
-    {
-      eventName: 'search',
-      eventParameters: ['search_term'],
-      itemParameters: []
-    },
-    {
-      eventName: 'share',
-      eventParameters: ['method', 'content_type', 'item_id'],
-      itemParameters: []
-    },
-    {
-      eventName: 'select_content',
-      eventParameters: ['content_type', 'content_id'],
-      itemParameters: []
-    },
-    {
-      eventName: 'generate_lead',
-      eventParameters: ['currency', 'value', 'lead_source'],
-      itemParameters: []
-    }
-  ];
-}
 
 /**
  * Parses a parameter cell entry into a {@link ParameterRule}.

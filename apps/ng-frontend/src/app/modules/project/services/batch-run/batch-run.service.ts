@@ -25,7 +25,6 @@ import { ReportTableDataSourceModelService } from '../report-table-data-source-m
 
 export type BatchItemStatus = BatchRunItemStatus;
 export type BatchRun = BatchRunJson;
-export type BatchItem = BatchRun['items'][number];
 
 /** Where the frontend kept the batch it ran itself, before the backend did. */
 const LEGACY_STORAGE_KEY = 'tag-check.batch-run';

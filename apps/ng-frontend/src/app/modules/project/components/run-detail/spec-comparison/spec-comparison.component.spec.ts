@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { describe, expect, it } from 'vitest';
-import { REPORT_DETAIL_SAMPLE } from '@utils';
+import { REPORT_DETAIL_SAMPLE } from '@utils/testing';
 import {
   showValue,
   SpecComparisonComponent

@@ -1,12 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { firstValueFrom, Observable, of } from 'rxjs';
-import {
-  DataLayerSpec,
-  Recording,
-  REPORT_DETAIL_SAMPLE,
-  ReportDetailResponse
-} from '@utils';
+import { DataLayerSpec, Recording, ReportDetailResponse } from '@utils';
+import { REPORT_DETAIL_SAMPLE } from '@utils/testing';
 import { ImageService } from '../../../shared/services/api/image/image.service';
 import { RecordingService } from '../../../shared/services/api/recording/recording.service';
 import { ReportService } from '../../../shared/services/api/report/report.service';

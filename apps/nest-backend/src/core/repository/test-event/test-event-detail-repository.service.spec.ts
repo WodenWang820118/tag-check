@@ -1,6 +1,6 @@
 import { HttpStatus } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
-import { RUN_SUMMARY_SAMPLE, shapeOf } from '@utils';
+import { RUN_SUMMARY_SAMPLE, shapeOf } from '@utils/testing';
 import { TestEventDetailRepositoryService } from './test-event-detail-repository.service';
 
 function build() {

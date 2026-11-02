@@ -21,11 +21,11 @@ import { BehaviorSubject, of, Subject, throwError } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   DataLayerSpec,
-  REPORT_DETAIL_SAMPLE,
   ReportDetailResponse,
   Recording,
   VariableConfig
 } from '@utils';
+import { REPORT_DETAIL_SAMPLE } from '@utils/testing';
 import {
   buildReportPage,
   ReportDetailRouteContext
