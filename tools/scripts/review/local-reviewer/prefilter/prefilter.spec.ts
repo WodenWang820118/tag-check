@@ -100,3 +100,139 @@ test('buildPrefilterFailureContext records the local runtime failure', () => {
   assert.match(context, /local reviewer failed/i);
   assert.match(context, /local runtime failure: timed out/i);
 });
+
+test('getEscalationReasons returns nothing for a clean small diff', () => {
+  assert.deepEqual(
+    getEscalationReasons({
+      changedFiles: ['README.md'],
+      diffText: 'noop',
+      fileCount: 1,
+      findings: []
+    }),
+    []
+  );
+});
+
+test('getEscalationReasons reports a local runtime failure first', () => {
+  const reasons = getEscalationReasons({
+    changedFiles: ['a.ts'],
+    diffText: '',
+    fileCount: 1,
+    findings: [],
+    localReviewError: 'spawn ENOENT'
+  });
+
+  assert.equal(reasons[0], 'local runtime failure: spawn ENOENT');
+});
+
+test('getEscalationReasons flags diffs touching more than 15 files', () => {
+  const reasons = getEscalationReasons({
+    changedFiles: [],
+    diffText: '',
+    fileCount: 20,
+    findings: []
+  });
+
+  assert.ok(reasons.includes('diff touches 20 files'));
+});
+
+test('getEscalationReasons lists each sensitive category once', () => {
+  const reasons = getEscalationReasons({
+    changedFiles: [],
+    diffText: 'auth login auth oauth',
+    fileCount: 1,
+    findings: []
+  });
+  const sensitive = reasons.find((reason) =>
+    reason.startsWith('sensitive area detected:')
+  );
+
+  assert.equal(sensitive?.match(/auth/g)?.length, 1);
+});
+
+test('selectPaidReviewContext keeps the full diff when forced, even for huge diffs', () => {
+  const selection = selectPaidReviewContext({
+    diffText: 'x'.repeat(5000),
+    forceFullDiff: true,
+    prefilterContext: 'short',
+    smallDiffThresholdChars: 100
+  });
+
+  assert.equal(selection.mode, 'full-diff');
+  assert.equal(selection.originalDiffLength, 5000);
+});
+
+test('selectPaidReviewContext keeps the full diff when the prefilter context is empty', () => {
+  const selection = selectPaidReviewContext({
+    diffText: 'x'.repeat(5000),
+    prefilterContext: '',
+    smallDiffThresholdChars: 100
+  });
+
+  assert.equal(selection.mode, 'full-diff');
+});
+
+test('selectPaidReviewContext switches to the prefilter summary for a large diff', () => {
+  const selection = selectPaidReviewContext({
+    diffText: 'x'.repeat(5000),
+    prefilterContext: 'short summary',
+    smallDiffThresholdChars: 100
+  });
+
+  assert.equal(selection.mode, 'prefilter-summary');
+  assert.equal(selection.contextText, 'short summary');
+  assert.equal(selection.originalDiffLength, 5000);
+});
+
+test('selectPaidReviewContext defaults the threshold to DEFAULT_SMALL_DIFF_THRESHOLD_CHARS', () => {
+  const selection = selectPaidReviewContext({
+    diffText: 'x'.repeat(500),
+    prefilterContext: 'short'
+  });
+
+  assert.equal(
+    selection.smallDiffThresholdChars,
+    DEFAULT_SMALL_DIFF_THRESHOLD_CHARS
+  );
+  assert.equal(selection.mode, 'full-diff');
+});
+
+test('buildPrefilterFailureContext lists reasons and files with "- none" findings', () => {
+  const text = buildPrefilterFailureContext({
+    changedFiles: ['a.ts', 'b.ts'],
+    diffText: 'unused',
+    escalationReasons: ['runtime down'],
+    localReviewError: 'EACCES'
+  });
+
+  assert.match(text, /runtime=unavailable/);
+  assert.match(text, /recommended_escalation=yes/);
+  assert.match(text, /- runtime down/);
+  assert.match(text, /- a\.ts/);
+  assert.match(text, /- b\.ts/);
+  assert.match(text, /findings:\n- none/);
+});
+
+test('buildPrefilterFailureContext renders "- none" when there are no changed files', () => {
+  const text = buildPrefilterFailureContext({
+    changedFiles: [],
+    diffText: '',
+    escalationReasons: [],
+    localReviewError: 'boom'
+  });
+
+  assert.match(text, /files:\n- none/);
+});
+
+test('buildPrefilterFailureContext truncates the file list to 8 entries', () => {
+  const text = buildPrefilterFailureContext({
+    changedFiles: Array.from({ length: 12 }, (_, index) => `f${index}.ts`),
+    diffText: '',
+    escalationReasons: [],
+    localReviewError: 'boom'
+  });
+
+  assert.match(text, /- f7\.ts/);
+  assert.doesNotMatch(text, /- f8\.ts/);
+  assert.match(text, /- \.\.\. 4 more file\(s\)/);
+});
