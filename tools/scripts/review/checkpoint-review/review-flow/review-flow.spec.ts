@@ -69,15 +69,14 @@ describe('getReviewExecutionPlan', () => {
     expect(plan[0]?.model).toBe('custom-copilot');
   });
 
-  it('runs both copilot defaults when no model is supplied for copilot', () => {
+  it('runs only the default Claude model when no model is supplied for copilot', () => {
     const plan = getReviewExecutionPlan({
       checkpoint: 'plan',
       focus: 'f',
       provider: 'copilot'
     });
     expect(plan.map((execution) => execution.model)).toEqual([
-      'claude-sonnet-4.6',
-      'gpt-5-mini'
+      'claude-sonnet-4.6'
     ]);
   });
 
@@ -101,7 +100,7 @@ describe('getReviewExecutionPlan', () => {
     expect(plan[0]?.provider).toBe('codex');
   });
 
-  it('auto + low-risk implementation prefers codex first then gemini then both copilot models', () => {
+  it('auto + low-risk implementation prefers codex first then gemini then copilot', () => {
     const plan = getReviewExecutionPlan({
       checkpoint: 'implementation',
       focus: 'docs polish',
@@ -115,12 +114,11 @@ describe('getReviewExecutionPlan', () => {
     expect(plan.map((execution) => execution.provider)).toEqual([
       'codex',
       'gemini',
-      'copilot',
       'copilot'
     ]);
   });
 
-  it('auto + non-low implementation/pre-merge starts with gemini, both copilots, then codex', () => {
+  it('auto + non-low implementation/pre-merge starts with gemini, copilot, then codex', () => {
     const plan = getReviewExecutionPlan({
       checkpoint: 'implementation',
       focus: 'auth refactor', // → high risk
@@ -129,12 +127,11 @@ describe('getReviewExecutionPlan', () => {
     expect(plan.map((execution) => execution.provider)).toEqual([
       'gemini',
       'copilot',
-      'copilot',
       'codex'
     ]);
   });
 
-  it('auto + test checkpoint starts with copilot/claude then gemini then copilot/gpt5 then codex', () => {
+  it('auto + test checkpoint starts with copilot then gemini then codex', () => {
     const plan = getReviewExecutionPlan({
       checkpoint: 'test',
       focus: 'f',
@@ -143,14 +140,12 @@ describe('getReviewExecutionPlan', () => {
     expect(plan.map((execution) => execution.provider)).toEqual([
       'copilot',
       'gemini',
-      'copilot',
       'codex'
     ]);
     expect(plan[0]?.model).toBe('claude-sonnet-4.6');
-    expect(plan[2]?.model).toBe('gpt-5-mini');
   });
 
-  it('auto + plan checkpoint runs the default 4-provider rotation', () => {
+  it('auto + plan checkpoint runs the default 3-provider rotation', () => {
     const plan = getReviewExecutionPlan({
       checkpoint: 'plan',
       focus: 'f',
@@ -159,7 +154,6 @@ describe('getReviewExecutionPlan', () => {
     expect(plan.map((execution) => execution.provider)).toEqual([
       'copilot',
       'gemini',
-      'copilot',
       'codex'
     ]);
   });

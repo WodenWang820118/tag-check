@@ -25,6 +25,10 @@ describe('normalizeReviewPath', () => {
     ).toBe('apps/nest-backend/src/main.ts');
   });
 
+  it('matches bare anchors anywhere in the path, as the active runner does', () => {
+    expect(normalizeReviewPath('pkg/myscripts/a.ts')).toBe('scripts/a.ts');
+  });
+
   it('returns the trimmed path unchanged when no anchor is found', () => {
     expect(normalizeReviewPath('  some/random/path.ts  ')).toBe(
       'some/random/path.ts'
