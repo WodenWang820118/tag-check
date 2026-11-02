@@ -107,39 +107,73 @@ export function sanitizeEnv(
   return Object.fromEntries(sanitizedEntries);
 }
 
-export function resolveWindowsPowerShellPath(): string | null {
-  if (process.platform !== 'win32') {
+// Omitted fields use this process, so existing callers keep the same lookup.
+interface WindowsResolverDependencies {
+  env?: NodeJS.ProcessEnv;
+  existsSync?: (targetPath: string) => boolean;
+  platform?: NodeJS.Platform;
+  spawnSync?: WindowsWhereRunner;
+}
+
+interface WindowsWhereResult {
+  error?: Error;
+  status: number | null;
+  stdout: string;
+}
+
+type WindowsWhereRunner = (
+  command: string,
+  args: readonly string[],
+  options: {
+    encoding: 'utf8';
+    stdio: ['ignore', 'pipe', 'pipe'];
+  }
+) => WindowsWhereResult;
+
+export function resolveWindowsPowerShellPath(
+  dependencies: WindowsResolverDependencies = {}
+): string | null {
+  if ((dependencies.platform ?? process.platform) !== 'win32') {
     return null;
   }
 
+  const fileExists = dependencies.existsSync ?? existsSync;
   const candidates = [
     'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe',
     'C:\\Program Files\\PowerShell\\7\\pwsh.exe'
   ];
 
-  return candidates.find((candidate) => existsSync(candidate)) ?? null;
+  return candidates.find((candidate) => fileExists(candidate)) ?? null;
 }
 
-export function resolveWindowsScriptPath(scriptName: string): string | null {
-  if (process.platform !== 'win32') {
+export function resolveWindowsScriptPath(
+  scriptName: string,
+  dependencies: WindowsResolverDependencies = {}
+): string | null {
+  if ((dependencies.platform ?? process.platform) !== 'win32') {
     return null;
   }
 
+  const env = dependencies.env ?? process.env;
+  const fileExists = dependencies.existsSync ?? existsSync;
   const candidates = [
-    process.env.APPDATA ? join(process.env.APPDATA, 'npm', scriptName) : null,
-    process.env.NVM_SYMLINK ? join(process.env.NVM_SYMLINK, scriptName) : null
+    env.APPDATA ? join(env.APPDATA, 'npm', scriptName) : null,
+    env.NVM_SYMLINK ? join(env.NVM_SYMLINK, scriptName) : null
   ].filter((candidate): candidate is string => Boolean(candidate));
 
   for (const candidate of candidates) {
-    if (existsSync(candidate)) {
+    if (fileExists(candidate)) {
       return candidate;
     }
   }
 
-  const whereResult = spawnSync('where.exe', [scriptName], {
-    encoding: 'utf8',
-    stdio: ['ignore', 'pipe', 'pipe']
-  });
+  // Call spawnSync directly so the utf8 overload still types stdout as string.
+  const whereResult = dependencies.spawnSync
+    ? dependencies.spawnSync('where.exe', [scriptName], {
+        encoding: 'utf8',
+        stdio: ['ignore', 'pipe', 'pipe']
+      })
+    : runWhereExe(scriptName);
 
   if (whereResult.error || whereResult.status !== 0) {
     return null;
@@ -149,8 +183,15 @@ export function resolveWindowsScriptPath(scriptName: string): string | null {
     whereResult.stdout
       .split(/\r?\n/)
       .map((line) => line.trim())
-      .find((line) => line.length > 0 && existsSync(line)) ?? null
+      .find((line) => line.length > 0 && fileExists(line)) ?? null
   );
+}
+
+function runWhereExe(scriptName: string): WindowsWhereResult {
+  return spawnSync('where.exe', [scriptName], {
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'pipe']
+  });
 }
 
 export function quoteWindowsArg(value: string): string {
