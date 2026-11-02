@@ -1,7 +1,6 @@
 [
   "default|binaries|package.json|http-server",
   "default|binaries|package.json|sentry-cli",
-  "default|exports|tools/scripts/shared/process.ts|resolveWindowsScriptPath",
   "default|files|libs/shared-styles/src/index.ts|libs/shared-styles/src/index.ts",
   "default|files|tools/scripts/backend-cold-start/measure-cold-start.ts|tools/scripts/backend-cold-start/measure-cold-start.ts",
   "default|types|apps/nest-backend/src/core/events-gateway/progress-events.service.ts|EventCompletedPayload",
