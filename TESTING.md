@@ -97,7 +97,12 @@ The objective of this testing plan is to outline a comprehensive strategy to ful
 
 - **Testing Frameworks:**
   - Vitest and Analog Vitest Angular (unit and integration tests)
+  - Node built-in test runner (`node --test`) for `node:test` tool specs (`tools-scripts:test-node` / `pnpm run test:tools:node`)
   - Playwright (browser E2E tests)
+
+- **Pre-commit vs CI:**
+  - `.husky/pre-commit` runs `pnpm run test:pre-commit` (`nx affected -t test,test-node --base=HEAD --parallel=3`) with task-level affected selection: `nest-backend:test` runs backend unit tests only, and `tools-scripts` runs both Vitest (`test`) and `node:test` (`test-node`) tool specs when tool scripts or their inputs change.
+  - Backend integration (`test-back:integration`), backend E2E (`test-back:e2e:cov`), and full workspace coverage (`test:cov`, `coverage:merge`) run in CI.
 
 - **Mocking and Stubbing:**
   - Supertest (HTTP mocking in Node.js)

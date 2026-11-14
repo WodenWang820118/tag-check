@@ -3,7 +3,7 @@
 # terminate this outer script (sourcing it with `.` can cause that).
 sh "$(dirname "$0")/_/h"
 
-# Fast pre-commit: lint/format staged files, then unit-test only affected projects.
+# Fast pre-commit: lint/format staged files, then run affected unit and tool test tasks.
 # --base=HEAD intentionally includes unstaged edits to shared libs (overly broad is safe).
-# Full coverage, backend e2e, and SonarCloud coverage merge all run in CI.
+# Backend integration/e2e, full coverage, and SonarCloud coverage merge all run in CI.
 pnpm run lint-staged:run && pnpm run test:pre-commit

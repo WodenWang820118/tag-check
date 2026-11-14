@@ -21,9 +21,12 @@
         }
       }
     },
-    "test-unit": {
+    "test": {
       "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["default", "^production"],
       "options": {
+        "cwd": "{workspaceRoot}",
         "command": "pnpm exec vitest --root=apps/nest-backend --exclude=\"**/test/*e2e-spec.ts\" --exclude=\"**/*.integration.spec.ts\" --watch=false"
       }
     },

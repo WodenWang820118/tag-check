@@ -219,6 +219,10 @@ pnpm run test:cov
 
 Notes:
 
+- `pnpm run test:pre-commit` runs task-level `nx affected` unit and tool tests
+  (`test,test-node`, including `nest-backend:test` unit tests and `tools-scripts`
+  Vitest/`node:test` targets); `pnpm run test:tools` and `pnpm run test:tools:node`
+  run the tool suites directly.
 - `pnpm run test:e2e` is an alias for the backend e2e path.
 - `test-front:e2e` mocks the backend. `test-front:journey` builds the
   backend and starts it on port 7070 with an empty data folder, then walks
