@@ -64,6 +64,10 @@ Every `project.json` has a `scope:*` and a `type:*` tag.
   util; `type:util` on util only; `type:e2e` on util only.
 - `libs/ui` is tagged `type:feature`: it holds routed views and injects
   `@data-access` services, not only presentational components.
+- `tools/scripts` is the Nx project `tools-scripts`, so a change to a tool
+  script selects the tool tests. The boundary rule is off for it: Node runs
+  these scripts directly, where the `@...` path aliases do not resolve, so
+  they import library files by relative path.
 
 Inside `apps/nest-backend/src`, imports point down:
 `controllers -> features -> infrastructure -> core -> shared`. A
@@ -194,9 +198,11 @@ module that provides any other: a second provider creates a second instance.
   dynamic import of a CommonJS package (such as exceljs) still adds the
   bundler's interop helpers to the initial bundle. Prefer `mat.*-overrides` mixins with only the tokens you change
   over `mat.*-color` / `mat.*-theme`.
-- The pre-commit hook runs `nx affected` tests three at a time. At six,
-  vitest workers ran out of memory (`DataCloneError: ... out of memory`) and
-  timing-sensitive specs timed out. If a project fails only there but passes
+- The pre-commit hook runs `nx affected -t test,test-node --base=HEAD --parallel=3`
+  with task-level selection (`nest-backend:test` runs unit tests only, and
+  `tools-scripts` covers Vitest and `node:test` tool specs). At six in
+  parallel, vitest workers ran out of memory (`DataCloneError: ... out of memory`)
+  and timing-sensitive specs timed out. If a project fails only there but passes
   alone, retry the commit.
 - Headful GTM runs (accompanied mode) leave their Chromium window open on
   purpose, for inspection. Close it yourself.

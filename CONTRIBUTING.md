@@ -62,7 +62,7 @@ pnpm lint          # nx run-many -t lint
 pnpm format:check  # oxfmt --check (use `pnpm format` to rewrite files)
 ```
 
-The pre-commit hook already runs `oxlint --fix` and `oxfmt` on staged files.
+The pre-commit hook runs `oxlint --fix` and `oxfmt` on staged files, followed by `pnpm run test:pre-commit` (`nx affected -t test,test-node --base=HEAD --parallel=3`) for affected unit and tool tests; backend integration/e2e tests and full coverage run in CI.
 
 ## Issue Tracker
 
