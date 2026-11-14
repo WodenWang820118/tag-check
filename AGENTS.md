@@ -204,5 +204,11 @@ module that provides any other: a second provider creates a second instance.
   parallel, vitest workers ran out of memory (`DataCloneError: ... out of memory`)
   and timing-sensitive specs timed out. If a project fails only there but passes
   alone, retry the commit.
+- Git exports `GIT_DIR` and `GIT_INDEX_FILE` to hooks. The pre-commit hook
+  unsets them before the tests, and a spec that runs git in a temp directory
+  must pass an environment without `GIT_*` variables: otherwise `git init`
+  re-initialises the repository being committed to, and from a linked worktree
+  that sets `core.bare = true` on the main checkout (`git config core.bare false`
+  repairs it).
 - Headful GTM runs (accompanied mode) leave their Chromium window open on
   purpose, for inspection. Close it yourself.
