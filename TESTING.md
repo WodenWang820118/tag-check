@@ -102,7 +102,7 @@ The objective of this testing plan is to outline a comprehensive strategy to ful
 
 - **Pre-commit vs CI:**
   - `.husky/pre-commit` runs `pnpm run test:pre-commit` (`nx affected -t test,test-node --base=HEAD --parallel=3`) with task-level affected selection: `nest-backend:test` runs backend unit tests only, and `tools-scripts` runs both Vitest (`test`) and `node:test` (`test-node`) tool specs when tool scripts or their inputs change.
-  - Backend integration (`test-back:integration`), backend E2E (`test-back:e2e:cov`), and full workspace coverage (`test:cov`, `coverage:merge`) run in CI.
+  - On pull requests, CI runs the full test suite and coverage (`test-back:integration`, `test-back:e2e:cov`, `test:tools`, `test:tools:node`, `test:cov`, `coverage:merge`) plus format check and dead-code gate, while `lint`, `typecheck-spec`, and `typecheck-tools` run only on tasks affected against the pull request's base branch (`origin/<base_ref>`). Pushes to `develop` and `main` run everything across all projects.
 
 - **Mocking and Stubbing:**
   - Supertest (HTTP mocking in Node.js)

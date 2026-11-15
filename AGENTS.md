@@ -204,6 +204,11 @@ module that provides any other: a second provider creates a second instance.
   parallel, vitest workers ran out of memory (`DataCloneError: ... out of memory`)
   and timing-sensitive specs timed out. If a project fails only there but passes
   alone, retry the commit.
+- In CI (`.github/workflows/build.yml`), pull requests run full tests,
+  coverage, dead-code gate, format check, and SonarCloud scan, while `lint`,
+  `typecheck-spec`, and `typecheck-tools` run only on tasks affected against
+  the pull request's base branch (`origin/<base_ref>`). Pushes to `develop`
+  and `main` run all checks across every project.
 - Git exports `GIT_DIR` and `GIT_INDEX_FILE` to hooks. The pre-commit hook
   unsets them before the tests, and a spec that runs git in a temp directory
   must pass an environment without `GIT_*` variables: otherwise `git init`
