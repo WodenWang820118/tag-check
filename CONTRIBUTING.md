@@ -62,7 +62,7 @@ pnpm lint          # nx run-many -t lint
 pnpm format:check  # oxfmt --check (use `pnpm format` to rewrite files)
 ```
 
-The pre-commit hook runs `oxlint --fix` and `oxfmt` on staged files, followed by `pnpm run test:pre-commit` (`nx affected -t test,test-node --base=HEAD --parallel=3`) for affected unit and tool tests; backend integration/e2e tests and full coverage run in CI.
+The pre-commit hook runs `oxlint --fix` and `oxfmt` on staged files, followed by `pnpm run test:pre-commit` (`nx affected -t test,test-node --base=HEAD --parallel=3`) for affected unit and tool tests. On pull requests, CI runs full tests and coverage, while `lint`, `typecheck-spec`, and `typecheck-tools` run only on tasks affected against the pull request's base branch; pushes to `develop` and `main` run everything.
 
 ## Issue Tracker
 

@@ -35,6 +35,22 @@
       "options": {
         "command": "node tools/scripts/testing/node-test-specs/node-test-specs.ts"
       }
+    },
+    "typecheck-tools": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "default",
+        "^production",
+        "{workspaceRoot}/tools/tsconfig.tools.json",
+        "{workspaceRoot}/tsconfig.base.json",
+        {
+          "externalDependencies": ["typescript"]
+        }
+      ],
+      "options": {
+        "command": "tsc --noEmit -p tools/scripts/tsconfig.json"
+      }
     }
   }
 }
