@@ -86,6 +86,15 @@
               "maximumError": "4kb"
             }
           ],
+          "optimization": {
+            "scripts": true,
+            "styles": {
+              "minify": true,
+              "removeSpecialComments": true,
+              "inlineCritical": false
+            },
+            "fonts": true
+          },
           "localize": true,
           "i18nMissingTranslation": "error",
           "outputHashing": "all"
@@ -157,8 +166,12 @@
             "description": "Stamp sitemaps with today's lastmod date before building."
           },
           {
-            "command": "pnpm nx build ng-product-doc --configuration production --optimization",
+            "command": "pnpm nx build ng-product-doc --configuration production",
             "description": "Build the localized static site output."
+          },
+          {
+            "command": "node tools/scripts/csp/apply-site-csp.ts --site ng-product-doc --dir dist/apps/ng-product-doc/browser",
+            "description": "Compute inline script hashes and inject the Content Security Policy meta tag into built HTML pages."
           }
         ],
         "parallel": false
@@ -175,6 +188,14 @@
         "port": 4200,
         "staticFilePath": "dist/apps/ng-product-doc/browser",
         "spa": false
+      }
+    },
+    "csp-check": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "dependsOn": ["build-static"],
+      "options": {
+        "command": "node tools/scripts/csp-check/check-site-csp.ts --dir dist/apps/ng-product-doc/browser --block-external"
       }
     }
   }
