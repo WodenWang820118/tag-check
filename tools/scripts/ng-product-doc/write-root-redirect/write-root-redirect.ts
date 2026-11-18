@@ -2,6 +2,8 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 
 import { SUPPORTED_LOCALES } from '../../../../libs/ui/src/lib/locale/locale-routing.ts';
+import { applyPolicyToHtml } from '../../csp/build-policy.ts';
+import { SITE_POLICIES } from '../../csp/site-policies.ts';
 import { isDirectEntrypoint } from '../../shared/paths.ts';
 
 export const DEFAULT_LOCALE_PATH = '/en/';
@@ -107,9 +109,14 @@ export async function writeRedirectFile(
   target: string
 ): Promise<string> {
   const absoluteFilePath = join(outputDirectory, relativeFilePath);
+  const html = applyPolicyToHtml(
+    createRedirectHtml(target),
+    SITE_POLICIES['ng-product-doc'],
+    absoluteFilePath
+  );
 
   await mkdir(dirname(absoluteFilePath), { recursive: true });
-  await writeFile(absoluteFilePath, createRedirectHtml(target), 'utf8');
+  await writeFile(absoluteFilePath, html, 'utf8');
 
   return absoluteFilePath;
 }

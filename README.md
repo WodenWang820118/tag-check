@@ -284,6 +284,25 @@ preview of each site whose Nx project it affects, from the
 workflow comments the preview URLs on the pull request. It needs a Vercel
 access token in the `VERCEL_TOKEN` repository secret and skips without one.
 
+#### Content Security Policy
+
+Static sites enforce a Content Security Policy delivered as a
+`<meta http-equiv="Content-Security-Policy">` tag in each built HTML page, so
+the same policy applies on Vercel, preview URLs, and local static servers.
+Policies are defined in
+[tools/scripts/csp/site-policies.ts](./tools/scripts/csp/site-policies.ts).
+After `ng-product-doc:build-static` builds the site (with
+`styles.inlineCritical` disabled so Angular does not emit `onload` handlers on
+stylesheets), `tools/scripts/csp/apply-site-csp.ts` hashes every inline
+`<script>` and writes the `<meta>` tag into each HTML page.
+
+To allow a new origin (for example an image, font, or script host), add it to
+the relevant directive in `SITE_POLICIES` in
+[tools/scripts/csp/site-policies.ts](./tools/scripts/csp/site-policies.ts)
+alongside a comment naming the file that requires it. Directives that `<meta>`
+ignores (`frame-ancestors`, `report-uri`, `report-to`, `sandbox`) must be
+configured in host headers rather than `SITE_POLICIES`.
+
 ## Review Workflow
 
 This repo uses review gates for non-trivial work. The most common commands are:
