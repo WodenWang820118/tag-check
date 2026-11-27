@@ -6,7 +6,8 @@ import {
   inlineScriptHashes,
   serializePolicy
 } from './build-policy.ts';
-import { SITE_POLICIES } from './site-policies.ts';
+import { CSP_DIRECTIVES, SITE_POLICIES } from './site-policies.ts';
+import type { SiteCspPolicy } from './site-policies.ts';
 
 function expectedSha256(text: string): string {
   return `'sha256-${createHash('sha256').update(text, 'utf8').digest('base64')}'`;
@@ -86,6 +87,25 @@ describe('serializePolicy', () => {
     );
     expect(first.indexOf('script-src')).toBeLessThan(
       first.indexOf('form-action')
+    );
+  });
+
+  it('writes every directive a policy may set, in CSP_DIRECTIVES order', () => {
+    const policy: SiteCspPolicy = {
+      hashInlineScripts: false,
+      directives: Object.fromEntries(
+        [...CSP_DIRECTIVES]
+          .reverse()
+          .map((directive) => [directive, [`https://${directive}.example`]])
+      )
+    };
+
+    const serialized = serializePolicy(policy);
+
+    expect(serialized.split('; ')).toEqual(
+      CSP_DIRECTIVES.map(
+        (directive) => `${directive} https://${directive}.example`
+      )
     );
   });
 });

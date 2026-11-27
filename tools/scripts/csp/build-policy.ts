@@ -1,20 +1,7 @@
 import { createHash } from 'node:crypto';
 
-import type { CspDirective, SiteCspPolicy } from './site-policies.ts';
-
-const DIRECTIVE_ORDER: readonly CspDirective[] = [
-  'default-src',
-  'script-src',
-  'style-src',
-  'font-src',
-  'img-src',
-  'connect-src',
-  'frame-src',
-  'media-src',
-  'object-src',
-  'base-uri',
-  'form-action'
-];
+import { CSP_DIRECTIVES as DIRECTIVE_ORDER } from './site-policies.ts';
+import type { SiteCspPolicy } from './site-policies.ts';
 
 const JAVASCRIPT_MIME_TYPES = new Set([
   'application/ecmascript',

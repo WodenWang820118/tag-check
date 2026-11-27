@@ -12,18 +12,26 @@
  * same time"), and these sites are prerendered.
  */
 
-export type CspDirective =
-  | 'default-src'
-  | 'script-src'
-  | 'style-src'
-  | 'font-src'
-  | 'img-src'
-  | 'connect-src'
-  | 'frame-src'
-  | 'media-src'
-  | 'object-src'
-  | 'base-uri'
-  | 'form-action';
+/**
+ * Every directive a site policy may set, in the order the serialized policy
+ * lists them. `CspDirective` is derived from this list, so a directive cannot
+ * be allowed in a policy without also being written into it.
+ */
+export const CSP_DIRECTIVES = [
+  'default-src',
+  'script-src',
+  'style-src',
+  'font-src',
+  'img-src',
+  'connect-src',
+  'frame-src',
+  'media-src',
+  'object-src',
+  'base-uri',
+  'form-action'
+] as const;
+
+export type CspDirective = (typeof CSP_DIRECTIVES)[number];
 
 export interface SiteCspPolicy {
   readonly hashInlineScripts: boolean;
@@ -58,6 +66,47 @@ export const SITE_POLICIES = {
       ],
       'frame-src': ['https://www.googletagmanager.com'],
       'media-src': ["'self'"],
+      'object-src': ["'none'"],
+      'base-uri': ["'self'"],
+      'form-action': ["'self'"]
+    }
+  },
+  // Measured on the static build with the real GTM-K2LT6GM4 container. Google
+  // sources follow https://developers.google.com/tag-platform/security/guides/csp.
+  'ng-tag-build': {
+    hashInlineScripts: true,
+    directives: {
+      'default-src': ["'self'"],
+      'script-src': [
+        "'self'",
+        // gtm.js (index.html snippet) and the gtag.js the container loads.
+        'https://www.googletagmanager.com'
+      ],
+      'style-src': [
+        "'self'",
+        // Angular component styles, CodeMirror and mermaid add <style>
+        // elements; the build inlines the Google Fonts stylesheets as <style>.
+        "'unsafe-inline'"
+      ],
+      // Roboto and Material Icons files named by the inlined font stylesheets.
+      'font-src': ["'self'", 'https://fonts.gstatic.com'],
+      'img-src': [
+        "'self'",
+        // CodeMirror editor theme backgrounds (data:image/svg+xml).
+        'data:',
+        // GTM and GA4 image requests.
+        'https://www.googletagmanager.com',
+        'https://*.google-analytics.com'
+      ],
+      'connect-src': [
+        "'self'",
+        // GA4 /g/collect hits sent by the container's Google tag.
+        'https://*.google-analytics.com',
+        'https://*.analytics.google.com',
+        'https://*.googletagmanager.com'
+      ],
+      // The GTM <noscript> iframe (ns.html) in index.html.
+      'frame-src': ['https://www.googletagmanager.com'],
       'object-src': ["'none'"],
       'base-uri': ["'self'"],
       'form-action': ["'self'"]
