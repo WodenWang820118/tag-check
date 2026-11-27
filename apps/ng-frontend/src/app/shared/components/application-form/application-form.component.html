@@ -8,7 +8,10 @@
     </mat-card-header>
     <br />
     <mat-card-content>
-      <form class="application-form" [formGroup]="applicationForm">
+      <form
+        class="application-form"
+        (submit)="$event.preventDefault(); onFormSubmit()"
+      >
         <!-- Website URL section -->
         <section aria-labelledby="website-url-heading">
           <h2 id="website-url-heading">Website URL</h2>
@@ -16,7 +19,7 @@
             <mat-label>Website URL</mat-label>
             <input
               matInput
-              formControlName="websiteUrl"
+              [formField]="f.websiteUrl"
               data-testid="preload-website-url"
               placeholder="https://www.example.com"
             />
@@ -26,26 +29,22 @@
         <!-- Local Storage section -->
         <section aria-labelledby="local-storage-heading">
           <h2 id="local-storage-heading">Local Storage</h2>
-          <div formArrayName="localStorage" data-testid="preload-local-storage">
-            @for (
-              item of localStorageFormArrayValue;
-              track item.key;
-              let idx = $index
-            ) {
-              <div class="application-form__sub-form" [formGroupName]="idx">
+          <div data-testid="preload-local-storage">
+            @for (item of f.localStorage; track $index; let idx = $index) {
+              <div class="application-form__sub-form">
                 <mat-form-field
                   class="application-form__field"
                   appearance="outline"
                 >
                   <mat-label>Key</mat-label>
-                  <input matInput formControlName="key" />
+                  <input matInput [formField]="item.key" />
                 </mat-form-field>
                 <mat-form-field
                   class="application-form__field"
                   appearance="outline"
                 >
                   <mat-label>Value</mat-label>
-                  <input matInput formControlName="value" />
+                  <input matInput [formField]="item.value" />
                 </mat-form-field>
                 <button
                   mat-icon-button
@@ -73,26 +72,22 @@
         <!-- Cookie section -->
         <section aria-labelledby="cookie-heading">
           <h2 id="cookie-heading">Cookie</h2>
-          <div formArrayName="cookie" data-testid="preload-cookies">
-            @for (
-              item of cookieFormArrayValue;
-              track item.key;
-              let idx = $index
-            ) {
-              <div class="application-form__sub-form" [formGroupName]="idx">
+          <div data-testid="preload-cookies">
+            @for (item of f.cookie; track $index; let idx = $index) {
+              <div class="application-form__sub-form">
                 <mat-form-field
                   class="application-form__field"
                   appearance="outline"
                 >
                   <mat-label>Key</mat-label>
-                  <input matInput formControlName="key" />
+                  <input matInput [formField]="item.key" />
                 </mat-form-field>
                 <mat-form-field
                   class="application-form__field"
                   appearance="outline"
                 >
                   <mat-label>Value</mat-label>
-                  <input matInput formControlName="value" />
+                  <input matInput [formField]="item.value" />
                 </mat-form-field>
                 <button
                   mat-icon-button

@@ -22,10 +22,6 @@ export type DataLayerVariableConfig = {
   type: VariableTypeEnum.DATA_LAYER;
 } & Omit<VariableConfig, 'type'>;
 
-export type RegexVariableConfig = {
-  type: VariableTypeEnum.REGEX;
-} & Omit<VariableConfig, 'type'>;
-
 export type EventSettingsVariableConfig = {
   type: VariableTypeEnum.EVENT_SETTINGS;
 } & Omit<VariableConfig, 'type'>;

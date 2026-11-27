@@ -31,7 +31,7 @@
       <div class="p-2">
         <lib-editor
           data-testid="tagbuild-input"
-          [content]="specs() | json"
+          [content]="specs().length ? (specs() | json) : ''"
           [editorExtension]="inputExtension"
         ></lib-editor>
       </div>
@@ -48,6 +48,10 @@
           class="functional-card__actions__item"
           (uploadClick)="onUpload()"
         ></lib-upload-action>
+        <lib-plan-editor-action
+          class="functional-card__actions__item"
+          (planClick)="openPlanEditorDialog()"
+        ></lib-plan-editor-action>
         <lib-developer-guide-action
           class="functional-card__actions__item"
           (guideClick)="openDeveloperGuideDialog()"

@@ -78,6 +78,7 @@ export class ReportTableFacadeService {
         ...r,
         passed: r.passed === true,
         requestPassed: r.requestPassed === true,
+        requestChecked: r.requestChecked !== false,
         createdAt: toDate(r.createdAt) ?? new Date(0),
         updatedAt: toDate(r.updatedAt)
       }))

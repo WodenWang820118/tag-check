@@ -1,0 +1,8 @@
+[
+  "default|binaries|package.json|http-server",
+  "default|binaries|package.json|sentry-cli",
+  "default|files|libs/shared-styles/src/index.ts|libs/shared-styles/src/index.ts",
+  "default|files|tools/scripts/backend-cold-start/measure-cold-start.ts|tools/scripts/backend-cold-start/measure-cold-start.ts",
+  "default|types|apps/nest-backend/src/core/events-gateway/progress-events.service.ts|EventCompletedPayload",
+  "production|enumMembers|libs/data-access/src/lib/services/tag-build-mode/tag-build-mode.service.ts|TagExtract"
+]

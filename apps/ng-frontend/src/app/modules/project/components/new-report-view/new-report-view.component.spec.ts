@@ -49,7 +49,7 @@ describe('NewReportViewComponent.uploadReport', () => {
   it('reloads the tests page and closes the sidenav after the upload', async () => {
     const { component, router, facade, sidenav } = render({ reports: [] });
 
-    component.uploadReport();
+    await component.uploadReport();
 
     expect(facade.uploadReport).toHaveBeenCalledWith('demo');
     expect(router.navigated).toBe(false);
@@ -61,7 +61,7 @@ describe('NewReportViewComponent.uploadReport', () => {
   it('keeps the sidenav open on a page without reports', async () => {
     const { component, router, sidenav } = render({});
 
-    component.uploadReport();
+    await component.uploadReport();
     await router.navigate.mock.results[0]?.value;
 
     expect(sidenav.close).not.toHaveBeenCalled();

@@ -24,13 +24,9 @@ import { StepExecutorUtilsService } from '../step-executor/step-executor-utils.s
 import { DataLayerService } from '../web-monitoring/data-layer/data-layer.service';
 import type { Step } from '@utils';
 
-const chromeAvailable = (() => {
-  try {
-    return existsSync(puppeteer.executablePath());
-  } catch {
-    return false;
-  }
-})();
+const chromeAvailable = await puppeteer
+  .executablePath()
+  .then(existsSync, () => false);
 
 /**
  * The host is large and the button sits in its corner, so a click that only

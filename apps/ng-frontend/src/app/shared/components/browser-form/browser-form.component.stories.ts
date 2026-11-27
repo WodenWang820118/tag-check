@@ -7,7 +7,7 @@ import {
 import { BrowserFormComponent } from './browser-form.component';
 
 import { provideHttpClient, withXhr } from '@angular/common/http';
-import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { FormField } from '@angular/forms/signals';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -23,16 +23,14 @@ const meta: Meta<BrowserFormComponent> = {
   title: 'Shared/Components/BrowserFormComponent',
   decorators: [
     moduleMetadata({
-      //👇 Imports both components to allow component composition with Storybook
       imports: [
         MatIconModule,
         MatButtonModule,
         MatCardModule,
         MatFormFieldModule,
         MatInputModule,
-        ReactiveFormsModule,
-        FormsModule,
-        MatCheckboxModule
+        MatCheckboxModule,
+        FormField
       ],
       providers: [SettingsService]
     }),

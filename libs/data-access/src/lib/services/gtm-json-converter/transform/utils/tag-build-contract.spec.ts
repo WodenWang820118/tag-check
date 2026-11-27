@@ -9,12 +9,9 @@ import {
   isParameterWithKeyValue,
   isParameterListItem,
   isParameterMap,
-  isSpec,
-  isSpecArray,
   isStrictDataLayerEvent,
   isStrictDataLayerEventArray,
   isTagConfig,
-  isTrigger,
   isTriggerConfig,
   isVariableConfig,
   validateGTMImportReadiness,
@@ -22,6 +19,7 @@ import {
   type Parameter,
   type TriggerConfig
 } from '@utils';
+import { isSpec } from '@utils/testing';
 
 describe('tag-build contract helpers', () => {
   const validTagParameter = {
@@ -369,13 +367,6 @@ describe('tag-build contract helpers', () => {
     expect(isParameterListItem({ type: 'TEMPLATE', value: 99 })).toBe(false);
   });
 
-  it('validates basic trigger guards directly', () => {
-    expect(isTrigger({ name: 'page_view', triggerId: '1' })).toBe(true);
-    expect(isTrigger({ name: 'page_view', triggerId: 1 })).toBe(false);
-    expect(isTrigger({ name: 'page_view' })).toBe(false);
-    expect(isTrigger(null)).toBe(false);
-  });
-
   it('recognizes strict data-layer event arrays', () => {
     expect(isStrictDataLayerEvent({ event: 'page_view' })).toBe(true);
     expect(isStrictDataLayerEvent({ event: 123 })).toBe(false);
@@ -553,7 +544,7 @@ describe('tag-build contract helpers', () => {
     ).toBe(false);
   });
 
-  it('recognizes spec arrays through the shared contract helper', () => {
+  it('recognizes specs through the test contract guard', () => {
     const spec = createPlaceholderSpec('GA4 event - page_view', {
       trigger: [validTrigger]
     });
@@ -561,9 +552,6 @@ describe('tag-build contract helpers', () => {
     expect(isSpec(spec)).toBe(true);
     expect(isSpec({ tag: spec.tag })).toBe(false);
     expect(isSpec({ trigger: spec.trigger })).toBe(false);
-    expect(isSpecArray([spec])).toBe(true);
-    expect(isSpecArray([])).toBe(true);
-    expect(isSpecArray([{ tag: spec.tag }])).toBe(false);
   });
 
   it('rejects missing required tag config fields at baseline', () => {

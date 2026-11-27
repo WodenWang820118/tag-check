@@ -4,10 +4,11 @@ import {
   computed,
   effect,
   inject,
+  signal,
   ChangeDetectionStrategy
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormField, form } from '@angular/forms/signals';
 import { ActivatedRoute } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -30,8 +31,7 @@ import { getPublicDestinationBySlug } from '../../../../shared/services/destinat
 @Component({
   selector: 'app-details',
   imports: [
-    ReactiveFormsModule,
-    FormsModule,
+    FormField,
     HlmAlertImports,
     HlmButton,
     HlmLabel,
@@ -64,11 +64,12 @@ export class DetailsComponent {
 
     return getPublicDestinationBySlug(slug) ?? null;
   });
-  /** A native select reports its value as a string. */
-  readonly numberOfPersonsControl = new FormControl<number | string>(1);
+
+  readonly numberOfPersonsModel = signal<string>('1');
+  readonly numberOfPersonsControl = form(this.numberOfPersonsModel);
   readonly personOptions = Array.from({ length: 6 }, (_, index) => ({
     label: `${index + 1} ${index + 1 === 1 ? 'person' : 'persons'}`,
-    value: index + 1
+    value: String(index + 1)
   }));
 
   constructor(
@@ -93,7 +94,7 @@ export class DetailsComponent {
   }
 
   addToCart(destination: Destination): void {
-    const numOfPersons = Number(this.numberOfPersonsControl.value);
+    const numOfPersons = Number(this.numberOfPersonsControl().value());
     if (numOfPersons > 0) {
       this.orderService.addToCart(destination, numOfPersons);
     }

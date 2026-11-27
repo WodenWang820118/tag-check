@@ -1,13 +1,14 @@
 import {
   Component,
+  computed,
   inject,
-  signal,
+  Signal,
   ViewEncapsulation,
   ChangeDetectionStrategy
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { BreakpointObserver } from '@angular/cdk/layout';
-import { ActivatedRoute, Router, RouterOutlet } from '@angular/router';
+import { ActivatedRoute, Data, Router, RouterOutlet } from '@angular/router';
 import { map } from 'rxjs';
 import { Project, ProjectSetting } from '@utils';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
@@ -71,9 +72,23 @@ const WIDE_LAYOUT_QUERY = '(min-width: 1280px)';
   encapsulation: ViewEncapsulation.None
 })
 export class ProjectViewComponent {
-  project = signal<ProjectSetting>({} as ProjectSetting);
-  projectInfo = signal<Project[]>([]);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly breakpointObserver = inject(BreakpointObserver);
+
+  private readonly routeData: Signal<Data> = toSignal(this.route.data, {
+    initialValue: this.route.snapshot.data
+  });
+
+  readonly project = computed<ProjectSetting>(
+    () =>
+      (this.routeData()['projectSetting'] as ProjectSetting) ??
+      ({} as ProjectSetting)
+  );
+  readonly projectInfo = computed<Project[]>(
+    () => (this.routeData()['projectInfo'] as Project[]) ?? []
+  );
+
   readonly isWide = toSignal(
     this.breakpointObserver
       .observe(WIDE_LAYOUT_QUERY)
@@ -82,18 +97,6 @@ export class ProjectViewComponent {
       initialValue: this.breakpointObserver.isMatched(WIDE_LAYOUT_QUERY)
     }
   );
-
-  constructor(
-    private readonly route: ActivatedRoute,
-    private readonly router: Router
-  ) {
-    this.route.data.subscribe((data) => {
-      const projectSettings = data['projectSetting'];
-      const projectInfo = data['projectInfo'];
-      this.project.set(projectSettings);
-      this.projectInfo.set(projectInfo);
-    });
-  }
 
   onChangeProject(projectSlug: string, snav: MatSidenav) {
     this.closeOverlayMenu(snav);

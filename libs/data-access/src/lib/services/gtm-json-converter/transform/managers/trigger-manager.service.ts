@@ -6,6 +6,15 @@ import { ScrollTrigger } from '../triggers/scroll-trigger.service';
 import { EventUtils } from '../../utils/event-utils.service';
 import { SCROLL_TRIGGER_NAME, VIDEO_TRIGGER_NAME } from '../utils/constant';
 
+interface TriggerContribution {
+  names: (dataLayers: DataLayer[]) => string[];
+  configs: (
+    accountId: string,
+    containerId: string,
+    dataLayers: DataLayer[]
+  ) => TriggerConfig[];
+}
+
 /**
  * Builds the container's triggers: one Custom Event trigger per custom data
  * layer event, then a YouTube Video trigger and a Scroll Depth trigger when
@@ -28,17 +37,14 @@ export class TriggerManager {
    * reference. Custom Event triggers are named after their event; the
    * built-in triggers keep their own names (`event youtube video`,
    * `event scroll`).
+   *
+   * Custom-event references retain raw event names because tag matching uses
+   * those names.
    */
   createTriggers(dataLayer: DataLayer[]): Trigger[] {
-    const names = [
-      ...this.getCustomEvents(dataLayer),
-      ...(this.eventUtils.isIncludeVideo(dataLayer)
-        ? [VIDEO_TRIGGER_NAME]
-        : []),
-      ...(this.eventUtils.isIncludeScroll(dataLayer)
-        ? [SCROLL_TRIGGER_NAME]
-        : [])
-    ];
+    const names = this.getTriggerContributions().flatMap((contribution) =>
+      contribution.names(dataLayer)
+    );
     return this.assignTriggerIds(names.map((name) => ({ name })));
   }
 
@@ -48,24 +54,50 @@ export class TriggerManager {
     containerId: string,
     dataLayer: DataLayer[]
   ): TriggerConfig[] {
-    const eventTriggers = this.getCustomEvents(dataLayer).map((event) =>
-      this.eventTrigger.createTrigger(accountId, containerId, event)
+    const configs = this.getTriggerContributions().flatMap((contribution) =>
+      contribution.configs(accountId, containerId, dataLayer)
     );
-    const videoTriggers = this.videoTrigger.createVideoTrigger(
-      accountId,
-      containerId,
-      dataLayer
-    );
-    const scrollTriggers = this.scrollTrigger.createScrollTrigger(
-      accountId,
-      containerId,
-      dataLayer
-    );
-    return this.assignTriggerIds([
-      ...eventTriggers,
-      ...videoTriggers,
-      ...scrollTriggers
-    ]);
+    return this.assignTriggerIds(configs);
+  }
+
+  /**
+   * Keep contribution order shared because generated tag references depend on
+   * positional trigger IDs.
+   */
+  private getTriggerContributions(): TriggerContribution[] {
+    return [
+      {
+        names: (dataLayers) => this.getCustomEvents(dataLayers),
+        configs: (accountId, containerId, dataLayers) =>
+          this.getCustomEvents(dataLayers).map((event) =>
+            this.eventTrigger.createTrigger(accountId, containerId, event)
+          )
+      },
+      {
+        names: (dataLayers) =>
+          this.eventUtils.isIncludeVideo(dataLayers)
+            ? [VIDEO_TRIGGER_NAME]
+            : [],
+        configs: (accountId, containerId, dataLayers) =>
+          this.videoTrigger.createVideoTrigger(
+            accountId,
+            containerId,
+            dataLayers
+          )
+      },
+      {
+        names: (dataLayers) =>
+          this.eventUtils.isIncludeScroll(dataLayers)
+            ? [SCROLL_TRIGGER_NAME]
+            : [],
+        configs: (accountId, containerId, dataLayers) =>
+          this.scrollTrigger.createScrollTrigger(
+            accountId,
+            containerId,
+            dataLayers
+          )
+      }
+    ];
   }
 
   /**

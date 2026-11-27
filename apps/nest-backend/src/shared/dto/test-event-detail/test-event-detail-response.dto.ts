@@ -14,6 +14,10 @@ export class TestEventDetailResponseDto implements TestEventDetailSchema {
   @Expose()
   requestPassed!: boolean;
 
+  /** Whether the run made the GA4 request check (Request Check on). */
+  @Expose()
+  requestChecked!: boolean;
+
   @Expose()
   passed!: boolean;
 

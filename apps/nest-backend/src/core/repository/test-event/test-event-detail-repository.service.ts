@@ -36,6 +36,7 @@ export type RunHistoryRow = {
   runId: number;
   passed: boolean;
   requestPassed: boolean;
+  requestChecked: boolean;
   runAt: Date;
   /** Null when the run did not keep its recordings in a folder of its own. */
   recordingKey: string | null;
@@ -59,6 +60,7 @@ export class TestEventDetailRepositoryService {
         id: true,
         passed: true,
         requestPassed: true,
+        requestChecked: true,
         createdAt: true,
         testEvent: { id: true, eventId: true, eventName: true, testName: true }
       },
@@ -73,6 +75,7 @@ export class TestEventDetailRepositoryService {
       testName: run.testEvent.testName,
       passed: run.passed,
       requestPassed: run.requestPassed,
+      requestChecked: run.requestChecked,
       runAt: run.createdAt
     }));
   }
@@ -85,10 +88,17 @@ export class TestEventDetailRepositoryService {
     id: number;
     passed: boolean;
     requestPassed: boolean;
+    requestChecked: boolean;
     message: string | null;
   } | null> {
     const run = await this.repository.findOne({
-      select: { id: true, passed: true, requestPassed: true, message: true },
+      select: {
+        id: true,
+        passed: true,
+        requestPassed: true,
+        requestChecked: true,
+        message: true
+      },
       where: { testEvent: { id: testEventId } },
       order: { id: 'DESC' }
     });
@@ -97,6 +107,7 @@ export class TestEventDetailRepositoryService {
           id: run.id,
           passed: run.passed,
           requestPassed: run.requestPassed,
+          requestChecked: run.requestChecked,
           message: run.message ?? null
         }
       : null;
@@ -140,6 +151,7 @@ export class TestEventDetailRepositoryService {
         id: true,
         passed: true,
         requestPassed: true,
+        requestChecked: true,
         createdAt: true,
         recordingKey: true
       },
@@ -150,6 +162,7 @@ export class TestEventDetailRepositoryService {
       runId: run.id,
       passed: run.passed,
       requestPassed: run.requestPassed,
+      requestChecked: run.requestChecked,
       runAt: run.createdAt,
       recordingKey: run.recordingKey ?? null
     }));
@@ -222,6 +235,7 @@ export class TestEventDetailRepositoryService {
       testEventDetailEntity.destinationUrl = data.destinationUrl;
       testEventDetailEntity.passed = data.passed;
       testEventDetailEntity.requestPassed = data.requestPassed;
+      testEventDetailEntity.requestChecked = data.requestChecked ?? true;
       testEventDetailEntity.rawRequest = data.rawRequest;
       testEventDetailEntity.message = data.message ?? null;
       testEventDetailEntity.requestMessage = data.requestMessage ?? null;

@@ -7,7 +7,6 @@ import type {
   ParameterMap,
   ParameterWithKeyValue,
   TagConfig,
-  Trigger,
   TriggerConfig,
   VariableConfig
 } from '../types/tag-build';
@@ -158,17 +157,6 @@ export function getParameterMapValue(
 }
 
 /**
- * Whether a value is a trigger name with its ID.
- */
-export function isTrigger(value: unknown): value is Trigger {
-  return (
-    isRecord(value) &&
-    typeof value['name'] === 'string' &&
-    typeof value['triggerId'] === 'string'
-  );
-}
-
-/**
  * Whether a value has the fields every exported trigger has: name, type,
  * account and container IDs, and well-formed optional IDs and parameters.
  */
@@ -271,25 +259,6 @@ export function isVariableConfig(value: unknown): value is VariableConfig {
   }
 
   return true;
-}
-
-/**
- * Whether a value is a tag with the triggers that fire it.
- */
-export function isSpec(value: unknown): value is Spec {
-  return (
-    isRecord(value) &&
-    isTagConfig(value['tag']) &&
-    Array.isArray(value['trigger']) &&
-    value['trigger'].every(isTriggerConfig)
-  );
-}
-
-/**
- * Whether a value is an array of {@link isSpec} values.
- */
-export function isSpecArray(value: unknown): value is Spec[] {
-  return Array.isArray(value) && value.every(isSpec);
 }
 
 /**

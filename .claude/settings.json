@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/tools/scripts/dead-code-gate/dead-code-gate.ts\" --hook",
+            "timeout": 120
+          }
+        ]
+      }
+    ]
+  }
+}

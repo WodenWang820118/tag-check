@@ -858,6 +858,94 @@
           <context context-type="linenumber">65,68</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="writePlanActionComponentButton" datatype="html">
+        <source> Write plan </source>
+        <target>填寫評估計畫</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/plan-editor-action/plan-editor-action.component.html</context>
+          <context context-type="linenumber">1,8</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="planEditorDialogTitle" datatype="html">
+        <source> Measurement plan </source>
+        <target>評估計畫</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/plan-editor-dialog/plan-editor-dialog.component.html</context>
+          <context context-type="linenumber">1,8</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="planEditorDialogHint" datatype="html">
+        <source> Rule forms: currency (any value), currency=TWD (exact value), transaction_id=/^T\d+$/ (regex pattern). Comma separated. </source>
+        <target>規則格式：currency（任意值）、currency=TWD（特定值）、transaction_id=/^T\d+$/（正規表達式）。以逗號分隔。</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/plan-editor-dialog/plan-editor-dialog.component.html</context>
+          <context context-type="linenumber">10,15</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="planEditorDialogHeaderEventName" datatype="html">
+        <source> event_name </source>
+        <target>event_name</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/plan-editor-dialog/plan-editor-dialog.component.html</context>
+          <context context-type="linenumber">18,22</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="planEditorDialogHeaderEventParameters" datatype="html">
+        <source> event_parameters </source>
+        <target>event_parameters</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/plan-editor-dialog/plan-editor-dialog.component.html</context>
+          <context context-type="linenumber">23,27</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="planEditorDialogHeaderItemParameters" datatype="html">
+        <source> item_parameters </source>
+        <target>item_parameters</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/plan-editor-dialog/plan-editor-dialog.component.html</context>
+          <context context-type="linenumber">28,32</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="planEditorDialogDeleteRow" datatype="html">
+        <source> Delete </source>
+        <target>刪除</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/plan-editor-dialog/plan-editor-dialog.component.html</context>
+          <context context-type="linenumber">65,72</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="planEditorDialogAddEvent" datatype="html">
+        <source> Add event </source>
+        <target>新增事件</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/plan-editor-dialog/plan-editor-dialog.component.html</context>
+          <context context-type="linenumber">75,82</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="planEditorDialogDownloadCsv" datatype="html">
+        <source> Download CSV </source>
+        <target>下載 CSV</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/plan-editor-dialog/plan-editor-dialog.component.html</context>
+          <context context-type="linenumber">100,106</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="planEditorDialogClose" datatype="html">
+        <source> Close </source>
+        <target>關閉</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/plan-editor-dialog/plan-editor-dialog.component.html</context>
+          <context context-type="linenumber">108,114</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="planEditorDialogUsePlan" datatype="html">
+        <source> Use plan </source>
+        <target>套用計畫</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/plan-editor-dialog/plan-editor-dialog.component.html</context>
+          <context context-type="linenumber">116,124</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="uploadActionComponentUploadButton" datatype="html">
         <source> Upload </source>
         <target>上傳</target>

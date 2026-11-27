@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ItemDef, Recording } from '@utils';
 import {
@@ -14,11 +14,9 @@ import { ItemDefService } from '../../../../shared/services/api/item-def/item-de
  */
 @Injectable()
 export class ReportDetailPanelsFacadeService {
-  constructor(
-    private readonly specService: SpecService,
-    private readonly recordingService: RecordingService,
-    private readonly itemDefService: ItemDefService
-  ) {}
+  private readonly specService = inject(SpecService);
+  private readonly recordingService = inject(RecordingService);
+  private readonly itemDefService = inject(ItemDefService);
 
   readFile(file: File): Promise<string> {
     return file.text();

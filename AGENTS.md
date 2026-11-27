@@ -23,10 +23,10 @@ The UI, the API and the entities use different words for the same things.
 | ---------------- | --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Project          | `ProjectEntity`, `projectSlug`                                  | One website under test, with its settings: website URL, pre-loading values, GTM preview URL, authentication, browser.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | Test             | test event: `TestEventEntity`, `eventId`                        | One GA4 event to check. Owns a Chrome Recorder **recording** (the journey to replay), a **spec** (`SpecEntity`, the expected `dataLayer` push) and an optional item definition (`ItemDefEntity`).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| Run              | inspection: `inspectSingleEvent`, `singleEventInspectionRecipe` | One replay of a test in Puppeteer. Makes two checks: the **dataLayer check** (`passed`) and the **request check** (`requestPassed`: a GA4 `/g/collect` request for the event, sent to the measurement ID).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| Run              | inspection: `inspectSingleEvent`, `singleEventInspectionRecipe` | One replay of a test in Puppeteer. Makes two checks: the **dataLayer check** (`passed`) and the **request check** (`requestPassed`: a GA4 `/g/collect` request for the event, sent to the measurement ID). `requestChecked` is false when Request Check was off; such a run is judged by its dataLayer check alone and shows the request check as Not checked.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | Result           | `TestEventDetailEntity`                                         | One row per run with both check results, the raw request, the captured `dataLayer`, the message and the run's screenshot (`testImage`; null for older runs). `TestEventEntity.latestTestEventDetailId` points at the latest.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | Media            | `TestImageEntity`, `RunRecordingsService`                       | The run's screenshot (one row per run) and its screen recording, in the run's own folder `inspection_results/<eventId>/runs/<recordingKey>/recording.webm` (accompanied-mode runs also record the Tag Assistant tab to `recording-tag-assistant.webm`, served with `?view=tag-assistant`). The latest 10 runs of a test keep their recordings. `?run=<runId>` picks a run on `/videos`, `/projects/images` and `/reports/:projectSlug/:eventId`; the latest run by default. `mediaTimeline` places each recorded step on the site recording.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| Report           | `IReportDetails`; `reports`, `file-reports` controllers         | A test's page (`views/detail-view` with `components/run-detail`; `?run=<runId>` opens an earlier run), the Reports page (one row per run; deleting rows deletes runs and their screenshots, not tests) and the spreadsheet export. `GET /reports/:projectSlug` flattens each test's latest result into `passed`, `requestPassed`, `hasRecording` and `lastRunAt`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| Report           | `IReportDetails`; `reports`, `file-reports` controllers         | A test's page (`views/detail-view` with `components/run-detail`; `?run=<runId>` opens an earlier run), the Reports page (one row per run; deleting rows deletes runs and their screenshots, not tests) and the spreadsheet export. `GET /reports/:projectSlug` flattens each test's latest result into `passed`, `requestPassed`, `requestChecked`, `hasRecording` and `lastRunAt`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | Status           | `getRunStatus` (`report-detail.contracts.ts`)                   | Not run / Passed / Partial / Failed. A test has run when `lastRunAt` is set (null once every run is deleted).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | Accompanied mode | `gtm-operator`                                                  | Runs a test through GTM Preview (Tag Assistant) instead of opening the site directly.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | AI assist        | `AiAssistService`, `OllamaClientService`                        | Optional, app-wide (system configuration entries `aiAssist.*`): a model in Ollama on this computer suggests replacement selectors. Ollama is called only on a loopback address; TagCheck never installs it or downloads a model (it shows the `ollama pull` command). A suggestion never passes a test: the run's checks do. A step that cannot find its element throws `StepElementNotFoundError`; the run names the step in its message and keeps what the page showed (`step-failure.json` in the run's folder, `GET /ai-assist/step-failures/:projectSlug/:eventId`). `POST /ai-assist/suggestions/...` asks the model which recorded candidates the step meant (the model answers with candidate ids; the selectors come from the run); `POST /ai-assist/trials/...` runs the test headless with other selectors for that step (`RunStepOverrideService`) without changing the recording. Before a step fails, it is retried once without a model when exactly one recorded candidate carries its recorded test hook, id or name (`chooseFallbackCandidate`); the run's `step-fallbacks.json` lists those steps (`stepFallbacks` in the report), and the test page offers to save them. |
@@ -64,6 +64,10 @@ Every `project.json` has a `scope:*` and a `type:*` tag.
   util; `type:util` on util only; `type:e2e` on util only.
 - `libs/ui` is tagged `type:feature`: it holds routed views and injects
   `@data-access` services, not only presentational components.
+- `tools/scripts` is the Nx project `tools-scripts`, so a change to a tool
+  script selects the tool tests. The boundary rule is off for it: Node runs
+  these scripts directly, where the `@...` path aliases do not resolve, so
+  they import library files by relative path.
 
 Inside `apps/nest-backend/src`, imports point down:
 `controllers -> features -> infrastructure -> core -> shared`. A
@@ -96,6 +100,21 @@ module that provides any other: a second provider creates a second instance.
 - `any`, non-null assertions (`x!`) and unused variables are lint errors
   everywhere, specs and `tools/scripts` included. Narrow or guard values
   instead of asserting them.
+- Dead code is gated by knip (`knip.json`) and a Rust `#[allow(dead_code)]`
+  freeze (rustc already reports dead code; the attribute is how it gets
+  hidden) as a ratchet. Keep production (`!`) and non-production project
+  globs in `knip.json` disjoint, or knip silently drops the overlap from the
+  production pass:
+  `tools/quality/dead-code-baseline.json` lists the known findings, and
+  `pnpm run dead-code:check` fails only on new ones. CI runs it with `--ci`,
+  which also fails when a baseline entry is gone, so run
+  `pnpm run dead-code:update` after deleting dead code. A `production` entry
+  means only tests still use that code. When you replace a design, delete
+  the old path instead of keeping it "for compatibility". When knip cannot
+  see a real use (a CLI entry, DI by string), add an entry to `knip.json`;
+  never add new dead code to the baseline. A Stop hook in
+  `.claude/settings.json` runs the check before Claude Code ends a turn that
+  changed code.
 - `data-testid` hooks are kebab-case, area first, with the GA4 event name or
   project slug as the per-row suffix (`run-test-add_to_cart`,
   `project-open-<slug>`).
@@ -103,6 +122,19 @@ module that provides any other: a second provider creates a second instance.
   returns (dates are strings), not a hand-built object cast to the type. A
   mapper once read a nested field the API never sent, and its specs still
   passed.
+- Angular code keeps state in signals and forms in Signal Forms
+  (`@angular/forms/signals`). Read route data with `toSignal` and await
+  one-shot requests with `firstValueFrom`. After the await, return early
+  when `DestroyRef.destroyed` is true, as `takeUntilDestroyed` did. RxJS
+  stays where the code is a stream or needs its operators:
+  - HttpClient API services and CDK `DataSource.connect()`;
+  - SSE progress events, router events, and polling;
+  - flows that order or cancel requests, such as the report table's
+    effects facade.
+
+  A `[formField]` element cannot take a `readonly` attribute (use
+  `readonly()` in the schema). `(ngSubmit)` fires only with
+  `FormsModule` or `ReactiveFormsModule`, so Signal Forms use `(submit)`.
 
 ## Pitfalls
 
@@ -154,6 +186,15 @@ module that provides any other: a second provider creates a second instance.
   `.github/workflows/vercel-previews.yaml`, which deploys the sites whose Nx
   project is affected. Register a new Vercel site in
   `tools/scripts/vercel/preview-targets`.
+- The Vercel sites' Content Security Policy is written into the built pages
+  after the build (`tools/scripts/csp`; decisions in
+  [docs/specs/web-content-security-policy.md](docs/specs/web-content-security-policy.md)).
+  On the strict sites (`ng-product-doc`, `ng-tag-build`) the build refuses a
+  page with an inline event handler, and a request to a new outside origin is
+  blocked until the origin is in `SITE_POLICIES`. After such a change run
+  `pnpm nx run <site>:csp-check`. The policy header in the root `vercel.json`
+  holds `frame-ancestors` only: a fetch directive there would also restrict
+  the sample site and Storybook.
 - ng-tag-build's initial bundle is about 686 kB against its 750 kB warning
   budget, and `libs/shared-styles` counts against it. Its global styles
   (`tag-build-indigo-pink.scss`, `tag-build.scss`) theme only the Material
@@ -166,9 +207,22 @@ module that provides any other: a second provider creates a second instance.
   dynamic import of a CommonJS package (such as exceljs) still adds the
   bundler's interop helpers to the initial bundle. Prefer `mat.*-overrides` mixins with only the tokens you change
   over `mat.*-color` / `mat.*-theme`.
-- The pre-commit hook runs `nx affected` tests three at a time. At six,
-  vitest workers ran out of memory (`DataCloneError: ... out of memory`) and
-  timing-sensitive specs timed out. If a project fails only there but passes
+- The pre-commit hook runs `nx affected -t test,test-node --base=HEAD --parallel=3`
+  with task-level selection (`nest-backend:test` runs unit tests only, and
+  `tools-scripts` covers Vitest and `node:test` tool specs). At six in
+  parallel, vitest workers ran out of memory (`DataCloneError: ... out of memory`)
+  and timing-sensitive specs timed out. If a project fails only there but passes
   alone, retry the commit.
+- In CI (`.github/workflows/build.yml`), pull requests run full tests,
+  coverage, dead-code gate, format check, and SonarCloud scan, while `lint`,
+  `typecheck-spec`, and `typecheck-tools` run only on tasks affected against
+  the pull request's base branch (`origin/<base_ref>`). Pushes to `develop`
+  and `main` run all checks across every project.
+- Git exports `GIT_DIR` and `GIT_INDEX_FILE` to hooks. The pre-commit hook
+  unsets them before the tests, and a spec that runs git in a temp directory
+  must pass an environment without `GIT_*` variables: otherwise `git init`
+  re-initialises the repository being committed to, and from a linked worktree
+  that sets `core.bare = true` on the main checkout (`git config core.bare false`
+  repairs it).
 - Headful GTM runs (accompanied mode) leave their Chromium window open on
   purpose, for inspection. Close it yourself.

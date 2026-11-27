@@ -14,7 +14,7 @@
       @if (card.check; as check) {
         <article
           class="flex flex-col gap-[1rem] rounded-[1.2rem] bg-white p-[2rem]"
-          [class.verdict-card--failed]="!check.passed"
+          [class.verdict-card--failed]="!check.passed && !check.notChecked"
           [attr.data-testid]="'run-check-' + card.id"
         >
           <div class="flex items-center justify-between gap-[1rem]">
@@ -26,13 +26,23 @@
             <span
               class="inline-flex items-center gap-[0.4rem] rounded-full px-[1.2rem] py-[0.4rem] text-[1.4rem] font-medium"
               [class]="
-                check.passed ? 'verdict-chip--passed' : 'verdict-chip--failed'
+                check.notChecked
+                  ? 'verdict-chip--not-checked'
+                  : check.passed
+                    ? 'verdict-chip--passed'
+                    : 'verdict-chip--failed'
               "
             >
               <mat-icon class="verdict-chip__icon" aria-hidden="true">{{
-                check.passed ? 'check' : 'close'
+                check.notChecked ? 'remove' : check.passed ? 'check' : 'close'
               }}</mat-icon>
-              {{ check.passed ? 'Passed' : 'Failed' }}
+              {{
+                check.notChecked
+                  ? 'Not checked'
+                  : check.passed
+                    ? 'Passed'
+                    : 'Failed'
+              }}
             </span>
           </div>
           <p

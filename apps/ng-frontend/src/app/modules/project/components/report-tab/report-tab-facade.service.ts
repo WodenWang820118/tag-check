@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { take } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { IReportDetails } from '@utils';
 import { FileReportService } from '../../../../shared/services/api/file-report/file-report.service';
 import { VideosService } from '../../../../shared/services/api/videos/videos.service';
@@ -34,11 +34,11 @@ export class ReportTabFacade {
   }
 
   /** Downloads the spreadsheet of the given test through the file-reports API. */
-  shareSpreadsheet(
+  async shareSpreadsheet(
     projectSlug: string | undefined,
     details: IReportDetails | undefined,
     runId?: number
-  ) {
+  ): Promise<void> {
     if (!details) {
       this.openSnackBar('Spreadsheet not available for this run', 1800);
       return;
@@ -53,24 +53,30 @@ export class ReportTabFacade {
       return;
     }
 
-    this.fileReportService
-      .downloadFileReports(projectSlug, [eventId], runId)
-      .pipe(take(1))
-      .subscribe((response) => {
-        if (response) {
-          this.openSnackBar('Spreadsheet downloaded', 1400);
-        } else {
-          this.openSnackBar('Unable to download spreadsheet', 1800);
-        }
-      });
+    try {
+      const response = await firstValueFrom(
+        this.fileReportService.downloadFileReports(
+          projectSlug,
+          [eventId],
+          runId
+        )
+      );
+      if (response) {
+        this.openSnackBar('Spreadsheet downloaded', 1400);
+      } else {
+        this.openSnackBar('Unable to download spreadsheet', 1800);
+      }
+    } catch {
+      this.openSnackBar('Unable to download spreadsheet', 1800);
+    }
   }
 
-  exportRecording(
+  async exportRecording(
     projectSlug: string | undefined,
     details: IReportDetails | undefined,
     existingBlob: Blob | undefined,
     runId?: number
-  ) {
+  ): Promise<void> {
     const eventId = details?.eventId;
     const fileBase = this.buildFileBase(
       projectSlug,
@@ -91,34 +97,33 @@ export class ReportTabFacade {
       return;
     }
 
-    this.videosService
-      .getVideo(projectSlug, eventId, undefined, runId)
-      .pipe(take(1))
-      .subscribe({
-        next: ({ blob }) => {
-          if (!blob || blob.size === 0) {
-            this.openSnackBar('No recording available');
-            return;
-          }
+    try {
+      const { blob } = await firstValueFrom(
+        this.videosService.getVideo(projectSlug, eventId, undefined, runId)
+      );
+      if (!blob || blob.size === 0) {
+        this.openSnackBar('No recording available');
+        return;
+      }
 
-          this.saveBlob(blob, `${fileBase}.webm`);
-          this.openSnackBar('Recording downloaded', 1400);
-        },
-        error: () => {
-          this.openSnackBar('Unable to download recording');
-        }
-      });
+      this.saveBlob(blob, `${fileBase}.webm`);
+      this.openSnackBar('Recording downloaded', 1400);
+    } catch {
+      this.openSnackBar('Unable to download recording');
+    }
   }
 
-  exportEvent(
+  async exportEvent(
     projectSlug: string | undefined,
     details: IReportDetails | undefined,
     existingBlob: Blob | undefined,
     runId?: number
-  ) {
+  ): Promise<void> {
     this.openSnackBar('Starting event export (XLSX + WEBM)', 1200);
-    this.shareSpreadsheet(projectSlug, details, runId);
-    this.exportRecording(projectSlug, details, existingBlob, runId);
+    await Promise.all([
+      this.shareSpreadsheet(projectSlug, details, runId),
+      this.exportRecording(projectSlug, details, existingBlob, runId)
+    ]);
   }
 
   private saveBlob(blob: Blob, fileName: string) {

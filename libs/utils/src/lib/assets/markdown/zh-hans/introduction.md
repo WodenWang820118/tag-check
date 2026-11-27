@@ -10,7 +10,7 @@ TagCheck 用于检查 Google Tag Manager（GTM）配置是否发送了您规划�
   - **数据层检查**（data layer check）：推送到 `dataLayer` 的事件与规格相符；
   - **请求检查**（request check）：该事件的 GA4 请求已发送到项目的测量 ID，且其参数与规格相符。
 - **结果**（Result）：一次运行的发现，包括两项检查、捕获的 `dataLayer`、原始请求、一张截图和一段录屏。
-- **状态**（Status）：每个测试显示其最近一次运行的状态：两项检查都通过时为 **Passed**，只有一项通过时为 **Partial**，两项都未通过时为 **Failed**，首次运行之前为 **Not run**。
+- **状态**（Status）：每个测试显示其最近一次运行的状态：两项检查都通过时为 **Passed**，只有一项通过时为 **Partial**，两项都未通过时为 **Failed**，首次运行之前为 **Not run**。未进行请求检查（Request Check 关闭）的运行，只按数据层检查判定为 Passed 或 Failed。
 
 ## 运行期间会发生什么
 

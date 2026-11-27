@@ -1,5 +1,5 @@
 import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormField } from '@angular/forms/signals';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   lucideCircleAlert,
@@ -17,7 +17,10 @@ import { HlmNativeSelectImports } from '@spartan-ng/helm/native-select';
 import { HlmSpinner } from '@spartan-ng/helm/spinner';
 import { HlmTextarea } from '@spartan-ng/helm/textarea';
 import { DestinationImageSlot } from '../../../../shared/models/create-destination-draft.model';
-import { AddDataFacadeService } from './add-data-facade.service';
+import {
+  AddDataFacadeService,
+  DestinationFormModel
+} from './add-data-facade.service';
 
 interface MediaFieldConfig {
   key: DestinationImageSlot;
@@ -33,7 +36,7 @@ interface MediaFieldConfig {
 @Component({
   selector: 'app-add-data',
   imports: [
-    ReactiveFormsModule,
+    FormField,
     HlmAlertImports,
     HlmButton,
     HlmCard,
@@ -93,6 +96,9 @@ export class AddDataComponent {
   get destinationForm() {
     return this.facade.destinationForm;
   }
+  get destinationModel() {
+    return this.facade.destinationModel;
+  }
   get uploadState() {
     return this.facade.uploadState;
   }
@@ -102,18 +108,15 @@ export class AddDataComponent {
   get selectedFiles() {
     return this.facade.selectedFiles;
   }
-  get countries() {
-    return this.facade.countries;
+  get countries(): { label: string; value: string }[] {
+    return this.facade.countries();
   }
 
-  control(name: keyof typeof this.facade.destinationForm.controls) {
+  control<K extends keyof DestinationFormModel>(name: K) {
     return this.facade.control(name);
   }
 
-  hasError(
-    name: keyof typeof this.facade.destinationForm.controls,
-    error?: string
-  ): boolean {
+  hasError(name: keyof DestinationFormModel, error?: string): boolean {
     return this.facade.hasError(name, error);
   }
 

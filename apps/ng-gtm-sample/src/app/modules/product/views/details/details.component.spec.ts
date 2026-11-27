@@ -99,4 +99,40 @@ describe('DetailsComponent', () => {
       { persist: false, trackViewItem: false }
     );
   });
+
+  it('adds the destination to cart using the numberOfPersonsControl Signal Form value', async () => {
+    const destination = getPublicDestinationBySlug('san-francisco');
+
+    expect(destination).not.toBeNull();
+    if (!destination) {
+      throw new Error('Expected the san-francisco destination in the catalog');
+    }
+
+    await router.navigateByUrl('/product/details/san-francisco');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const travelersSelect = fixture.nativeElement.querySelector(
+      '[data-testid="travelers"] select'
+    ) as HTMLSelectElement | null;
+    expect(travelersSelect).not.toBeNull();
+    expect(travelersSelect?.value).toBe('1');
+
+    const addToCartButton = fixture.nativeElement.querySelector(
+      '[data-testid="add-to-cart"]'
+    ) as HTMLButtonElement | null;
+    expect(addToCartButton).not.toBeNull();
+
+    addToCartButton?.click();
+    fixture.detectChanges();
+
+    expect(orderServiceMock.addToCart).toHaveBeenCalledWith(
+      expect.objectContaining({
+        slug: destination.slug,
+        title: destination.title
+      }),
+      1
+    );
+  });
 });

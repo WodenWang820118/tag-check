@@ -1,6 +1,7 @@
-import { Injectable, inject, signal } from '@angular/core';
-import { FormBuilder, Validators } from '@angular/forms';
-import { latitudeValidator, longitudeValidator } from './validators';
+import { Injectable, computed, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { form, required, schema, validate } from '@angular/forms/signals';
+import { isValidLatitude, isValidLongitude } from './validators';
 import { CountriesDataService } from '../../../../shared/services/countries-data/countries-data.service';
 import { FirebaseDestinationUploadService } from '../../../../shared/services/firebase-destination-upload/firebase-destination-upload.service';
 import {
@@ -8,16 +9,83 @@ import {
   DestinationImageSlot
 } from '../../../../shared/models/create-destination-draft.model';
 
+export interface DestinationFormModel {
+  country: string;
+  city: string;
+  title: string;
+  smallTitle: string;
+  latitude: string;
+  longitude: string;
+  description: string;
+  price: string;
+  video: string;
+  imageBigAuthorInfo: string;
+  image1AuthorInfo: string;
+  image2AuthorInfo: string;
+  image3AuthorInfo: string;
+}
+
+export const initialDestinationFormValues: DestinationFormModel = {
+  country: '',
+  city: '',
+  title: '',
+  smallTitle: '',
+  latitude: '',
+  longitude: '',
+  description: '',
+  price: '',
+  video: '',
+  imageBigAuthorInfo: '',
+  image1AuthorInfo: '',
+  image2AuthorInfo: '',
+  image3AuthorInfo: ''
+};
+
+export const destinationSchema = schema<DestinationFormModel>((p) => {
+  required(p.country);
+  required(p.city);
+  required(p.title);
+  required(p.smallTitle);
+  required(p.latitude);
+  validate(p.latitude, ({ value }) => {
+    return isValidLatitude(value()) ? null : { kind: 'invalidLatitude' };
+  });
+  required(p.longitude);
+  validate(p.longitude, ({ value }) => {
+    return isValidLongitude(value()) ? null : { kind: 'invalidLongitude' };
+  });
+  required(p.description);
+  required(p.price);
+  validate(p.price, ({ value }) => {
+    const val = value();
+    if (val === null || val === undefined || val === '') {
+      return null;
+    }
+    const price = Number.parseFloat(val);
+    const isValid = !Number.isNaN(price) && price >= 1;
+    return isValid ? null : { kind: 'min' };
+  });
+});
+
 @Injectable()
 export class AddDataFacadeService {
-  private readonly fb = inject(FormBuilder);
   private readonly firebaseDestinationUploadService = inject(
     FirebaseDestinationUploadService
   );
   private readonly countriesDataService = inject(CountriesDataService);
 
+  private readonly countriesSignal = toSignal(
+    this.countriesDataService.getCountries(),
+    { initialValue: [] }
+  );
+
   /** Loaded country options for the destination country selector. */
-  countries: { label: string; value: string }[] = [];
+  readonly countries = computed<{ label: string; value: string }[]>(() =>
+    this.countriesSignal().map((country) => ({
+      label: country.name.common,
+      value: country.name.common
+    }))
+  );
 
   readonly uploadState = signal<'idle' | 'saving' | 'success' | 'error'>(
     'idle'
@@ -30,45 +98,22 @@ export class AddDataFacadeService {
     image3: null
   });
 
-  destinationForm = this.fb.group({
-    country: ['', Validators.required],
-    city: ['', Validators.required],
-    title: ['', Validators.required],
-    smallTitle: ['', Validators.required],
-    latitude: ['', [Validators.required, latitudeValidator()]],
-    longitude: ['', [Validators.required, longitudeValidator()]],
-    description: ['', Validators.required],
-    price: ['', [Validators.required, Validators.min(1)]],
-    video: [''],
-    imageBigAuthorInfo: [''],
-    image1AuthorInfo: [''],
-    image2AuthorInfo: [''],
-    image3AuthorInfo: ['']
+  readonly destinationModel = signal<DestinationFormModel>({
+    ...initialDestinationFormValues
   });
 
-  constructor() {
-    this.countriesDataService
-      .getCountries()
-      .subscribe((data: { name: { common: string } }[]) => {
-        this.countries = data.map((country) => ({
-          label: country.name.common,
-          value: country.name.common
-        }));
-      });
+  readonly destinationForm = form(this.destinationModel, destinationSchema);
+
+  control<K extends keyof DestinationFormModel>(name: K) {
+    return this.destinationForm[name];
   }
 
-  control(name: keyof typeof this.destinationForm.controls) {
-    return this.destinationForm.controls[name];
-  }
-
-  hasError(
-    name: keyof typeof this.destinationForm.controls,
-    error?: string
-  ): boolean {
-    const control = this.control(name);
-    if (!control) return false;
-    if (!error) return control.invalid && control.touched;
-    return control.hasError(error) && control.touched;
+  hasError(name: keyof DestinationFormModel, error?: string): boolean {
+    const field = this.control(name);
+    if (!field) return false;
+    const state = field();
+    if (!error) return state.invalid() && state.touched();
+    return state.getError(error) !== undefined && state.touched();
   }
 
   onFileSelected(slot: DestinationImageSlot, event: Event) {
@@ -94,7 +139,7 @@ export class AddDataFacadeService {
       return null;
     }
 
-    const rawValue = this.destinationForm.getRawValue();
+    const rawValue = this.destinationForm().value();
     return {
       country: rawValue.country ?? '',
       city: rawValue.city ?? '',
@@ -119,8 +164,8 @@ export class AddDataFacadeService {
   }
 
   addDestination() {
-    this.destinationForm.markAllAsTouched();
-    if (this.destinationForm.invalid || this.hasMissingFiles()) {
+    this.destinationForm().markAsTouched();
+    if (this.destinationForm().invalid() || this.hasMissingFiles()) {
       this.uploadState.set('error');
       this.uploadMessage.set(
         'Please complete the highlighted fields and attach all four destination images before submitting.'
@@ -148,7 +193,8 @@ export class AddDataFacadeService {
         this.uploadMessage.set(
           'Destination created successfully. The admin cache has been refreshed for the new entry.'
         );
-        this.destinationForm.reset();
+        this.destinationForm().reset(initialDestinationFormValues);
+        this.destinationModel.set({ ...initialDestinationFormValues });
         this.selectedFiles.set({
           imageBig: null,
           image1: null,
@@ -156,7 +202,7 @@ export class AddDataFacadeService {
           image3: null
         });
       },
-      error: (error) => {
+      error: (error: unknown) => {
         console.error('destination upload error', error);
         this.uploadState.set('error');
         this.uploadMessage.set(

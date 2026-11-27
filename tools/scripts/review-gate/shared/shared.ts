@@ -15,12 +15,6 @@ export type {
   SupportedReviewer,
   TaskSize
 } from './contracts.ts';
-export {
-  PRIMARY_FAMILIES,
-  REVIEW_GATE_MODES,
-  SUPPORTED_REVIEWERS,
-  TASK_SIZES
-} from './contracts.ts';
 import type {
   HookInput,
   HookPermissionResult,

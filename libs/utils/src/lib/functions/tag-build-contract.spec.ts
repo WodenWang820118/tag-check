@@ -10,16 +10,14 @@ import {
   isParameterListItem,
   isParameterMap,
   isParameterWithKeyValue,
-  isSpec,
-  isSpecArray,
   isStrictDataLayerEvent,
   isStrictDataLayerEventArray,
   isTagConfig,
-  isTrigger,
   isTriggerConfig,
   isVariableConfig,
   validateGTMImportReadiness
 } from './tag-build-contract';
+import { isSpec } from '../../testing/tag-build-contract.testing';
 import { TagTypeEnum } from '../enums/tag-build';
 
 const accountId = '123';
@@ -258,18 +256,6 @@ describe('getParameterMapValue', () => {
   });
 });
 
-describe('isTrigger', () => {
-  it('accepts a trigger reference with name and triggerId', () => {
-    expect(isTrigger({ name: 't', triggerId: '1' })).toBe(true);
-  });
-
-  it('rejects missing or non-string fields', () => {
-    expect(isTrigger({ name: 't' })).toBe(false);
-    expect(isTrigger({ triggerId: '1' })).toBe(false);
-    expect(isTrigger(null)).toBe(false);
-  });
-});
-
 describe('isTriggerConfig', () => {
   it('accepts a minimal valid trigger config', () => {
     expect(isTriggerConfig(makeTrigger())).toBe(true);
@@ -331,18 +317,15 @@ describe('isVariableConfig', () => {
   });
 });
 
-describe('isSpec / isSpecArray', () => {
+describe('isSpec', () => {
   it('accepts a Spec with tag + trigger array', () => {
     const spec = { tag: makeTag(), trigger: [makeTrigger()] };
     expect(isSpec(spec)).toBe(true);
-    expect(isSpecArray([spec, spec])).toBe(true);
   });
 
   it('rejects when tag or trigger entries are invalid', () => {
     expect(isSpec({ tag: makeTag(), trigger: [{}] })).toBe(false);
     expect(isSpec({ trigger: [] })).toBe(false);
-    expect(isSpecArray([{}])).toBe(false);
-    expect(isSpecArray('no')).toBe(false);
   });
 });
 

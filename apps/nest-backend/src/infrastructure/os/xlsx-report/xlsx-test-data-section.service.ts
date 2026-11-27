@@ -79,7 +79,10 @@ export class XlsxTestDataSectionService {
         this.xlsxUtilsService.formatJsonForExcel(detail?.dataLayer),
         // Keep booleans as booleans so conditional formatting works correctly
         detail?.passed === true,
-        detail?.requestPassed === true,
+        // A run without the request check has no request result to show.
+        detail?.requestChecked === false
+          ? 'Not checked'
+          : detail?.requestPassed === true,
         detail?.rawRequest ?? '',
         detail?.destinationUrl ?? ''
       ];

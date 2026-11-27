@@ -166,7 +166,7 @@ describe('ReportDetailPanelsComponent', () => {
     expect(component.editItemId()).toBe('purchase');
   });
 
-  it('does not reload the definition when the spec is saved', () => {
+  it('does not reload the definition when the spec is saved', async () => {
     const fixture = TestBed.createComponent(ReportDetailPanelsComponent);
     const component = fixture.componentInstance;
 
@@ -174,13 +174,13 @@ describe('ReportDetailPanelsComponent', () => {
     fixture.detectChanges();
     component.toggleSpecEdit();
     component.onSpecDraftChange('{"event":"signup"}');
-    component.saveSpec();
+    await component.saveSpec();
     fixture.detectChanges();
 
     expect(facade.getItemDef).toHaveBeenCalledTimes(1);
   });
 
-  it('uses explicit route context when saving a valid spec draft', () => {
+  it('uses explicit route context when saving a valid spec draft', async () => {
     const fixture = TestBed.createComponent(ReportDetailPanelsComponent);
     const component = fixture.componentInstance;
 
@@ -198,7 +198,7 @@ describe('ReportDetailPanelsComponent', () => {
       )
     );
     component.specSyntaxError.set(false);
-    component.saveSpec();
+    await component.saveSpec();
 
     expect(facade.updateSpec).toHaveBeenCalledWith(
       'storybook-project',
@@ -229,7 +229,7 @@ describe('ReportDetailPanelsComponent', () => {
     expect(component.specDraftText()).toContain('"event": "purchase"');
   });
 
-  it('blocks item-definition save when no item id is available', () => {
+  it('blocks item-definition save when no item id is available', async () => {
     const fixture = TestBed.createComponent(ReportDetailPanelsComponent);
     const component = fixture.componentInstance;
 
@@ -240,13 +240,13 @@ describe('ReportDetailPanelsComponent', () => {
     component.itemDefDraftText.set('{"item_name":"Socks"}');
     component.itemDefSyntaxError.set(false);
     component.editItemId.set('');
-    component.saveItemDef();
+    await component.saveItemDef();
 
     expect(component.itemDefPanelState().canSave).toBe(false);
     expect(facade.updateItemDef).not.toHaveBeenCalled();
   });
 
-  it("saves item-definition edits to the test's own route", () => {
+  it("saves item-definition edits to the test's own route", async () => {
     const fixture = TestBed.createComponent(ReportDetailPanelsComponent);
     const component = fixture.componentInstance;
     facade.updateItemDef.mockReturnValue(
@@ -265,7 +265,7 @@ describe('ReportDetailPanelsComponent', () => {
     component.editTemplateName.set('purchase-template');
     component.itemDefDraftText.set('{"item_name":"Socks"}');
     component.itemDefSyntaxError.set(false);
-    component.saveItemDef();
+    await component.saveItemDef();
 
     expect(facade.updateItemDef).toHaveBeenCalledWith(
       'storybook-project',
@@ -288,7 +288,7 @@ describe('ReportDetailPanelsComponent', () => {
     expect(component.itemDefEditMode()).toBe(false);
   });
 
-  it('creates the definition of a test that has none and shows what was saved', () => {
+  it('creates the definition of a test that has none and shows what was saved', async () => {
     const fixture = TestBed.createComponent(ReportDetailPanelsComponent);
     const component = fixture.componentInstance;
     facade.updateItemDef.mockReturnValue(
@@ -305,7 +305,7 @@ describe('ReportDetailPanelsComponent', () => {
 
     component.toggleItemDefEdit();
     component.onItemDefDraftChange('{"item_name":"Hat"}');
-    component.saveItemDef();
+    await component.saveItemDef();
 
     expect(facade.updateItemDef).toHaveBeenCalledWith(
       'storybook-project',
@@ -391,7 +391,7 @@ describe('ReportDetailPanelsComponent', () => {
     expect(target.value).toBe('');
   });
 
-  it('saves recording edits with the explicit route context', () => {
+  it('saves recording edits with the explicit route context', async () => {
     const fixture = TestBed.createComponent(ReportDetailPanelsComponent);
     const component = fixture.componentInstance;
 
@@ -403,7 +403,7 @@ describe('ReportDetailPanelsComponent', () => {
       '{"title":"Updated recording","steps":[]}'
     );
     component.recordingSyntaxError.set(false);
-    component.saveRecording();
+    await component.saveRecording();
 
     expect(facade.updateRecording).toHaveBeenCalledWith(
       'storybook-project',

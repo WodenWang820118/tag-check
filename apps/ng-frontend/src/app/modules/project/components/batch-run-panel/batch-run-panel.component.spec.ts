@@ -6,11 +6,12 @@ import { of } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import type { BatchRunStatus } from '@utils';
 import {
-  BatchItem,
   BatchRun,
   BatchRunService
 } from '../../services/batch-run/batch-run.service';
 import { BatchRunPanelComponent } from './batch-run-panel.component';
+
+type BatchItem = BatchRun['items'][number];
 
 function item(
   position: number,

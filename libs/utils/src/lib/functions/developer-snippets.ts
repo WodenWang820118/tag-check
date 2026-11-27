@@ -376,9 +376,6 @@ export function buildDeveloperSnippets(
   }));
 }
 
-export const generateDeveloperSnippet = buildDeveloperSnippet;
-export const generateDeveloperSnippets = buildDeveloperSnippets;
-
 /**
  * Formats all snippets into a single combined JavaScript file string.
  */

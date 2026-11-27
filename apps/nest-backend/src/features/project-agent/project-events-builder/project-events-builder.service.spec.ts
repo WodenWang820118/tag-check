@@ -65,6 +65,51 @@ describe('ProjectEventsBuilderService', () => {
     expect(ctx.testEventRepositoryService.listWithSpecs).not.toHaveBeenCalled();
   });
 
+  it('findImportConflicts() returns preview conflicts and performs no writes', async () => {
+    const existing = {
+      id: 7,
+      eventId: 'e-1',
+      testName: 'X',
+      eventName: 'purchase',
+      spec: {
+        dataLayerSpec: { event: 'purchase', page: '/edited' },
+        rawGtmTag: { tag: { name: 'X' }, trigger: [] }
+      }
+    };
+    const ctx = build([existing]);
+    ctx.dataLayerSpecBuilderService.isGeneratedDataLayerSpec.mockReturnValue(
+      false
+    );
+    const input = {
+      ...pageViewInput,
+      testName: 'X',
+      eventName: 'begin_checkout'
+    };
+
+    const conflicts = await ctx.service.findImportConflicts('demo', [input]);
+
+    expect(conflicts).toEqual([
+      {
+        tagName: 'X',
+        existingEventName: 'purchase',
+        newEventName: 'begin_checkout',
+        specEdited: true
+      }
+    ]);
+    expect(ctx.testEventRepositoryService.listWithSpecs).toHaveBeenCalledWith(
+      'demo'
+    );
+    expect(ctx.testEventRepositoryService.update).not.toHaveBeenCalled();
+    expect(ctx.specRepositoryService.update).not.toHaveBeenCalled();
+    expect(ctx.projectRecordingService.addRecording).not.toHaveBeenCalled();
+    expect(
+      ctx.testReportFacadeRepositoryService.createFullReport
+    ).not.toHaveBeenCalled();
+    expect(
+      ctx.projectReportService.createEventReportFolder
+    ).not.toHaveBeenCalled();
+  });
+
   it('buildEvents() creates report folder, adds recording, and creates full report for each input', async () => {
     const ctx = build();
     const variables = [{ name: 'DLV - x', type: 'v' }] as never;
@@ -388,6 +433,41 @@ describe('ProjectEventsBuilderService', () => {
         ]
       });
     }
+    expect(ctx.testEventRepositoryService.update).not.toHaveBeenCalled();
+    expect(ctx.specRepositoryService.update).not.toHaveBeenCalled();
+    expect(ctx.projectRecordingService.addRecording).not.toHaveBeenCalled();
+    expect(
+      ctx.testReportFacadeRepositoryService.createFullReport
+    ).not.toHaveBeenCalled();
+    expect(
+      ctx.projectReportService.createEventReportFolder
+    ).not.toHaveBeenCalled();
+  });
+
+  it('buildEvents() throws 409 and writes nothing with unresolved conflicts', async () => {
+    const existing = {
+      id: 7,
+      eventId: 'e-1',
+      testName: 'X',
+      eventName: 'purchase',
+      spec: { dataLayerSpec: { event: 'purchase' }, rawGtmTag: {} }
+    };
+    const ctx = build([existing]);
+    const conflictInput = {
+      ...pageViewInput,
+      testName: 'X',
+      eventName: 'begin_checkout'
+    };
+    const cleanInput = {
+      ...pageViewInput,
+      testName: 'Y',
+      eventName: 'view_item'
+    };
+
+    await expect(
+      ctx.service.buildEvents('demo', [cleanInput, conflictInput])
+    ).rejects.toBeInstanceOf(ConflictException);
+
     expect(ctx.testEventRepositoryService.update).not.toHaveBeenCalled();
     expect(ctx.specRepositoryService.update).not.toHaveBeenCalled();
     expect(ctx.projectRecordingService.addRecording).not.toHaveBeenCalled();

@@ -28,7 +28,7 @@
       "cache": true
     },
     "test": {
-      "inputs": ["default", "^production", "{workspaceRoot}/jest.preset.mjs"],
+      "inputs": ["default", "^production"],
       "cache": true
     },
     "e2e": {
@@ -41,6 +41,7 @@
       "inputs": [
         "default",
         "^production",
+        "{workspaceRoot}/tsconfig.base.json",
         {
           "externalDependencies": ["typescript"]
         }
@@ -115,6 +116,14 @@
     }
   },
   "plugins": [
+    {
+      "plugin": "@nx/js/typescript",
+      "options": {
+        "typecheck": {
+          "targetName": "typecheck"
+        }
+      }
+    },
     {
       "plugin": "@nx/vite/plugin",
       "options": {

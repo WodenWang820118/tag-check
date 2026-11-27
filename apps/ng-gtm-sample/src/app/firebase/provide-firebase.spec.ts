@@ -1,7 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { FirebaseClientConfig } from './firebase.config';
-import { provideFirebaseClients } from './provide-firebase';
+import { provideFirebaseApp } from './provide-firebase-app';
+import { provideFirebaseAuthClient } from './provide-firebase-auth';
+import { provideFirebaseDataClients } from './provide-firebase-data';
 import {
   FIREBASE_APP,
   FIREBASE_AUTH,
@@ -63,7 +65,7 @@ const firebaseConfig: FirebaseClientConfig = {
   appId: 'app-id'
 };
 
-describe('provideFirebaseClients', () => {
+describe('Firebase split providers', () => {
   beforeEach(() => {
     TestBed.resetTestingModule();
     firebaseSdkState.apps = [];
@@ -75,7 +77,11 @@ describe('provideFirebaseClients', () => {
 
   it('provides Firebase config and clients backed by the same app instance', () => {
     TestBed.configureTestingModule({
-      providers: [provideFirebaseClients(firebaseConfig)]
+      providers: [
+        provideFirebaseApp(firebaseConfig),
+        provideFirebaseAuthClient(),
+        provideFirebaseDataClients()
+      ]
     });
 
     const config = TestBed.inject(FIREBASE_CLIENT_CONFIG);
@@ -103,7 +109,11 @@ describe('provideFirebaseClients', () => {
     firebaseSdkState.apps = [existingApp];
 
     TestBed.configureTestingModule({
-      providers: [provideFirebaseClients(secondConfig)]
+      providers: [
+        provideFirebaseApp(secondConfig),
+        provideFirebaseAuthClient(),
+        provideFirebaseDataClients()
+      ]
     });
 
     const config = TestBed.inject(FIREBASE_CLIENT_CONFIG);

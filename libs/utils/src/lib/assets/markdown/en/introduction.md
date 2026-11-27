@@ -10,7 +10,7 @@ TagCheck checks that a Google Tag Manager (GTM) setup sends the data you planned
   - the **data layer check**: the event pushed to `dataLayer` matches the spec;
   - the **request check**: a GA4 request for the event was sent to the project's measurement ID, and its parameters match the spec.
 - **Result**: what a run found: both checks, the captured `dataLayer`, the raw request, a screenshot and a screen recording.
-- **Status**: each test shows the status of its latest run: **Passed** when both checks passed, **Partial** when one did, **Failed** when neither did, and **Not run** before the first run.
+- **Status**: each test shows the status of its latest run: **Passed** when both checks passed, **Partial** when one did, **Failed** when neither did, and **Not run** before the first run. A run made without the request check (Request Check off) is Passed or Failed by its data layer check alone.
 
 ## What happens during a run
 

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { RUN_SUMMARY_SAMPLE } from '@utils';
+import { RUN_SUMMARY_SAMPLE } from '@utils/testing';
 import { FileReportsController } from './file-reports.controller';
 
 describe('FileReportsController', () => {

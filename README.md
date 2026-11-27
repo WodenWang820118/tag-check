@@ -13,6 +13,19 @@ repeatable way to inspect GTM preview behavior, validate production analytics,
 and share verification evidence. The repo is broader than a single desktop app:
 the desktop shell is one delivery surface on top of a multi-project workspace.
 
+## Demo
+
+Watch the
+[walkthrough video](https://tag-check-documentation.vercel.app/media/tagcheck-demo.mp4)
+(3.5 minutes, captions in Traditional Chinese) before you change the
+verification flow. It starts from a new project and walks the whole user
+journey: set the website up, key in a measurement plan in Tag Build, save it
+as a CSV and upload it, convert it to a GTM container, import the specs as
+tests, upload a Chrome Recorder recording, run the test and read the result.
+The file is also in the repository at
+`apps/ng-product-doc/public/media/tagcheck-demo.mp4`.
+`pnpm run test-front:journey` walks the same journey as an e2e test.
+
 ## Workspace Topology
 
 - `apps/ng-frontend`: primary Angular frontend for the TagCheck verification
@@ -195,6 +208,7 @@ Browser e2e verification:
 
 ```bash
 pnpm run test-front:e2e
+pnpm run test-front:journey
 ```
 
 Workspace and Sonar coverage merge:
@@ -205,7 +219,15 @@ pnpm run test:cov
 
 Notes:
 
+- `pnpm run test:pre-commit` runs task-level `nx affected` unit and tool tests
+  (`test,test-node`, including `nest-backend:test` unit tests and `tools-scripts`
+  Vitest/`node:test` targets); `pnpm run test:tools` and `pnpm run test:tools:node`
+  run the tool suites directly.
 - `pnpm run test:e2e` is an alias for the backend e2e path.
+- `test-front:e2e` mocks the backend. `test-front:journey` builds the
+  backend and starts it on port 7070 with an empty data folder, then walks
+  the demo's journey against https://ng-gtm-sample.vercel.app. It needs
+  network access and takes a few minutes. CI runs neither.
 - Backend e2e coverage writes to `coverage/apps/nest-backend-e2e` so it does
   not overwrite backend unit coverage.
 - `pnpm run coverage:merge` writes the merged Sonar report to
@@ -261,6 +283,34 @@ preview of each site whose Nx project it affects, from the
 [Vercel previews workflow](./.github/workflows/vercel-previews.yaml). The
 workflow comments the preview URLs on the pull request. It needs a Vercel
 access token in the `VERCEL_TOKEN` repository secret and skips without one.
+
+#### Content Security Policy
+
+The documentation site and Tag Build enforce a strict Content Security Policy,
+and the sample site a light one (`object-src`, `base-uri`) that leaves
+scripts unrestricted for the tag manager container under test. The policy is
+a `<meta http-equiv="Content-Security-Policy">` tag in each built HTML page,
+so it is the same on Vercel, on preview URLs and on a local static server.
+
+- Policies are defined per site in
+  [tools/scripts/csp/site-policies.ts](./tools/scripts/csp/site-policies.ts).
+- Each site's `build-static` target builds the site and then runs
+  `tools/scripts/csp/apply-site-csp.ts`, which hashes every inline
+  `<script>` and writes the tag. The Vercel build scripts
+  (`build-product-doc`, `build-tag-build`, `build-ng-sample-site`) run
+  those targets.
+- The root [vercel.json](./vercel.json) sends the headers all four sites
+  share: `frame-ancestors 'self'`, `X-Content-Type-Options`,
+  `Referrer-Policy` and `Permissions-Policy`. Its policy header holds
+  `frame-ancestors` only; fetch directives belong in the page policies.
+- `pnpm nx run <site>:csp-check` builds a site and fails on any policy
+  violation in its pages.
+
+To allow a new origin (an image, font or script host), add it to the
+directive in `SITE_POLICIES` with a comment naming the file that needs it,
+then run the site's `csp-check` target. The decisions and their reasons are
+in
+[docs/specs/web-content-security-policy.md](./docs/specs/web-content-security-policy.md).
 
 ## Review Workflow
 

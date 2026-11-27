@@ -1,12 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { describe, expect, it } from 'vitest';
-import {
-  REPORT_DETAIL_SAMPLE,
-  type ReportDetailResponse,
-  type RunHistoryEntry,
-  type TestEventDetailSchema
+import type {
+  ReportDetailResponse,
+  RunHistoryEntry,
+  TestEventDetailSchema
 } from '@utils';
+import { REPORT_DETAIL_SAMPLE } from '@utils/testing';
 import {
   HISTORY_RUNS_SHOWN,
   RunVerdictComponent
@@ -76,6 +76,25 @@ describe('RunVerdictComponent', () => {
     expect(
       fixture.nativeElement.querySelectorAll('.verdict-card--failed')
     ).toHaveLength(2);
+  });
+
+  it('shows a run without the request check as passed, with the request check not checked', () => {
+    const run = {
+      ...sample().testEventDetails,
+      requestPassed: false,
+      requestChecked: false,
+      rawRequest: ''
+    } as TestEventDetailSchema;
+    const { fixture, text } = render(run);
+
+    expect(fixture.componentInstance.status()).toBe('passed');
+    expect(text('run-check-request')).toContain('Not checked');
+    expect(text('run-check-request-text')).toBe(
+      'Request Check was off for this run, so it made no GA4 request check.'
+    );
+    expect(
+      fixture.nativeElement.querySelectorAll('.verdict-card--failed')
+    ).toHaveLength(0);
   });
 
   it('links each recent run, oldest first, and marks the shown one', () => {

@@ -11,7 +11,6 @@ export type {
   HybridDecisionBasis,
   HybridGptFinding,
   HybridGptReview,
-  HybridGptReviewStatus,
   HybridHeuristics,
   HybridLocalMode,
   HybridLocalPlan,
@@ -24,10 +23,7 @@ export type {
   LocalReviewerDependencies,
   LocalReviewerEvaluationConfig,
   LocalReviewFinding,
-  LocalReviewProfile,
   LocalReviewReport,
-  LocalReviewSeverity,
-  PaidReviewContextMode,
   PaidReviewContextSelection,
   WindowsProcessBridgePayload
 } from './types.ts';
@@ -68,9 +64,3 @@ export {
   normalizeOptionalText
 } from './normalizers.ts';
 export { shuffleWithSeed, shortHash, median } from './sampling-utils.ts';
-export {
-  encodePowerShellCommand,
-  getPnpmCommand,
-  resolveWindowsPowerShellPath,
-  sanitizeEnv
-} from '../../../shared/process.ts';

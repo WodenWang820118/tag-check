@@ -173,6 +173,10 @@ export class GtmParserService {
   }
 }
 
+/**
+ * Prefer raw-container interpretation when containerVersion exists so export
+ * metadata cannot be mistaken for an upload wrapper.
+ */
 function readUploadBody(payload: unknown): {
   containerPayload: unknown;
   resolutions: Record<string, GtmImportResolution>;

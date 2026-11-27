@@ -1,19 +1,20 @@
 import {
   ChangeDetectorRef,
   Component,
+  computed,
+  inject,
   input,
-  signal,
   ChangeDetectionStrategy
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { EditorComponent } from '../../../../shared/components/editor/editor.component';
 import { NewReportViewFacadeService } from './new-report-view-facade.service';
 import { MatSidenav } from '@angular/material/sidenav';
-import { take } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { MatDividerModule } from '@angular/material/divider';
 import {
   EditorService,
@@ -29,8 +30,6 @@ import {
   standalone: true,
   imports: [
     MatFormFieldModule,
-    FormsModule,
-    ReactiveFormsModule,
     MatInputModule,
     MatButtonModule,
     EditorComponent,
@@ -40,8 +39,7 @@ import {
     <div class="new-report p-4">
       <form
         class="new-report__form space-y-6"
-        [formGroup]="reportForm"
-        (ngSubmit)="setEditorContent(); uploadReport()"
+        (submit)="$event.preventDefault(); setEditorContent(); uploadReport()"
       >
         <div class="flex items-center justify-between">
           <h2 class="text-xl font-semibold">Specification</h2>
@@ -107,26 +105,24 @@ import {
   styleUrls: ['./new-report-view.component.scss']
 })
 export class NewReportViewComponent {
-  sidenav = input.required<MatSidenav>();
-  projectSlug = signal<string>('');
-  scrollerShortStyle: EditorThemeStyles = {
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly newReportViewFacadeService = inject(
+    NewReportViewFacadeService
+  );
+  private readonly changeDetectorRef = inject(ChangeDetectorRef);
+  private readonly editorService = inject(EditorService);
+
+  readonly sidenav = input.required<MatSidenav>();
+  private readonly routeData = toSignal(this.route.data);
+  readonly projectSlug = computed(
+    () => (this.routeData()?.['projectSlug'] as string | undefined) ?? ''
+  );
+  readonly scrollerShortStyle: EditorThemeStyles = {
     '.cm-scroller': { height: '30vh', width: '100%' }
   };
-  jsonInvalid$ = this.editorService.jsonSyntaxError$.specJson;
-  constructor(
-    private readonly route: ActivatedRoute,
-    private readonly router: Router,
-    private readonly newReportViewFacadeService: NewReportViewFacadeService,
-    private readonly changeDetectorRef: ChangeDetectorRef,
-    private readonly editorService: EditorService
-  ) {
-    this.route.data.subscribe((data) => {
-      const projectSlug = data['projectSlug'];
-      if (projectSlug) {
-        this.projectSlug.set(projectSlug);
-      }
-    });
-  }
+  readonly jsonInvalid$ = this.editorService.jsonSyntaxError$.specJson;
+  readonly reportForm = this.newReportViewFacadeService.reportForm;
 
   cancel() {
     this.newReportViewFacadeService.cancel();
@@ -145,30 +141,27 @@ export class NewReportViewComponent {
     this.editorService.setContent('specJson', sample);
   }
 
-  uploadReport() {
-    if (!this.projectSlug()) throw new Error('Project slug is required');
-    this.newReportViewFacadeService
-      .uploadReport(this.projectSlug())
-      .pipe(take(1))
-      .subscribe(() => {
-        // force reload the page
-        this.router.navigated = false;
-        void this.router.navigate([this.router.url]).then(() => {
-          if (this.route.snapshot.data['reports']) {
-            void this.sidenav().close();
-          }
-        });
+  async uploadReport(): Promise<void> {
+    const slug = this.projectSlug();
+    if (!slug) throw new Error('Project slug is required');
+    try {
+      await firstValueFrom(this.newReportViewFacadeService.uploadReport(slug), {
+        defaultValue: undefined
       });
-    // force change detection; paired with runGuardsAndResolvers: 'always',
-    this.changeDetectorRef.detectChanges();
-    this.newReportViewFacadeService.completeUpload();
+      // force reload the page
+      this.router.navigated = false;
+      await this.router.navigate([this.router.url]);
+      if (this.route.snapshot?.data?.['reports']) {
+        void this.sidenav().close();
+      }
+    } finally {
+      // force change detection; paired with runGuardsAndResolvers: 'always',
+      this.changeDetectorRef.detectChanges();
+      this.newReportViewFacadeService.completeUpload();
+    }
   }
 
   get exampleInputJson() {
     return `{}`;
-  }
-
-  get reportForm() {
-    return this.newReportViewFacadeService.reportForm;
   }
 }

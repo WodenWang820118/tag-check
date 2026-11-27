@@ -3,18 +3,20 @@ import {
   Component,
   computed,
   DestroyRef,
+  effect,
   inject,
   input,
   signal,
+  untracked,
   ChangeDetectionStrategy
 } from '@angular/core';
 import {
   catchError,
   distinctUntilChanged,
   finalize,
+  firstValueFrom,
   of,
-  switchMap,
-  take
+  switchMap
 } from 'rxjs';
 import {
   DataLayerSpec,
@@ -151,6 +153,9 @@ function normalizeItemDefContent(
 })
 export class ReportDetailPanelsComponent {
   private readonly destroyRef = inject(DestroyRef);
+  private readonly reportDetailPanelsFacadeService = inject(
+    ReportDetailPanelsFacadeService
+  );
 
   context = input<ReportDetailRouteContext | undefined>(undefined);
 
@@ -218,18 +223,14 @@ export class ReportDetailPanelsComponent {
       !!this.editItemId().trim()
   }));
 
-  constructor(
-    private readonly reportDetailPanelsFacadeService: ReportDetailPanelsFacadeService
-  ) {
-    toObservable(this.context)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((context) => {
-        if (!context) {
-          return;
-        }
-
-        this.syncContext(context);
-      });
+  constructor() {
+    effect(() => {
+      const context = this.context();
+      if (!context) {
+        return;
+      }
+      untracked(() => this.syncContext(context));
+    });
 
     toObservable(this.itemDefTest)
       .pipe(
@@ -384,7 +385,7 @@ export class ReportDetailPanelsComponent {
     }
   }
 
-  saveSpec() {
+  async saveSpec(): Promise<void> {
     const context = this.context();
     const currentSpec = this.specContent();
     const parsed = parseJson<StrictDataLayerEvent>(this.specDraftText());
@@ -394,28 +395,33 @@ export class ReportDetailPanelsComponent {
     }
 
     this.specLoading.set(true);
-    this.reportDetailPanelsFacadeService
-      .updateSpec(context.projectSlug, context.eventId, {
-        event: parsed.event,
+    try {
+      await firstValueFrom(
+        this.reportDetailPanelsFacadeService.updateSpec(
+          context.projectSlug,
+          context.eventId,
+          {
+            event: parsed.event,
+            dataLayerSpec: parsed
+          }
+        )
+      );
+      this.specContent.set({
+        ...currentSpec,
+        eventName: parsed.event,
         dataLayerSpec: parsed
-      })
-      .pipe(
-        take(1),
-        finalize(() => this.specLoading.set(false))
-      )
-      .subscribe(() => {
-        this.specContent.set({
-          ...currentSpec,
-          eventName: parsed.event,
-          dataLayerSpec: parsed
-        });
-        this.specDraftText.set(stringifyJson(parsed));
-        this.specSyntaxError.set(false);
-        this.specEditMode.set(false);
       });
+      this.specDraftText.set(stringifyJson(parsed));
+      this.specSyntaxError.set(false);
+      this.specEditMode.set(false);
+    } catch {
+      // error handled in service
+    } finally {
+      this.specLoading.set(false);
+    }
   }
 
-  saveRecording() {
+  async saveRecording(): Promise<void> {
     const context = this.context();
     const parsed = parseJson<Recording>(this.recordingDraftText());
 
@@ -424,21 +430,26 @@ export class ReportDetailPanelsComponent {
     }
 
     this.recordingLoading.set(true);
-    this.reportDetailPanelsFacadeService
-      .updateRecording(context.projectSlug, context.eventId, parsed)
-      .pipe(
-        take(1),
-        finalize(() => this.recordingLoading.set(false))
-      )
-      .subscribe(() => {
-        this.recordingContent.set(parsed);
-        this.recordingDraftText.set(stringifyJson(parsed));
-        this.recordingSyntaxError.set(false);
-        this.recordingEditMode.set(false);
-      });
+    try {
+      await firstValueFrom(
+        this.reportDetailPanelsFacadeService.updateRecording(
+          context.projectSlug,
+          context.eventId,
+          parsed
+        )
+      );
+      this.recordingContent.set(parsed);
+      this.recordingDraftText.set(stringifyJson(parsed));
+      this.recordingSyntaxError.set(false);
+      this.recordingEditMode.set(false);
+    } catch {
+      // error handled in service
+    } finally {
+      this.recordingLoading.set(false);
+    }
   }
 
-  saveItemDef() {
+  async saveItemDef(): Promise<void> {
     const context = this.context();
     const parsed = parseJson<unknown>(this.itemDefDraftText());
     const itemId = this.editItemId().trim();
@@ -450,24 +461,29 @@ export class ReportDetailPanelsComponent {
     }
 
     this.itemDefLoading.set(true);
-    this.reportDetailPanelsFacadeService
-      .updateItemDef(context.projectSlug, context.eventId, {
-        itemId,
-        fullItemDef: normalized.fullItemDef,
-        templateName: templateName || undefined
-      })
-      .pipe(
-        take(1),
-        finalize(() => this.itemDefLoading.set(false))
-      )
-      .subscribe((saved) => {
-        this.itemDefContent.set(saved);
-        this.editItemId.set(saved.itemId);
-        this.editTemplateName.set(saved.templateName);
-        this.itemDefDraftText.set(stringifyJson(saved.fullItemDef));
-        this.itemDefSyntaxError.set(false);
-        this.itemDefEditMode.set(false);
-      });
+    try {
+      const saved = await firstValueFrom(
+        this.reportDetailPanelsFacadeService.updateItemDef(
+          context.projectSlug,
+          context.eventId,
+          {
+            itemId,
+            fullItemDef: normalized.fullItemDef,
+            templateName: templateName || undefined
+          }
+        )
+      );
+      this.itemDefContent.set(saved);
+      this.editItemId.set(saved.itemId);
+      this.editTemplateName.set(saved.templateName);
+      this.itemDefDraftText.set(stringifyJson(saved.fullItemDef));
+      this.itemDefSyntaxError.set(false);
+      this.itemDefEditMode.set(false);
+    } catch {
+      // error handled in service
+    } finally {
+      this.itemDefLoading.set(false);
+    }
   }
 
   onSpecDraftChange(content: string) {

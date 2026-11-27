@@ -4,13 +4,9 @@ import puppeteer, { type Browser, type Page } from 'puppeteer';
 import { chooseFallbackCandidate, type Step } from '@utils';
 import { StepFailureCollectorService } from './step-failure-collector.service';
 
-const chromeAvailable = (() => {
-  try {
-    return existsSync(puppeteer.executablePath());
-  } catch {
-    return false;
-  }
-})();
+const chromeAvailable = await puppeteer
+  .executablePath()
+  .then(existsSync, () => false);
 
 /**
  * The button moved into a new wrapper, so the structural path recorded

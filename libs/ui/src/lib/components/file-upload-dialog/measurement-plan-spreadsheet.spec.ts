@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { parseMeasurementPlanRows } from '@utils';
 import {
   buildExtractedMeasurementPlanCsv,
+  buildMeasurementPlanCsv,
   buildMeasurementPlanTemplateCsv,
   parseCsvToTable,
   readMeasurementPlanFile
@@ -83,6 +84,60 @@ describe('measurement-plan-spreadsheet', () => {
     expect(viewItemRow).toBeDefined();
     expect(viewItemRow?.[1]).toContain('currency');
     expect(viewItemRow?.[1]).toContain('value');
+  });
+
+  it('builds measurement plan CSV from object rows and round-trips through parser', () => {
+    const rows = [
+      {
+        eventName: 'purchase',
+        eventParameters: 'transaction_id=/^T\\d+$/, currency=TWD, value',
+        itemParameters: 'item_id, item_name, price'
+      },
+      {
+        eventName: 'login',
+        eventParameters: 'method=email',
+        itemParameters: ''
+      }
+    ];
+
+    const csv = buildMeasurementPlanCsv(rows);
+    const table = parseCsvToTable(csv);
+
+    expect(table).toEqual([
+      ['event_name', 'event_parameters', 'item_parameters'],
+      [
+        'purchase',
+        'transaction_id=/^T\\d+$/, currency=TWD, value',
+        'item_id, item_name, price'
+      ],
+      ['login', 'method=email', '']
+    ]);
+
+    const parsed = parseMeasurementPlanRows(table);
+    expect(parsed.issues).toEqual([]);
+    expect(parsed.rows.length).toBe(2);
+    expect(parsed.rows[0].eventName).toBe('purchase');
+    expect(parsed.rows[1].eventName).toBe('login');
+  });
+
+  it('quotes plan cells holding commas and quotes', () => {
+    const rows = [
+      {
+        eventName: 'purchase',
+        eventParameters: 'currency=TWD, value="special"',
+        itemParameters: 'item_id'
+      }
+    ];
+
+    const csv = buildMeasurementPlanCsv(rows);
+    expect(csv).toContain('"currency=TWD, value=""special"""');
+
+    const table = parseCsvToTable(csv);
+    expect(table[1]).toEqual([
+      'purchase',
+      'currency=TWD, value="special"',
+      'item_id'
+    ]);
   });
 
   it('writes an extracted plan with notes that the plan upload reads back', () => {

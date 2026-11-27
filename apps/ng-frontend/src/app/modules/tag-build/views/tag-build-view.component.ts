@@ -1,8 +1,8 @@
 import { AsyncPipe, NgComponentOutlet } from '@angular/common';
 import {
   Component,
-  computed,
-  OnDestroy,
+  DestroyRef,
+  inject,
   OnInit,
   signal,
   ChangeDetectionStrategy
@@ -10,14 +10,10 @@ import {
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute } from '@angular/router';
 import type { ProjectContainerImport } from '@ui';
-import {
-  GTMConfiguration,
-  GtmImportSummary,
-  StrictDataLayerEvent
-} from '@utils';
-import { firstValueFrom, Subject, takeUntil, tap } from 'rxjs';
+import { GTMConfiguration, GtmImportSummary } from '@utils';
+import { firstValueFrom } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ProjectService } from '../../../shared/services/api/project-info/project-info.service';
-import { SpecService } from '../../../shared/services/api/spec/spec.service';
 import {
   gtmImportErrorMessage,
   UploadCardFacadeService
@@ -25,10 +21,9 @@ import {
 import { TagBuildImportSnackbarComponent } from '../components/tag-build-import-snackbar.component';
 
 /**
- * The TagBuild page: loads the project's specs into @ui's
- * TagBuildPageComponent, imported lazily. It passes the project's saved
- * container and an import hook, which the standalone tag-build site does
- * not set.
+ * The TagBuild page: opens @ui's TagBuildPageComponent, imported lazily,
+ * with empty specs. It passes the project's saved container and an import
+ * hook, which the standalone tag-build site does not set.
  */
 @Component({
   selector: 'app-tag-build-view',
@@ -36,36 +31,28 @@ import { TagBuildImportSnackbarComponent } from '../components/tag-build-import-
   imports: [AsyncPipe, NgComponentOutlet],
   template: `
     @if (tagBuildPageComponent | async; as tagBuildPageComponent) {
-      @if (projectSpecSignal$().length > 0) {
-        <ng-container
-          [ngComponentOutlet]="tagBuildPageComponent"
-          [ngComponentOutletInputs]="{
-            specs: projectSpecSignal$(),
-            projectSlug: projectSlug,
-            projectImport: projectImport,
-            projectContainer: projectContainer()
-          }"
-        ></ng-container>
-      } @else {
-        <ng-container
-          [ngComponentOutlet]="tagBuildPageComponent"
-          [ngComponentOutletInputs]="{
-            specs: [],
-            projectSlug: projectSlug,
-            projectImport: projectImport,
-            projectContainer: projectContainer()
-          }"
-        ></ng-container>
-      }
+      <ng-container
+        [ngComponentOutlet]="tagBuildPageComponent"
+        [ngComponentOutletInputs]="{
+          specs: [],
+          projectSlug: projectSlug,
+          projectImport: projectImport,
+          projectContainer: projectContainer()
+        }"
+      ></ng-container>
     }
   `,
   changeDetection: ChangeDetectionStrategy.Eager,
   styles: [``]
 })
-export class TagBuildViewComponent implements OnInit, OnDestroy {
-  tagBuildPageComponent = this.loadTagBuildPageComponent();
-  projectSpecSignal = signal([] as StrictDataLayerEvent[]);
-  projectSpecSignal$ = computed(() => this.projectSpecSignal());
+export class TagBuildViewComponent implements OnInit {
+  private readonly route = inject(ActivatedRoute);
+  private readonly projectService = inject(ProjectService);
+  private readonly uploadCardFacade = inject(UploadCardFacadeService);
+  private readonly snackBar = inject(MatSnackBar);
+  private readonly destroyRef = inject(DestroyRef);
+
+  readonly tagBuildPageComponent = this.loadTagBuildPageComponent();
   /** Saved container from `GET projects/:slug/gtm-config`, or null. */
   readonly projectContainer = signal<GTMConfiguration | null>(null);
   /**
@@ -73,20 +60,11 @@ export class TagBuildViewComponent implements OnInit, OnDestroy {
    * The page reads it when the success dialog opens.
    */
   projectImport: ProjectContainerImport | null = null;
-  destroy$ = new Subject<void>();
   projectSlug?: string;
-
-  constructor(
-    private readonly specService: SpecService,
-    private readonly route: ActivatedRoute,
-    private readonly projectService: ProjectService,
-    private readonly uploadCardFacade: UploadCardFacadeService,
-    private readonly snackBar: MatSnackBar
-  ) {}
 
   ngOnInit() {
     const projectSlugParam: unknown =
-      this.route.parent?.parent?.snapshot.params['projectSlug'];
+      this.route.parent?.parent?.snapshot?.params?.['projectSlug'];
     const slug =
       typeof projectSlugParam === 'string' ? projectSlugParam : undefined;
     this.projectSlug = slug;
@@ -95,20 +73,9 @@ export class TagBuildViewComponent implements OnInit, OnDestroy {
       label: 'Import into this project',
       run: (container) => this.importBuiltContainer(slug, container)
     };
-    this.specService
-      .getProjectSpec(slug)
-      .pipe(
-        takeUntil(this.destroy$),
-        tap((data) => {
-          if (data.specs.length > 0) {
-            this.projectSpecSignal.set(data.specs);
-          }
-        })
-      )
-      .subscribe();
     this.projectService
       .getProjectGtmConfig(slug)
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((container) => {
         this.projectContainer.set(container);
       });
@@ -160,11 +127,6 @@ export class TagBuildViewComponent implements OnInit, OnDestroy {
         testsLink: `/projects/${projectSlug}`
       }
     });
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }
 

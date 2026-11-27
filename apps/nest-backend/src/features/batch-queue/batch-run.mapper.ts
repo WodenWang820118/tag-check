@@ -29,11 +29,16 @@ export const NO_RESULT_MESSAGE = 'The run saved no result';
 /**
  * An item's status from its run: the saved result's two checks, as
  * getCheckStatus reads them (both passed: passed; one: partial; neither:
- * failed), or `error` when the run threw, with the reason the client may see.
+ * failed; without the request check, the data layer check alone), or `error` when the run threw, with the reason the client may see.
  * A run that threw keeps the result it saved, if any.
  */
 export function toItemOutcome(
-  result: { id: number; passed: boolean; requestPassed: boolean } | null,
+  result: {
+    id: number;
+    passed: boolean;
+    requestPassed: boolean;
+    requestChecked: boolean;
+  } | null,
   failure?: { error: unknown }
 ): ItemOutcome {
   if (failure) {
@@ -51,7 +56,11 @@ export function toItemOutcome(
     };
   }
   return {
-    status: getCheckStatus(result.passed, result.requestPassed),
+    status: getCheckStatus(
+      result.passed,
+      result.requestPassed,
+      result.requestChecked
+    ),
     message: null,
     testEventDetailId: result.id
   };

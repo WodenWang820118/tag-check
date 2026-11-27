@@ -9,16 +9,16 @@
         </mat-panel-title>
       </mat-expansion-panel-header>
       <section class="advanced__tags">
-        <form [formGroup]="form">
+        <form>
           <div style="display: flex; flex-direction: column">
             <mat-checkbox
               i18n="@@advancedExpansionPanelComponentIncludeVideoTag"
-              formControlName="includeVideoTag"
+              [formField]="form.includeVideoTag"
               >Include Video Tag</mat-checkbox
             >
             <mat-checkbox
               i18n="@@advancedExpansionPanelComponentIncludeScrollTag"
-              formControlName="includeScrollTag"
+              [formField]="form.includeScrollTag"
               >Include Scroll Tag</mat-checkbox
             >
           </div>
@@ -41,22 +41,19 @@
         >
       </mat-expansion-panel-header>
       <section class="advanced__configuration-name">
-        <form
-          [formGroup]="setupForm"
-          style="display: flex; flex-direction: column"
-        >
+        <form style="display: flex; flex-direction: column">
           <mat-form-field appearance="outline" density="compact">
             <mat-label i18n="@@advancedExpansionPanelComponentGoogleTagName"
               >Google Tag Name</mat-label
             >
-            <input matInput formControlName="googleTagName" />
+            <input matInput [formField]="setupForm.googleTagName" />
           </mat-form-field>
           <mat-form-field appearance="outline">
             <mat-label
               i18n="@@advancedExpansionPanelComponentGoogleTagMeasurementId"
               >Use Existing Measurement ID</mat-label
             >
-            <input matInput formControlName="useExistingMeasurementId" />
+            <input matInput [formField]="setupForm.useExistingMeasurementId" />
           </mat-form-field>
         </form>
       </section>
@@ -77,24 +74,21 @@
         >
       </mat-expansion-panel-header>
       <section class="advanced__configuration-name">
-        <form
-          [formGroup]="ecAndEsvForm"
-          style="display: flex; flex-direction: column"
-        >
+        <form style="display: flex; flex-direction: column">
           <mat-checkbox
             i18n="@@advancedExpansionPanelComponentSendECData"
-            formControlName="isSendingEcommerceData"
+            [formField]="ecAndEsvForm.isSendingEcommerceData"
             >Send Ecommerce Data</mat-checkbox
           >
           <mat-checkbox
-            formControlName="isEsv"
+            [formField]="ecAndEsvForm.isEsv"
             i18n="@@advancedExpansionPanelComponentAddESV"
             >Add Event Settings Variable</mat-checkbox
           >
-          @if (this.ecAndEsvForm.controls['isEsv'].value) {
+          @if (ecAndEsvForm.isEsv().value()) {
             <lib-general-editor
               languageExtension="json"
-              [content]="this.ecAndEsvForm.controls['esv'].value"
+              [content]="ecAndEsvForm.esv().value()"
             ></lib-general-editor>
           }
         </form>

@@ -2,7 +2,7 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
-import { firstValueFrom, of } from 'rxjs';
+import { of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ConfigurationService } from '../../../../shared/services/api/configuration/configuration.service';
 import { ProjectService } from '../../../../shared/services/api/project-info/project-info.service';
@@ -67,9 +67,10 @@ describe('InitProjectFormFacadeService', () => {
   it('generates a slug when the project name changes', () => {
     vi.spyOn(Math, 'random').mockReturnValue(0.123456789);
 
-    service.projectForm.controls.projectName.setValue('Corporate Website');
+    service.projectForm.projectName().value.set('Corporate Website');
+    TestBed.flushEffects();
 
-    expect(service.projectForm.controls.projectSlug.value).toMatch(
+    expect(service.projectForm.projectSlug().value()).toMatch(
       /^corporate-website-[a-z0-9]{4}$/
     );
   });
@@ -77,29 +78,30 @@ describe('InitProjectFormFacadeService', () => {
   it('normalizes whitespace and invalid symbols when generating a slug', () => {
     vi.spyOn(Math, 'random').mockReturnValue(0.123456789);
 
-    service.projectForm.controls.projectName.setValue('  Test  Project!!  ');
+    service.projectForm.projectName().value.set('  Test  Project!!  ');
+    TestBed.flushEffects();
 
-    expect(service.projectForm.controls.projectSlug.value).toMatch(
+    expect(service.projectForm.projectSlug().value()).toMatch(
       /^test-project-[a-z0-9]{4}$/
     );
   });
 
   it('guards against duplicate project-name subscriptions', () => {
     vi.spyOn(Math, 'random').mockReturnValue(0.123456789);
-    const projectSlugSetValueSpy = vi.spyOn(
-      service.projectForm.controls.projectSlug,
-      'setValue'
+    const projectSlugSetSpy = vi.spyOn(
+      service.projectForm.projectSlug().value,
+      'set'
     );
 
     service.observeProjectNameChanges();
-    service.projectForm.controls.projectName.setValue('Single Observer');
+    service.projectForm.projectName().value.set('Single Observer');
+    TestBed.flushEffects();
 
-    expect(projectSlugSetValueSpy).toHaveBeenCalledTimes(1);
+    expect(projectSlugSetSpy).toHaveBeenCalledTimes(1);
   });
 
   it('shows an error dialog when the form is invalid', async () => {
-    service.submitProject();
-    await Promise.resolve();
+    await service.submitProject();
 
     expect(projectService.initProject).not.toHaveBeenCalled();
     expect(dialog.open).toHaveBeenCalledWith(MockErrorDialogComponent, {
@@ -118,11 +120,11 @@ describe('InitProjectFormFacadeService', () => {
     );
     // ProjectService answers a failed request with null.
     projectService.initProject.mockReturnValue(of(null));
-    service.projectForm.controls.projectName.setValue('Test Project');
-    service.projectForm.controls.measurementId.setValue('G-TEST123');
+    service.projectForm.projectName().value.set('Test Project');
+    TestBed.flushEffects();
+    service.projectForm.measurementId().value.set('G-TEST123');
 
-    await firstValueFrom(service.submitProject(), { defaultValue: null });
-    await Promise.resolve();
+    await service.submitProject();
 
     expect(router.navigate).not.toHaveBeenCalled();
     expect(dialog.open).toHaveBeenCalledWith(MockErrorDialogComponent, {
@@ -147,12 +149,12 @@ describe('InitProjectFormFacadeService', () => {
       })
     );
 
-    service.projectForm.controls.projectName.setValue('Test Project');
-    service.projectForm.controls.measurementId.setValue('G-TEST123');
-    service.projectForm.controls.projectDescription.setValue('Demo project');
+    service.projectForm.projectName().value.set('Test Project');
+    TestBed.flushEffects();
+    service.projectForm.measurementId().value.set('G-TEST123');
+    service.projectForm.projectDescription().value.set('Demo project');
 
-    await firstValueFrom(service.submitProject());
-    await Promise.resolve();
+    await service.submitProject();
 
     expect(projectService.initProject).toHaveBeenCalledWith({
       measurementId: 'G-TEST123',
@@ -165,7 +167,7 @@ describe('InitProjectFormFacadeService', () => {
       'projects',
       'test-project-abcd'
     ]);
-    expect(service.projectForm.getRawValue()).toEqual({
+    expect(service.projectModel()).toEqual({
       measurementId: '',
       projectDescription: '',
       projectName: '',

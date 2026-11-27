@@ -4,7 +4,6 @@
   "projectType": "application",
   "prefix": "app",
   "sourceRoot": "apps/ng-product-doc/src",
-  "tags": ["scope:frontend", "type:app"],
   "i18n": {
     "sourceLocale": {
       "code": "en-US",
@@ -25,11 +24,13 @@
       }
     }
   },
+  "tags": ["scope:frontend", "type:app"],
   "targets": {
     "typecheck-spec": {},
     "build": {
       "executor": "@angular-devkit/build-angular:application",
       "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
       "options": {
         "outputPath": "dist/apps/ng-product-doc",
         "index": "apps/ng-product-doc/src/index.html",
@@ -51,6 +52,11 @@
           {
             "input": "libs/utils/src/lib/assets",
             "glob": "**/*",
+            "output": "/assets/"
+          },
+          {
+            "input": "node_modules/ngx-scrollbar/assets",
+            "glob": "scroll-timeline-polyfill.js",
             "output": "/assets/"
           },
           "apps/ng-product-doc/src/assets"
@@ -85,6 +91,15 @@
               "maximumError": "4kb"
             }
           ],
+          "optimization": {
+            "scripts": true,
+            "styles": {
+              "minify": true,
+              "removeSpecialComments": true,
+              "inlineCritical": false
+            },
+            "fonts": true
+          },
           "localize": true,
           "i18nMissingTranslation": "error",
           "outputHashing": "all"
@@ -106,11 +121,11 @@
           "extractLicenses": false,
           "sourceMap": true
         }
-      },
-      "defaultConfiguration": "production"
+      }
     },
     "serve": {
       "executor": "@angular-devkit/build-angular:dev-server",
+      "defaultConfiguration": "development",
       "configurations": {
         "zh-Hant": {
           "buildTarget": "ng-product-doc:build:zh-Hant"
@@ -128,7 +143,9 @@
           "buildTarget": "ng-product-doc:build:development"
         }
       },
-      "defaultConfiguration": "development"
+      "readyWhen": {
+        "signal": true
+      }
     },
     "extract-i18n": {
       "executor": "@angular-devkit/build-angular:extract-i18n",
@@ -145,7 +162,12 @@
     "build-static": {
       "executor": "nx:run-commands",
       "cache": true,
-      "inputs": ["production", "^production"],
+      "inputs": [
+        "production",
+        "^production",
+        "{workspaceRoot}/tools/scripts/csp/*.ts",
+        "!{workspaceRoot}/tools/scripts/csp/*.spec.ts"
+      ],
       "outputs": ["{workspaceRoot}/dist/apps/ng-product-doc/browser"],
       "options": {
         "commands": [
@@ -154,8 +176,12 @@
             "description": "Stamp sitemaps with today's lastmod date before building."
           },
           {
-            "command": "pnpm nx build ng-product-doc --configuration production --optimization",
+            "command": "pnpm nx build ng-product-doc --configuration production",
             "description": "Build the localized static site output."
+          },
+          {
+            "command": "node tools/scripts/csp/apply-site-csp.ts --site ng-product-doc --dir dist/apps/ng-product-doc/browser",
+            "description": "Compute inline script hashes and inject the Content Security Policy meta tag into built HTML pages."
           }
         ],
         "parallel": false
@@ -163,11 +189,23 @@
     },
     "serve-static": {
       "executor": "@nx/web:file-server",
+      "readyWhen": {
+        "signal": true
+      },
+      "dependsOn": ["build-static"],
       "options": {
         "buildTarget": "ng-product-doc:build-static",
         "port": 4200,
         "staticFilePath": "dist/apps/ng-product-doc/browser",
         "spa": false
+      }
+    },
+    "csp-check": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "dependsOn": ["build-static"],
+      "options": {
+        "command": "node tools/scripts/csp-check/check-site-csp.ts --dir dist/apps/ng-product-doc/browser --block-external"
       }
     }
   }

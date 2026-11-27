@@ -1,5 +1,5 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { FormField } from '@angular/forms/signals';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideTruck } from '@ng-icons/lucide';
 import { HlmButton } from '@spartan-ng/helm/button';
@@ -10,14 +10,7 @@ import { CheckoutFormManagerService } from '../../../../shared/services/checkout
 @Component({
   selector: 'app-shipping-form',
   standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    FormsModule,
-    HlmButton,
-    HlmInput,
-    HlmLabel,
-    NgIcon
-  ],
+  imports: [FormField, HlmButton, HlmInput, HlmLabel, NgIcon],
   providers: [provideIcons({ lucideTruck })],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
@@ -36,11 +29,7 @@ import { CheckoutFormManagerService } from '../../../../shared/services/checkout
         </p>
       </div>
 
-      <form
-        [formGroup]="shippingForm"
-        (ngSubmit)="continue()"
-        class="space-y-4"
-      >
+      <form (submit)="$event.preventDefault(); continue()" class="space-y-4">
         <div class="grid gap-4 md:grid-cols-2">
           <div class="space-y-2">
             <label
@@ -52,7 +41,7 @@ import { CheckoutFormManagerService } from '../../../../shared/services/checkout
             </label>
             <input
               hlmInput
-              formControlName="name"
+              [formField]="shippingForm.name"
               id="name"
               class="w-full bg-white"
               data-testid="shipping-name"
@@ -68,7 +57,7 @@ import { CheckoutFormManagerService } from '../../../../shared/services/checkout
             </label>
             <input
               hlmInput
-              formControlName="address"
+              [formField]="shippingForm.address"
               id="address"
               class="w-full bg-white"
               data-testid="shipping-address"
@@ -84,7 +73,7 @@ import { CheckoutFormManagerService } from '../../../../shared/services/checkout
             </label>
             <input
               hlmInput
-              formControlName="zip"
+              [formField]="shippingForm.zip"
               id="zip"
               class="w-full bg-white"
               data-testid="shipping-zip"
@@ -100,7 +89,7 @@ import { CheckoutFormManagerService } from '../../../../shared/services/checkout
             </label>
             <input
               hlmInput
-              formControlName="city"
+              [formField]="shippingForm.city"
               id="city"
               class="w-full bg-white"
               data-testid="shipping-city"
@@ -119,17 +108,12 @@ import { CheckoutFormManagerService } from '../../../../shared/services/checkout
     </div>
   `
 })
-export class ShippingFormComponent implements OnInit {
-  shippingForm!: FormGroup;
-
-  constructor(public checkoutFormManager: CheckoutFormManagerService) {}
-
-  ngOnInit(): void {
-    this.shippingForm = this.checkoutFormManager.shippingForm;
-  }
+export class ShippingFormComponent {
+  public readonly checkoutFormManager = inject(CheckoutFormManagerService);
+  readonly shippingForm = this.checkoutFormManager.shippingForm;
 
   continue() {
-    if (this.shippingForm.valid) {
+    if (this.shippingForm().valid()) {
       this.checkoutFormManager.shippingFormComplete();
     }
   }

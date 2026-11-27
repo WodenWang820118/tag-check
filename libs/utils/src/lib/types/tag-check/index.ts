@@ -1,5 +1,4 @@
 export * from './action.type';
-export * from './carousel-item.type';
 export * from './sys-configuration.type';
 export * from './event-inspection-preset.type';
 export * from './file-report.type';

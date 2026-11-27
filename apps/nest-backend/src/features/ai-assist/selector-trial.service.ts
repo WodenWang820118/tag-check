@@ -56,7 +56,8 @@ export class SelectorTrialService {
     return {
       runId: run.runId,
       passed: run.passed,
-      requestPassed: run.requestPassed
+      requestPassed: run.requestPassed,
+      requestChecked: run.requestChecked
     };
   }
 }

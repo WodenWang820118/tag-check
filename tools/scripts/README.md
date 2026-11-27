@@ -26,3 +26,13 @@ without extra runtime flags.
   constructs such as `enum`, `namespace`, or constructor parameter properties.
 - Do not rely on `tsconfig.json` path aliases in this tree. Use relative imports
   with explicit `.ts` extensions so Node can resolve them directly.
+
+## Tools
+
+- `csp-check` (`tools/scripts/csp-check/check-site-csp.ts`): visits every page
+  of a site in Chromium and fails on any Content Security Policy violation,
+  missing policy (unless `--no-require-policy`), or page load error.
+  - Built directory:
+    `node tools/scripts/csp-check/check-site-csp.ts --dir dist/apps/ng-product-doc/browser --block-external`
+  - Deployed URL:
+    `node tools/scripts/csp-check/check-site-csp.ts --url https://example.vercel.app`

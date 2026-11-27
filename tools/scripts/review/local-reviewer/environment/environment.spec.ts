@@ -127,3 +127,89 @@ test(
     assert.equal(result.stderr.trim(), '');
   }
 );
+
+test('buildWindowsProcessBridgePayload defaults cwd to process.cwd()', () => {
+  const payload = buildWindowsProcessBridgePayload({
+    args: ['--flag', 'value'],
+    command: 'pnpm.cmd'
+  });
+
+  assert.equal(payload.cwd, process.cwd());
+});
+
+test('buildWindowsProcessBridgePayload copies args instead of retaining the caller array', () => {
+  const args = ['a', 'b'];
+  const payload = buildWindowsProcessBridgePayload({ args, command: 'x' });
+
+  assert.notEqual(payload.args, args);
+  args.push('c');
+  assert.deepEqual(payload.args, ['a', 'b']);
+});
+
+test('createLocalReviewerEnv fills every LOCAL_REVIEWER default for an empty base env', () => {
+  const env = createLocalReviewerEnv({});
+
+  assert.equal(env.LOCAL_REVIEWER_RUNTIME, 'ollama');
+  assert.equal(env.LOCAL_REVIEWER_OLLAMA_HOST, 'http://127.0.0.1:11434');
+  assert.equal(env.LOCAL_REVIEWER_OLLAMA_KEEP_ALIVE, '10m');
+  assert.equal(env.LOCAL_REVIEWER_OLLAMA_MODEL, 'qwen3:8b');
+  assert.equal(env.LOCAL_REVIEWER_DEFAULT_MODEL, 'qwen3:8b');
+  assert.equal(env.LOCAL_REVIEWER_OLLAMA_THINK, 'false');
+  assert.equal(env.LOCAL_REVIEWER_OLLAMA_TIMEOUT_MS, '120000');
+});
+
+test('createLocalReviewerEnv keeps base env values and lets overrides win', () => {
+  const kept = createLocalReviewerEnv({
+    LOCAL_REVIEWER_OLLAMA_HOST: 'http://other:1',
+    LOCAL_REVIEWER_OLLAMA_KEEP_ALIVE: '1h',
+    LOCAL_REVIEWER_OLLAMA_THINK: 'true',
+    LOCAL_REVIEWER_OLLAMA_TIMEOUT_MS: '60000',
+    LOCAL_REVIEWER_RUNTIME: 'foundry'
+  });
+  assert.equal(kept.LOCAL_REVIEWER_RUNTIME, 'foundry');
+  assert.equal(kept.LOCAL_REVIEWER_OLLAMA_HOST, 'http://other:1');
+  assert.equal(kept.LOCAL_REVIEWER_OLLAMA_KEEP_ALIVE, '1h');
+  assert.equal(kept.LOCAL_REVIEWER_OLLAMA_THINK, 'true');
+  assert.equal(kept.LOCAL_REVIEWER_OLLAMA_TIMEOUT_MS, '60000');
+
+  const overridden = createLocalReviewerEnv(
+    { LOCAL_REVIEWER_RUNTIME: 'ollama' },
+    { LOCAL_REVIEWER_RUNTIME: 'foundry' }
+  );
+  assert.equal(overridden.LOCAL_REVIEWER_RUNTIME, 'foundry');
+});
+
+test('createLocalReviewerEnv resolves the Ollama model from overrides, then base env', () => {
+  const ollamaOverride = createLocalReviewerEnv(
+    { LOCAL_REVIEWER_DEFAULT_MODEL: 'base-default' },
+    { LOCAL_REVIEWER_OLLAMA_MODEL: 'override-model' }
+  );
+  assert.equal(ollamaOverride.LOCAL_REVIEWER_OLLAMA_MODEL, 'override-model');
+  assert.equal(ollamaOverride.LOCAL_REVIEWER_DEFAULT_MODEL, 'base-default');
+
+  const defaultOverride = createLocalReviewerEnv(
+    {},
+    { LOCAL_REVIEWER_DEFAULT_MODEL: 'overridden-default' }
+  );
+  assert.equal(
+    defaultOverride.LOCAL_REVIEWER_OLLAMA_MODEL,
+    'overridden-default'
+  );
+  assert.equal(
+    defaultOverride.LOCAL_REVIEWER_DEFAULT_MODEL,
+    'overridden-default'
+  );
+
+  const baseOllama = createLocalReviewerEnv({
+    LOCAL_REVIEWER_DEFAULT_MODEL: 'base-default',
+    LOCAL_REVIEWER_OLLAMA_MODEL: 'base-ollama'
+  });
+  assert.equal(baseOllama.LOCAL_REVIEWER_OLLAMA_MODEL, 'base-ollama');
+});
+
+test('createLocalReviewerEnv preserves unrelated base env keys', () => {
+  const env = createLocalReviewerEnv({ HOME: '/home/me', PATH: '/usr/bin' });
+
+  assert.equal(env.PATH, '/usr/bin');
+  assert.equal(env.HOME, '/home/me');
+});

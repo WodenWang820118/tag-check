@@ -1,30 +1,34 @@
 import { CommonModule } from '@angular/common';
 import {
+  ChangeDetectionStrategy,
   Component,
-  OnInit,
-  DestroyRef,
-  ChangeDetectionStrategy
+  computed,
+  effect,
+  inject,
+  linkedSignal
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { catchError, switchMap, take, tap } from 'rxjs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import {
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  FormsModule,
-  ReactiveFormsModule
-} from '@angular/forms';
-import { SettingsService } from '../../services/api/settings/settings.service';
-import { ActivatedRoute, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { ActivatedRoute, Router } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { firstValueFrom } from 'rxjs';
+import { disabled, form, FormField } from '@angular/forms/signals';
 import { ApplicationSetting, ProjectSetting } from '@utils';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { SettingsService } from '../../services/api/settings/settings.service';
+
+interface GtmFormModel {
+  gtmPreviewModeUrl: string;
+  tagManagerUrl: string;
+  isAccompanyMode: boolean;
+  isRequestCheck: boolean;
+}
+
 /**
  * Settings > Google Tag Manager: the GTM Preview URL, accompanied mode,
  * which needs that URL, and the request check, which needs a
@@ -40,70 +44,71 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
     MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
-    FormsModule,
-    ReactiveFormsModule,
     MatCardModule,
     MatCheckboxModule,
-    MatTooltipModule
+    MatTooltipModule,
+    FormField
   ],
   templateUrl: './gtm-form.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./gtm-form.component.scss']
 })
-export class GtmFormComponent implements OnInit {
-  previewModeForm: FormGroup<{
-    gtmPreviewModeUrl: FormControl<string | null>;
-    tagManagerUrl: FormControl<string | null>;
-    isAccompanyMode: FormControl<boolean | null>;
-    isRequestCheck: FormControl<boolean | null>;
-  }> = this.fb.group({
-    gtmPreviewModeUrl: [''],
-    tagManagerUrl: [''],
-    isAccompanyMode: [false],
-    isRequestCheck: new FormControl({ value: false, disabled: true })
+export class GtmFormComponent {
+  private readonly settingsService = inject(SettingsService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+
+  private readonly routeData = toSignal(this.route.data);
+
+  readonly projectInfo = computed(
+    () => this.routeData()?.['projectInfo'] as ProjectSetting | undefined
+  );
+
+  readonly hasMeasurementId = computed(() => {
+    const measurementId = this.projectInfo()?.measurementId;
+    return typeof measurementId === 'string' && measurementId.trim().length > 0;
   });
 
-  constructor(
-    private readonly settingsService: SettingsService,
-    private readonly route: ActivatedRoute,
-    private readonly fb: FormBuilder,
-    private readonly destroyRef: DestroyRef,
-    private readonly router: Router
-  ) {}
+  readonly model = linkedSignal<GtmFormModel>(() => {
+    const gtm = this.projectInfo()?.applicationSettings?.gtm;
+    const hasMeasurement = this.hasMeasurementId();
+    const previewUrl = gtm?.gtmPreviewModeUrl ?? '';
+    const hasPreviewUrl = previewUrl.trim().length > 0;
+    return {
+      gtmPreviewModeUrl: previewUrl,
+      tagManagerUrl: gtm?.tagManagerUrl ?? '',
+      isAccompanyMode: hasPreviewUrl ? (gtm?.isAccompanyMode ?? false) : false,
+      isRequestCheck: hasMeasurement ? (gtm?.isRequestCheck ?? false) : false
+    };
+  });
 
-  ngOnInit() {
-    this.route.data
-      .pipe(
-        takeUntilDestroyed(this.destroyRef),
-        tap((data) => {
-          const settings: ProjectSetting = data[
-            'projectInfo'
-          ] as ProjectSetting;
-          if (settings) {
-            this.previewModeForm.patchValue(settings.applicationSettings.gtm);
-            if (settings.measurementId) {
-              this.previewModeForm.controls.isRequestCheck.enable();
-            } else {
-              this.previewModeForm.controls.isRequestCheck.disable();
-              this.previewModeForm.controls.isRequestCheck.setValue(false);
-            }
-          }
-        })
-      )
-      .subscribe();
+  readonly f = form(this.model, (p) => {
+    disabled(p.isAccompanyMode, {
+      when: ({ valueOf }) => {
+        const url = valueOf(p.gtmPreviewModeUrl);
+        return !url || url.trim().length === 0;
+      }
+    });
+    disabled(p.isRequestCheck, {
+      when: () => !this.hasMeasurementId()
+    });
+  });
 
-    // keep accompanied mode disabled until a Preview Mode URL is provided
-    this.previewModeForm.controls.gtmPreviewModeUrl.valueChanges
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((val) => {
-        const hasUrl = !!val && String(val).trim().length > 0;
-        if (hasUrl) {
-          this.previewModeForm.controls.isAccompanyMode.enable();
-        } else {
-          this.previewModeForm.controls.isAccompanyMode.setValue(false);
-          this.previewModeForm.controls.isAccompanyMode.disable();
-        }
-      });
+  constructor() {
+    effect(() => {
+      const url = this.model().gtmPreviewModeUrl;
+      const hasUrl = typeof url === 'string' && url.trim().length > 0;
+      if (!hasUrl && this.model().isAccompanyMode) {
+        this.model.update((m) => ({ ...m, isAccompanyMode: false }));
+      }
+    });
+
+    effect(() => {
+      const hasMeasurement = this.hasMeasurementId();
+      if (!hasMeasurement && this.model().isRequestCheck) {
+        this.model.update((m) => ({ ...m, isRequestCheck: false }));
+      }
+    });
   }
 
   get requestCheckTooltip(): string {
@@ -114,43 +119,38 @@ export class GtmFormComponent implements OnInit {
   }
 
   goToProjectInfo() {
-    // Navigate to the project info settings route
     void this.router.navigate(['../project-info'], {
       relativeTo: this.route
     });
   }
 
   onReset() {
-    this.previewModeForm.controls.gtmPreviewModeUrl.reset();
+    this.f.gtmPreviewModeUrl().value.set('');
   }
 
-  onSubmit() {
-    this.route.parent?.params
-      .pipe(
-        take(1),
-        switchMap((params) => {
-          const projectSlug = params['projectSlug'];
-          const settings: Partial<ApplicationSetting> = {
-            gtm: {
-              gtmPreviewModeUrl:
-                this.previewModeForm.value.gtmPreviewModeUrl || '',
-              isAccompanyMode:
-                this.previewModeForm.value.isAccompanyMode || false,
-              isRequestCheck:
-                this.previewModeForm.value.isRequestCheck || false,
-              tagManagerUrl: this.previewModeForm.value.tagManagerUrl || ''
-            }
-          };
-          return this.settingsService.updateApplicationSetting(
-            projectSlug,
-            settings
-          );
-        }),
-        catchError((err) => {
-          console.error(err);
-          return [];
-        })
-      )
-      .subscribe();
+  async onSubmit(): Promise<void> {
+    const params = this.route.parent?.params
+      ? await firstValueFrom(this.route.parent.params)
+      : undefined;
+    const projectSlug = params?.['projectSlug'];
+    if (!projectSlug) return;
+
+    const current = this.model();
+    const settings: Partial<ApplicationSetting> = {
+      gtm: {
+        gtmPreviewModeUrl: current.gtmPreviewModeUrl || '',
+        isAccompanyMode: current.isAccompanyMode || false,
+        isRequestCheck: current.isRequestCheck || false,
+        tagManagerUrl: current.tagManagerUrl || ''
+      }
+    };
+
+    try {
+      await firstValueFrom(
+        this.settingsService.updateApplicationSetting(projectSlug, settings)
+      );
+    } catch (err) {
+      console.error(err);
+    }
   }
 }

@@ -1,8 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import { LOCALE_ID, PLATFORM_ID } from '@angular/core';
 import { MarkdownService } from 'ngx-markdown';
-import { firstValueFrom, of, throwError } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { treeNodeResolver } from './documentation.resolver';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('treeNodeResolver', () => {
   let markdown: { getSource: ReturnType<typeof vi.fn> };
@@ -26,7 +27,7 @@ describe('treeNodeResolver', () => {
       ]
     });
     markdown.getSource.mockReturnValueOnce(of('# hi'));
-    const out = await firstValueFrom(callResolver('use-cases'));
+    const out = await callResolver('use-cases');
     expect(out).toEqual({
       fileName: 'assets/markdown/en/use-cases.md',
       content: '# hi'
@@ -42,7 +43,7 @@ describe('treeNodeResolver', () => {
       ]
     });
     markdown.getSource.mockReturnValueOnce(of(''));
-    const out = await firstValueFrom(callResolver('objective'));
+    const out = await callResolver('objective');
     expect(out.fileName).toBe('404.md');
     expect(out.content).toContain('404');
   });
@@ -59,7 +60,7 @@ describe('treeNodeResolver', () => {
     const errSpy = vi
       .spyOn(console, 'error')
       .mockImplementation(() => undefined);
-    const out = await firstValueFrom(callResolver('objective'));
+    const out = await callResolver('objective');
     expect(out.fileName).toBe('404.md');
     expect(out.content).toContain('404 Not Found');
     errSpy.mockRestore();
@@ -74,7 +75,7 @@ describe('treeNodeResolver', () => {
       ]
     });
 
-    const out = await firstValueFrom(callResolver('introduction'));
+    const out = await callResolver('introduction');
     expect(markdown.getSource).not.toHaveBeenCalled();
     expect(out.fileName).toBe('assets/markdown/en/introduction.md');
     expect(out.content).toContain('# Introduction');
@@ -93,7 +94,7 @@ describe('treeNodeResolver', () => {
       ]
     });
 
-    const out = await firstValueFrom(callResolver(name));
+    const out = await callResolver(name);
     expect(markdown.getSource).not.toHaveBeenCalled();
     expect(out.fileName).toBe('404.md');
   });
@@ -111,7 +112,7 @@ describe('treeNodeResolver', () => {
       .spyOn(console, 'error')
       .mockImplementation(() => undefined);
     const cwd = vi.spyOn(process, 'cwd').mockReturnValue('/no/such/workspace');
-    const out = await firstValueFrom(callResolver('introduction'));
+    const out = await callResolver('introduction');
     cwd.mockRestore();
     expect(markdown.getSource).not.toHaveBeenCalled();
     expect(out.fileName).toBe('404.md');
@@ -133,7 +134,7 @@ describe('treeNodeResolver', () => {
       )
       .mockReturnValueOnce(of('# english fallback'));
 
-    const out = await firstValueFrom(callResolver('use-cases'));
+    const out = await callResolver('use-cases');
 
     expect(markdown.getSource).toHaveBeenNthCalledWith(
       1,

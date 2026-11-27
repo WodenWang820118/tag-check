@@ -1,0 +1,56 @@
+{
+  "name": "tools-scripts",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "tools/scripts",
+  "projectType": "library",
+  "tags": ["scope:shared", "type:util"],
+  "targets": {
+    "test": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "default",
+        "^production",
+        "{workspaceRoot}/vitest.config.ts",
+        "{workspaceRoot}/VERSION",
+        "{workspaceRoot}/package.json",
+        "{workspaceRoot}/nx.json",
+        "{workspaceRoot}/**/project.json",
+        "{workspaceRoot}/docs/releases/*.md",
+        "{workspaceRoot}/.github/workflows/release.yaml",
+        "{workspaceRoot}/apps/desktop-tauri/src-tauri/tauri.conf.json",
+        "{workspaceRoot}/apps/desktop-tauri/src-tauri/Cargo.toml",
+        {
+          "externalDependencies": ["nx"]
+        }
+      ],
+      "options": {
+        "command": "pnpm exec vitest run --project tools"
+      }
+    },
+    "test-node": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["default", "^production"],
+      "options": {
+        "command": "node tools/scripts/testing/node-test-specs/node-test-specs.ts"
+      }
+    },
+    "typecheck-tools": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "default",
+        "^production",
+        "{workspaceRoot}/tools/tsconfig.tools.json",
+        "{workspaceRoot}/tsconfig.base.json",
+        {
+          "externalDependencies": ["typescript"]
+        }
+      ],
+      "options": {
+        "command": "tsc --noEmit -p tools/scripts/tsconfig.json"
+      }
+    }
+  }
+}

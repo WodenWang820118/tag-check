@@ -28,7 +28,6 @@ export interface ReviewFlowDependencies {
 }
 
 export const DEFAULT_COPILOT_CLAUDE_MODEL = 'claude-sonnet-4.6';
-export const DEFAULT_COPILOT_GPT5_MINI_MODEL = 'gpt-5-mini';
 
 export function getDefaultGeminiModel(): string {
   return 'gemini-3.5-flash-high';

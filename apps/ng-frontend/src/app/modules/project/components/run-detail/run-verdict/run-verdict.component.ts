@@ -20,6 +20,8 @@ export const HISTORY_RUNS_SHOWN = 20;
 /** One check of a run, as a card shows it. */
 export type CheckCard = {
   passed: boolean;
+  /** The run did not make this check (Request Check off): not a failure. */
+  notChecked?: boolean;
   text: string;
   /** An ID shown after the text, unbroken. */
   code?: string;
@@ -53,7 +55,7 @@ export class RunVerdictComponent {
   readonly status = computed<RunStatus | null>(() => {
     const run = this.run();
     return run
-      ? getCheckStatus(run.passed, run.requestPassed)
+      ? getCheckStatus(run.passed, run.requestPassed, run.requestChecked)
       : this.runs().length > 0
         ? null
         : 'notRun';
@@ -79,6 +81,13 @@ export class RunVerdictComponent {
     const run = this.run();
     if (!run) {
       return null;
+    }
+    if (run.requestChecked === false) {
+      return {
+        passed: false,
+        notChecked: true,
+        text: 'Request Check was off for this run, so it made no GA4 request check.'
+      };
     }
     if (run.requestPassed) {
       const measurementId = run.rawRequest
@@ -107,7 +116,11 @@ export class RunVerdictComponent {
       .slice(0, HISTORY_RUNS_SHOWN)
       .reverse()
       .map((run) => {
-        const status = getCheckStatus(run.passed, run.requestPassed);
+        const status = getCheckStatus(
+          run.passed,
+          run.requestPassed,
+          run.requestChecked
+        );
         return {
           runId: run.runId,
           status,

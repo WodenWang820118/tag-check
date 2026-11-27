@@ -1,9 +1,5 @@
-import {
-  DataLayerSpec,
-  REPORT_DETAIL_SAMPLE,
-  REPORT_LIST_ITEM_SAMPLE,
-  ReportDetailResponse
-} from '@utils';
+import { DataLayerSpec, ReportDetailResponse } from '@utils';
+import { REPORT_DETAIL_SAMPLE, REPORT_LIST_ITEM_SAMPLE } from '@utils/testing';
 import {
   buildReportPage,
   getLastRunAt,
@@ -46,6 +42,20 @@ describe('getRunStatus', () => {
     expect(getRunStatus(report(true, false))).toBe('partial');
     expect(getRunStatus(report(false, true))).toBe('partial');
     expect(getRunStatus(report(false, false))).toBe('failed');
+  });
+
+  it('judges a test whose latest run made no request check by its data layer check', () => {
+    // An item of GET /reports/:projectSlug for a project with Request Check off.
+    const item = JSON.parse(
+      JSON.stringify({
+        ...REPORT_LIST_ITEM_SAMPLE,
+        requestPassed: false,
+        requestChecked: false
+      })
+    );
+
+    expect(getRunStatus(item)).toBe('passed');
+    expect(getRunStatus({ ...item, passed: false })).toBe('failed');
   });
 
   it('follows lastRunAt from GET /reports when the API sends it', () => {

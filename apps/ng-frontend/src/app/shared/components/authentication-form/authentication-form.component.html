@@ -7,19 +7,18 @@
     <br />
     <mat-card-content>
       <form
-        [formGroup]="authenticationForm"
         class="authentication-form"
-        (ngSubmit)="onSubmit()"
+        (submit)="$event.preventDefault(); onSubmit()"
       >
         <mat-form-field class="authentication-form__field" appearance="outline">
           <mat-label>Username</mat-label>
-          <input matInput formControlName="username" />
+          <input matInput [formField]="f.username" />
         </mat-form-field>
         <mat-form-field class="authentication-form__field" appearance="outline">
           <mat-label>Password</mat-label>
           <input
             matInput
-            formControlName="password"
+            [formField]="f.password"
             autocomplete="off"
             [type]="showPassword() ? 'text' : 'password'"
           />

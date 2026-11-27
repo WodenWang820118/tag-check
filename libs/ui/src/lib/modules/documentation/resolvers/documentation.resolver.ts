@@ -3,7 +3,7 @@ import { isPlatformServer } from '@angular/common';
 import { ActivatedRouteSnapshot, ResolveFn } from '@angular/router';
 import { getLocaleConfig } from '../../../locale/locale-routing';
 import { MarkdownService } from 'ngx-markdown';
-import { firstValueFrom, from, Observable, of } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { DOCUMENTATION_ROUTE_SLUGS } from '../tree-data';
 
 /** A documentation page's markdown and the asset path it came from. */
@@ -107,7 +107,7 @@ async function loadMarkdown(
  */
 export const treeNodeResolver = ((
   route: ActivatedRouteSnapshot
-): Observable<DocumentationMarkdown> => {
+): Promise<DocumentationMarkdown> => {
   const markdownService = inject(MarkdownService);
   const platformId = inject(PLATFORM_ID);
   const locale = getLocaleConfig(inject(LOCALE_ID)).assetSegment;
@@ -117,19 +117,17 @@ export const treeNodeResolver = ((
     typeof nodeName !== 'string' ||
     !DOCUMENTATION_ROUTE_SLUGS.includes(nodeName)
   ) {
-    return of(NOT_FOUND);
+    return Promise.resolve(NOT_FOUND);
   }
 
   const localeSegments = getCandidateLocaleSegments(locale);
-  return from(
-    isPlatformServer(platformId)
-      ? loadMarkdown(localeSegments, nodeName, (segment) =>
-          readMarkdownFromWorkspace(segment, nodeName)
+  return isPlatformServer(platformId)
+    ? loadMarkdown(localeSegments, nodeName, (segment) =>
+        readMarkdownFromWorkspace(segment, nodeName)
+      )
+    : loadMarkdown(localeSegments, nodeName, (segment) =>
+        firstValueFrom(
+          markdownService.getSource(buildAssetPath(segment, nodeName))
         )
-      : loadMarkdown(localeSegments, nodeName, (segment) =>
-          firstValueFrom(
-            markdownService.getSource(buildAssetPath(segment, nodeName))
-          )
-        )
-  );
+      );
 }) satisfies ResolveFn<DocumentationMarkdown>;

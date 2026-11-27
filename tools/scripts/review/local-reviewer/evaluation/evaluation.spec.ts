@@ -1,5 +1,11 @@
 import assert from 'node:assert/strict';
-import { existsSync, mkdtempSync, rmSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  rmSync,
+  writeFileSync
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
@@ -12,6 +18,7 @@ import {
   type LocalReviewReport
 } from '../shared/shared.ts';
 import {
+  resolveEvaluationRepoTargets,
   selectAbSamples,
   selectEvaluationSamples,
   summarizeEvaluation
@@ -161,3 +168,77 @@ function reviewReport(findings: LocalReviewFinding[]): LocalReviewReport {
     advisory_only: true
   };
 }
+
+test('selectAbSamples returns nothing when desiredCount is not positive', () => {
+  assert.deepEqual(selectAbSamples([sample('small-ts', 'a')], 0), []);
+  assert.deepEqual(selectAbSamples([sample('small-ts', 'a')], -1), []);
+});
+
+test('selectAbSamples never returns more than desiredCount', () => {
+  const results = selectAbSamples(
+    [sample('small-ts', 'a'), sample('small-ts', 'b'), sample('general', 'c')],
+    2
+  );
+
+  assert.equal(results.length, 2);
+});
+
+test('selectAbSamples fills the remainder in input order once preferred kinds are used', () => {
+  const results = selectAbSamples(
+    [
+      sample('small-ts', 's1'),
+      sample('small-ts', 's2'),
+      sample('general', 'g1')
+    ],
+    3
+  );
+
+  assert.deepEqual(
+    results.map((entry) => entry.commit),
+    ['s1', 'g1', 's2']
+  );
+});
+
+test('selectAbSamples returns fewer samples when the input is too small', () => {
+  assert.equal(selectAbSamples([sample('small-ts', 'only')], 5).length, 1);
+});
+
+test('resolveEvaluationRepoTargets resolves a relative path against the current repo root and uses its basename', () => {
+  const workspace = mkdtempSync(join(tmpdir(), 'local-reviewer-targets-'));
+
+  try {
+    const currentRepo = join(workspace, 'current');
+    const neighbour = join(workspace, 'neighbour');
+    mkdirSync(currentRepo, { recursive: true });
+    mkdirSync(neighbour, { recursive: true });
+    writeFileSync(join(neighbour, 'package.json'), '{}', 'utf8');
+
+    const [target] = resolveEvaluationRepoTargets(currentRepo, [
+      '../neighbour'
+    ]);
+
+    assert.equal(target.name, 'neighbour');
+    assert.equal(target.root, neighbour);
+  } finally {
+    rmSync(workspace, { force: true, recursive: true });
+  }
+});
+
+test('resolveEvaluationRepoTargets resolves a known repo name as a sibling of the current repo', () => {
+  const workspace = mkdtempSync(join(tmpdir(), 'local-reviewer-targets-'));
+
+  try {
+    const currentRepo = join(workspace, 'current');
+    const sibling = join(workspace, 'gx.go');
+    mkdirSync(currentRepo, { recursive: true });
+    mkdirSync(sibling, { recursive: true });
+    writeFileSync(join(sibling, 'package.json'), '{}', 'utf8');
+
+    const [target] = resolveEvaluationRepoTargets(currentRepo, ['gx.go']);
+
+    assert.equal(target.name, 'gx.go');
+    assert.equal(target.root, sibling);
+  } finally {
+    rmSync(workspace, { force: true, recursive: true });
+  }
+});

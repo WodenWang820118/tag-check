@@ -179,6 +179,18 @@ async function installApiMocks(
       return;
     }
 
+    // The Tests page asks for the project's latest batch run.
+    if (method === 'GET' && pathname.startsWith('/batch-runs/')) {
+      await route.fulfill(jsonResponse([]));
+      return;
+    }
+
+    // Progress events (SSE): 204 tells EventSource not to reconnect.
+    if (method === 'GET' && pathname === '/events') {
+      await route.fulfill({ status: 204 });
+      return;
+    }
+
     throw new Error(`Unhandled mocked API request: ${method} ${pathname}`);
   });
 }
@@ -267,16 +279,13 @@ test('submits a new project and redirects to the project workspace', async ({
   await page.locator('#init-form-submit-btn').click();
 
   await expect(page).toHaveURL(/\/projects\/test-project-[a-z0-9]{4}$/);
-  await expect(page.getByText('Tests')).toBeVisible();
+  await expect(page.getByTestId('nav-tests')).toBeVisible();
   await expect(
     page.getByRole('columnheader', { name: 'Actions' })
   ).toBeVisible();
 
-  await page
-    .locator('app-toolbar')
-    .last()
-    .locator('span', { hasText: 'TagCheck' })
-    .click();
+  // The app shell's toolbar stays in the DOM under the project view's own.
+  await page.locator('app-project-view').getByTestId('toolbar-home').click();
   await expect(page).toHaveURL(/\/$/);
   await expect(page.getByText('Test Project')).toBeVisible();
   await expect(page.getByText('Existing Project')).toBeVisible();

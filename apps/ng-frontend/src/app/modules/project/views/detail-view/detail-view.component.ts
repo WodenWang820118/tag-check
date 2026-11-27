@@ -1,11 +1,12 @@
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { toSignal } from '@angular/core/rxjs-interop';
 import {
   Component,
   computed,
   DestroyRef,
+  effect,
   inject,
-  OnInit,
   signal,
+  untracked,
   ChangeDetectionStrategy
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
@@ -17,7 +18,14 @@ import {
   Router,
   RouterLink
 } from '@angular/router';
-import { distinctUntilChanged, map, of, startWith, switchMap } from 'rxjs';
+import {
+  distinctUntilChanged,
+  firstValueFrom,
+  map,
+  of,
+  startWith,
+  switchMap
+} from 'rxjs';
 import { describeFallbackMatch, StepFallback, VariableConfig } from '@utils';
 import { MatButtonModule } from '@angular/material/button';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -94,8 +102,7 @@ function serializeParamMap(params: ParamMap): string {
   styleUrls: ['./detail-view.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DetailViewComponent implements OnInit {
-  private readonly destroyRef = inject(DestroyRef);
+export class DetailViewComponent {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly snackBar = inject(MatSnackBar);
@@ -104,6 +111,8 @@ export class DetailViewComponent implements OnInit {
   private readonly reportFacade = inject(ReportTabFacade);
   private readonly testRunning = inject(TestRunningFacadeService);
   private readonly dialog = inject(MatDialog);
+  /** Awaited runs and dialogs stop here once the page is left. */
+  private readonly destroyRef = inject(DestroyRef);
 
   /** Loaded by reportPageResolver. */
   private readonly resolvedContext = toSignal(
@@ -193,17 +202,24 @@ export class DetailViewComponent implements OnInit {
     { initialValue: [] as VariableConfig[] }
   );
 
-  ngOnInit(): void {
-    this.route.queryParamMap
-      .pipe(
-        startWith(convertToParamMap(this.route.snapshot.queryParams)),
-        distinctUntilChanged(
-          (previous, current) =>
-            serializeParamMap(previous) === serializeParamMap(current)
-        ),
-        takeUntilDestroyed(this.destroyRef)
+  private readonly queryParamMap = toSignal(
+    this.route.queryParamMap.pipe(
+      startWith(convertToParamMap(this.route.snapshot.queryParams)),
+      distinctUntilChanged(
+        (previous, current) =>
+          serializeParamMap(previous) === serializeParamMap(current)
       )
-      .subscribe((params) => this.handleQueryParams(params));
+    ),
+    { initialValue: convertToParamMap(this.route.snapshot.queryParams) }
+  );
+
+  constructor() {
+    effect(() => {
+      const params = this.queryParamMap();
+      untracked(() => {
+        this.handleQueryParams(params);
+      });
+    });
   }
 
   goBack() {
@@ -211,123 +227,120 @@ export class DetailViewComponent implements OnInit {
   }
 
   /** Runs the test again, then shows its new run. */
-  runAgain() {
+  async runAgain(): Promise<void> {
     const context = this.routeContext();
     if (!context || this.busy()) {
       return;
     }
-    this.testRunning
-      .runTestForReport(context.eventId, context.projectSlug)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (report) => {
-          const runId = report?.testEventDetails?.id;
-          if (runId !== undefined) {
-            void this.router.navigate([], {
-              relativeTo: this.route,
-              queryParams: { run: runId },
-              queryParamsHandling: 'merge'
-            });
-          }
-        },
-        error: () =>
-          this.snackBar.openFromComponent(SnackBarComponent, {
-            duration: 5000,
-            data: 'The run did not finish. See the message on the Tests page.'
-          })
+    try {
+      const report = await firstValueFrom(
+        this.testRunning.runTestForReport(context.eventId, context.projectSlug)
+      );
+      if (this.destroyRef.destroyed) {
+        return;
+      }
+      const runId = report?.testEventDetails?.id;
+      if (runId !== undefined) {
+        void this.router.navigate([], {
+          relativeTo: this.route,
+          queryParams: { run: runId },
+          queryParamsHandling: 'merge'
+        });
+      }
+    } catch {
+      if (this.destroyRef.destroyed) {
+        return;
+      }
+      this.snackBar.openFromComponent(SnackBarComponent, {
+        duration: 5000,
+        data: 'The run did not finish. See the message on the Tests page.'
       });
+    }
   }
 
   /**
    * Opens the side panel that finds a replacement for the shown run's step
    * that could not find its element. A trial run in it shows afterwards.
    */
-  findReplacement() {
+  async findReplacement(): Promise<void> {
     const context = this.routeContext();
     const run = context?.run;
     const stepLabel = this.stepFailureLabel();
     if (!context || !run || !stepLabel) {
       return;
     }
-    this.dialog
-      .open<
-        SelectorHealDialogComponent,
-        SelectorHealDialogData,
-        SelectorHealDialogResult
-      >(SelectorHealDialogComponent, {
-        data: {
-          projectSlug: context.projectSlug,
-          eventId: context.eventId,
-          runId: run.id,
-          stepLabel
-        },
-        // A side panel: the run's recordings stay in view.
-        position: { top: '0', right: '0' },
-        height: '100vh',
-        width: 'min(48rem, 100vw)',
-        maxWidth: '100vw',
-        panelClass: 'side-sheet-panel',
-        // The panel closes itself, so a trial run it made still shows.
-        disableClose: true
-      })
-      .afterClosed()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((result) => {
-        if (result) {
-          void this.router.navigate([], {
-            relativeTo: this.route,
-            queryParams: { run: result.runId },
-            queryParamsHandling: 'merge'
-          });
-        }
+    const dialogRef = this.dialog.open<
+      SelectorHealDialogComponent,
+      SelectorHealDialogData,
+      SelectorHealDialogResult
+    >(SelectorHealDialogComponent, {
+      data: {
+        projectSlug: context.projectSlug,
+        eventId: context.eventId,
+        runId: run.id,
+        stepLabel
+      },
+      // A side panel: the run's recordings stay in view.
+      position: { top: '0', right: '0' },
+      height: '100vh',
+      width: 'min(48rem, 100vw)',
+      maxWidth: '100vw',
+      panelClass: 'side-sheet-panel',
+      // The panel closes itself, so a trial run it made still shows.
+      disableClose: true
+    });
+    const result = await firstValueFrom(dialogRef.afterClosed());
+    if (result && !this.destroyRef.destroyed) {
+      void this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { run: result.runId },
+        queryParamsHandling: 'merge'
       });
+    }
   }
 
   /**
    * Opens the dialog that writes a fallback selector the shown run used
    * into its step of the recording.
    */
-  saveFallback(fallback: StepFallback, stepLabel: string) {
+  async saveFallback(fallback: StepFallback, stepLabel: string): Promise<void> {
     const context = this.routeContext();
     const resolved = this.resolvedContext();
     if (!context) {
       return;
     }
-    this.dialog
-      .open<
-        SaveFallbackDialogComponent,
-        SaveFallbackDialogData,
-        SaveFallbackDialogResult
-      >(SaveFallbackDialogComponent, {
-        data: {
-          projectSlug: context.projectSlug,
-          eventId: context.eventId,
-          fallback,
-          stepLabel
-        },
-        width: 'min(56rem, 100vw)'
-      })
-      .afterClosed()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((saved) => {
-        if (saved) {
-          this.recordingService
-            .getRecordingDetails(context.projectSlug, context.eventId)
-            .pipe(takeUntilDestroyed(this.destroyRef))
-            .subscribe({
-              next: (recording) => {
-                if (resolved && this.resolvedContext() === resolved) {
-                  this.refreshedRecording.set({ context: resolved, recording });
-                }
-              },
-              error: () =>
-                this.snackBar.openFromComponent(SnackBarComponent, {
-                  duration: 5000,
-                  data: 'The recording was saved, but could not be refreshed. Reload this page.'
-                })
-            });
+    const dialogRef = this.dialog.open<
+      SaveFallbackDialogComponent,
+      SaveFallbackDialogData,
+      SaveFallbackDialogResult
+    >(SaveFallbackDialogComponent, {
+      data: {
+        projectSlug: context.projectSlug,
+        eventId: context.eventId,
+        fallback,
+        stepLabel
+      },
+      width: 'min(56rem, 100vw)'
+    });
+    const saved = await firstValueFrom(dialogRef.afterClosed());
+    if (saved && !this.destroyRef.destroyed) {
+      try {
+        const recording = await firstValueFrom(
+          this.recordingService.getRecordingDetails(
+            context.projectSlug,
+            context.eventId
+          )
+        );
+        if (resolved && this.resolvedContext() === resolved) {
+          this.refreshedRecording.set({ context: resolved, recording });
         }
-      });
+      } catch {
+        this.snackBar.openFromComponent(SnackBarComponent, {
+          duration: 5000,
+          data: 'The recording was saved, but could not be refreshed. Reload this page.'
+        });
+      }
+    }
   }
 
   /** A step as the page names it: `Step 5 · Click [data-testid="add"]`. */
@@ -353,7 +366,7 @@ export class DetailViewComponent implements OnInit {
 
   exportSpreadsheet() {
     const context = this.routeContext();
-    this.reportFacade.shareSpreadsheet(
+    void this.reportFacade.shareSpreadsheet(
       context?.projectSlug,
       context?.reportDetails,
       context?.run?.id
@@ -362,7 +375,7 @@ export class DetailViewComponent implements OnInit {
 
   exportRecording() {
     const context = this.routeContext();
-    this.reportFacade.exportRecording(
+    void this.reportFacade.exportRecording(
       context?.projectSlug,
       context?.reportDetails,
       context?.videoBlob,
@@ -372,7 +385,7 @@ export class DetailViewComponent implements OnInit {
 
   exportEvent() {
     const context = this.routeContext();
-    this.reportFacade.exportEvent(
+    void this.reportFacade.exportEvent(
       context?.projectSlug,
       context?.reportDetails,
       context?.videoBlob,

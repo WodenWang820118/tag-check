@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { ReportMapperService } from './report-mapper.service';
-import { REPORT_LIST_ITEM_SAMPLE, type AbstractTestEvent } from '@utils';
+import { type AbstractTestEvent } from '@utils';
+import { REPORT_LIST_ITEM_SAMPLE } from '@utils/testing';
 import {
   getLastRunAt,
   getRunStatus

@@ -6,12 +6,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort } from '@angular/material/sort';
 import { firstValueFrom, of, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
-import {
-  ProjectSetting,
-  REPORT_DETAIL_SAMPLE,
-  REPORT_LIST_ITEM_SAMPLE,
-  ReportDetailResponse
-} from '@utils';
+import { ProjectSetting, ReportDetailResponse } from '@utils';
+import { REPORT_DETAIL_SAMPLE, REPORT_LIST_ITEM_SAMPLE } from '@utils/testing';
 import { ReportService } from '../../../../shared/services/api/report/report.service';
 import { GtmOperatorService } from '../../../../shared/services/api/gtm-operator/gtm-operator.service';
 import { SettingsService } from '../../../../shared/services/api/settings/settings.service';

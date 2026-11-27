@@ -1,4 +1,4 @@
-import { DestroyRef, Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { ComponentType } from '@angular/cdk/portal';
 import { ReportService } from '../../../../shared/services/api/report/report.service';
 import {
@@ -10,7 +10,7 @@ import {
 } from '@utils';
 import { tap, take, switchMap, throwError, catchError, EMPTY } from 'rxjs';
 import { EditorService } from '../../../../shared/services/editor/editor.service';
-import { FormBuilder, Validators } from '@angular/forms';
+import { form, required } from '@angular/forms/signals';
 import { MatDialog } from '@angular/material/dialog';
 import { Location } from '@angular/common';
 import { v4 as uuidv4 } from 'uuid';
@@ -30,9 +30,7 @@ export class NewReportViewFacadeService {
     null;
   private readonly logger = inject(LoggerService);
   private readonly reportService = inject(ReportService);
-  private readonly destroyedRef = inject(DestroyRef);
   private readonly editorService = inject(EditorService);
-  private readonly fb = inject(FormBuilder);
   private readonly location = inject(Location);
   private readonly dialog = inject(MatDialog);
   private readonly projectDataSourceService = inject(ProjectDataSourceService);
@@ -70,9 +68,14 @@ export class NewReportViewFacadeService {
     }
   });
 
-  reportForm = this.fb.group({
-    projectSlug: ['', Validators.required],
-    testName: ['', Validators.required]
+  readonly reportModel = signal({
+    projectSlug: '',
+    testName: ''
+  });
+
+  readonly reportForm = form(this.reportModel, (p) => {
+    required(p.projectSlug);
+    required(p.testName);
   });
 
   constructor() {

@@ -196,6 +196,14 @@ describe('tag-check-rules', () => {
           flags: 'i'
         })
       ).toBe('/abc/i');
+      expect(
+        ruleToSpecValue({
+          kind: 'pattern',
+          name: 'c',
+          pattern: 'abc',
+          flags: ''
+        })
+      ).toBe('/abc/');
     });
 
     it('converts any rules to $name placeholders', () => {

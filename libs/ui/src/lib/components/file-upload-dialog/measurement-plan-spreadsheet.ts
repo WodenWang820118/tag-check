@@ -7,6 +7,9 @@ import { type ExtractedMeasurementPlanRow } from '@utils';
 export const MEASUREMENT_PLAN_TEMPLATE_FILE_NAME =
   'ga4-measurement-plan-template.csv';
 
+/** The default file name for downloaded measurement plans. */
+export const MEASUREMENT_PLAN_FILE_NAME = 'ga4-measurement-plan.csv';
+
 const PLAN_HEADER = ['event_name', 'event_parameters', 'item_parameters'];
 
 function toCsvCell(value: string): string {
@@ -48,6 +51,29 @@ export function buildMeasurementPlanTemplateCsv(): string {
   return toCsv([
     PLAN_HEADER,
     ...MEASUREMENT_PLAN_TEMPLATE_ROWS.map((row) => [...row])
+  ]);
+}
+
+/** One plan row as typed in the plan editor: rule cells, not yet parsed. */
+export interface MeasurementPlanCsvInputRow {
+  readonly eventName: string;
+  readonly eventParameters: string;
+  readonly itemParameters: string;
+}
+
+/**
+ * Builds a measurement plan CSV string with header `event_name,event_parameters,item_parameters`.
+ */
+export function buildMeasurementPlanCsv(
+  rows: readonly MeasurementPlanCsvInputRow[]
+): string {
+  return toCsv([
+    PLAN_HEADER,
+    ...rows.map((row) => [
+      row.eventName,
+      row.eventParameters,
+      row.itemParameters
+    ])
   ]);
 }
 

@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
   DEFAULT_COPILOT_CLAUDE_MODEL,
-  DEFAULT_COPILOT_GPT5_MINI_MODEL,
   getDefaultGeminiModel
 } from './shared.ts';
 
@@ -14,9 +13,5 @@ describe('getDefaultGeminiModel', () => {
 describe('default Copilot model constants', () => {
   it('exposes the Claude Sonnet default model', () => {
     expect(DEFAULT_COPILOT_CLAUDE_MODEL).toBe('claude-sonnet-4.6');
-  });
-
-  it('exposes the GPT-5 mini default model', () => {
-    expect(DEFAULT_COPILOT_GPT5_MINI_MODEL).toBe('gpt-5-mini');
   });
 });

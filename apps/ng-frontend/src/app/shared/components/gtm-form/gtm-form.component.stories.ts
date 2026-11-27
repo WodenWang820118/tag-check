@@ -8,7 +8,7 @@ import { GtmFormComponent } from './gtm-form.component';
 
 import { CommonModule } from '@angular/common';
 import { provideHttpClient, withXhr } from '@angular/common/http';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormField } from '@angular/forms/signals';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -26,7 +26,6 @@ const meta: Meta<GtmFormComponent> = {
   title: 'Shared/Components/GtmFormComponent',
   decorators: [
     moduleMetadata({
-      //👇 Imports both components to allow component composition with Storybook
       imports: [
         CommonModule,
         MatToolbarModule,
@@ -34,11 +33,10 @@ const meta: Meta<GtmFormComponent> = {
         MatButtonModule,
         MatFormFieldModule,
         MatInputModule,
-        FormsModule,
-        ReactiveFormsModule,
         MatCardModule,
         MatCheckboxModule,
-        MatTooltipModule
+        MatTooltipModule,
+        FormField
       ],
       providers: [SettingsService]
     }),

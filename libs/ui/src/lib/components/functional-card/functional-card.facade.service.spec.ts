@@ -1,8 +1,10 @@
 import { TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { EditorFacadeService, EditorService } from '@data-access';
+import { EditorTypeEnum } from '@utils';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ConversionSuccessDialogComponent } from '../conversion-success-dialog/conversion-success-dialog.component';
+import { ErrorDialogComponent } from '../error-dialog/error-dialog.component';
 import { FunctionalCardFacade } from './functional-card.facade.service';
 
 describe('FunctionalCardFacade', () => {
@@ -26,6 +28,18 @@ describe('FunctionalCardFacade', () => {
   afterEach(() => {
     editor.editor$.inputJson().destroy();
     editor.editor$.outputJson().destroy();
+  });
+
+  it('shows a friendly error dialog when converting with empty input', () => {
+    editor.setContent(EditorTypeEnum.INPUT_JSON, '');
+
+    facade.convertCode();
+
+    expect(open).toHaveBeenCalledWith(ErrorDialogComponent, {
+      data: {
+        message: 'Please provide a valid JSON input.'
+      }
+    });
   });
 
   it('keeps the TagCheck drawer at its current scroll position during conversion', () => {

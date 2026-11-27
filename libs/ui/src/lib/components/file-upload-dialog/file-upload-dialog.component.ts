@@ -5,17 +5,14 @@ import {
   signal,
   ChangeDetectionStrategy
 } from '@angular/core';
-import { from } from 'rxjs';
 import { MatDialog, MatDialogContent } from '@angular/material/dialog';
 import { ErrorDialogComponent } from '../error-dialog/error-dialog.component';
 import { EditorFacadeService } from '@data-access';
 import {
-  extractDataLayerPushes,
-  isMeasurementPlanHeader,
-  measurementPlanToDataLayerSpecs,
-  parseMeasurementPlanRows,
-  StrictDataLayerEvent
-} from '@utils';
+  parseLegacySpecsTable,
+  parsePlanTable,
+  type TableImportResult
+} from './table-import';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
@@ -123,7 +120,7 @@ export class FileUploadDialogComponent {
 
       if (fileExtension === 'json') {
         this.selectedFile = file;
-        this.handleJsonFile(file);
+        await this.handleJsonFile(file);
       } else if (fileExtension === 'csv') {
         this.selectedFile = file;
         await this.handleMeasurementPlanFile(file);
@@ -178,124 +175,71 @@ export class FileUploadDialogComponent {
     });
   }
 
+  /**
+   * Return true for recognized invalid input as well, preventing another format
+   * from handling it.
+   */
   importPlanTable(table: string[][]): boolean {
-    if (table.length === 0 || !isMeasurementPlanHeader(table[0])) {
-      return false;
-    }
-
-    const { rows, issues } = parseMeasurementPlanRows(table);
-
-    if (issues.length > 0) {
-      this.selectedFile = null;
-      this.dialog.open(ErrorDialogComponent, {
-        data: {
-          message: issues.join('\n')
-        }
-      });
-      return true;
-    }
-
-    if (rows.length === 0) {
-      this.selectedFile = null;
-      this.dialog.open(ErrorDialogComponent, {
-        data: {
-          message: 'The uploaded measurement plan contains no event rows.'
-        }
-      });
-      return true;
-    }
-
-    const specs = measurementPlanToDataLayerSpecs(rows);
-    this.editorFacadeService.inputJsonContent = specs;
-    this.dialog.closeAll();
-    return true;
+    return this.applyTableImportResult(parsePlanTable(table));
   }
 
+  /**
+   * Return true for recognized invalid input as well, preventing another format
+   * from handling it.
+   */
   importLegacySpecsTable(table: string[][]): boolean {
-    if (table.length === 0) {
-      return false;
-    }
-    const headerRow = table[0];
-    const colIndex = headerRow.findIndex(
-      (cell) => (cell ?? '').trim().toLowerCase() === 'datalayer specs'
-    );
-    if (colIndex === -1) {
+    return this.applyTableImportResult(parseLegacySpecsTable(table));
+  }
+
+  private applyTableImportResult(result: TableImportResult): boolean {
+    if (result.kind === 'unrecognized') {
       return false;
     }
 
-    const allSpecs: StrictDataLayerEvent[] = [];
-    const allIssues: string[] = [];
-
-    for (let rowIndex = 1; rowIndex < table.length; rowIndex++) {
-      const row = table[rowIndex];
-      if (
-        row.length === 0 ||
-        row.every((cell) => !cell || cell.trim() === '')
-      ) {
-        continue;
-      }
-      const cellText = row[colIndex] ?? '';
-      const { specs, issues } = extractDataLayerPushes(cellText);
-      for (const issue of issues) {
-        allIssues.push(`Row ${rowIndex + 1}: ${issue}`);
-      }
-      allSpecs.push(...specs);
-    }
-
-    if (allIssues.length > 0) {
+    if (result.kind === 'invalid') {
       this.selectedFile = null;
       this.dialog.open(ErrorDialogComponent, {
         data: {
-          message: allIssues.join('\n')
+          message: result.message
         }
       });
       return true;
     }
 
-    if (allSpecs.length === 0) {
-      this.selectedFile = null;
-      this.dialog.open(ErrorDialogComponent, {
-        data: {
-          message:
-            'The uploaded sheet contained no dataLayer.push call with an event.'
-        }
-      });
-      return true;
-    }
-
-    this.editorFacadeService.inputJsonContent = allSpecs;
+    this.editorFacadeService.inputJsonContent = result.specs;
     this.dialog.closeAll();
     return true;
   }
 
-  handleJsonFile(file: File): void {
-    this.readJsonFileContent(file);
+  async handleJsonFile(file: File): Promise<void> {
+    await this.readJsonFileContent(file);
   }
 
-  readJsonFileContent(file: File): void {
-    from(file.text()).subscribe({
-      next: (fileContentString: string) => {
-        try {
-          this.fileContent.set(
-            JSON.parse(fileContentString) as Record<string, unknown>
-          );
-        } catch (error) {
-          console.error('Error parsing JSON file:', error);
-          this.dialog.open(ErrorDialogComponent, {
-            data: {
-              message: 'Error parsing JSON file. Please try again.'
-            }
-          });
+  async readJsonFileContent(file: File): Promise<void> {
+    let fileContentString: string;
+    try {
+      fileContentString = await file.text();
+    } catch (err) {
+      console.error('Error reading file:', err);
+      this.dialog.open(ErrorDialogComponent, {
+        data: {
+          message: 'Error reading file. Please try again.'
         }
-      },
-      error: (err) => {
-        console.error('Error reading file:', err);
-        this.dialog.open(ErrorDialogComponent, {
-          data: {
-            message: 'Error reading file. Please try again.'
-          }
-        });
-      }
-    });
+      });
+      return;
+    }
+
+    try {
+      this.fileContent.set(
+        JSON.parse(fileContentString) as Record<string, unknown>
+      );
+    } catch (error) {
+      console.error('Error parsing JSON file:', error);
+      this.dialog.open(ErrorDialogComponent, {
+        data: {
+          message: 'Error parsing JSON file. Please try again.'
+        }
+      });
+    }
   }
 }

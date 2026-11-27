@@ -14,8 +14,6 @@ import {
   map,
   switchMap,
   tap,
-  from,
-  finalize,
   ObservableInput
 } from 'rxjs';
 import { ReportTableDataSourceModelService } from '../../services/report-table-data-source-model/report-table-data-source-model.service';
@@ -52,7 +50,7 @@ export class Ga4UploadFacadeService {
   }
 
   /** Reads the selected JSON file and attempts to parse it as a GA4 data layer event array. */
-  onFileSelected(event: Event) {
+  async onFileSelected(event: Event): Promise<void> {
     const input = event.target as HTMLInputElement;
     const file = input?.files?.[0];
     if (!file) return;
@@ -60,33 +58,24 @@ export class Ga4UploadFacadeService {
     this.isParsing.set(true);
     this.parseError.set(null);
 
-    // Use File.text() which returns a Promise<string> and wrap it with RxJS
-    // so we keep the method reactive and avoid async/await.
-    // File.text() uses the browser's decoder (UTF-8 by default).
-    from(file.text())
-      .pipe(
-        tap((text) => {
-          const txt = String(text ?? '');
-          this.rawJson.set(txt);
-          this.tryParse();
-        }),
-        catchError((err) => {
-          console.error('Failed to read file', err);
-          this.parseError.set('Failed to read file.');
-          this.events.set([]);
-          return of(null);
-        }),
-        finalize(() => {
-          this.isParsing.set(false);
-          // reset the input so selecting the same file fires change again
-          try {
-            input.value = '';
-          } catch {
-            // ignore if input not writable in some environments
-          }
-        })
-      )
-      .subscribe();
+    try {
+      const text = await file.text();
+      const txt = String(text ?? '');
+      this.rawJson.set(txt);
+      this.tryParse();
+    } catch (err) {
+      console.error('Failed to read file', err);
+      this.parseError.set('Failed to read file.');
+      this.events.set([]);
+    } finally {
+      this.isParsing.set(false);
+      // reset the input so selecting the same file fires change again
+      try {
+        input.value = '';
+      } catch {
+        // ignore if input not writable in some environments
+      }
+    }
   }
 
   private tryParse() {

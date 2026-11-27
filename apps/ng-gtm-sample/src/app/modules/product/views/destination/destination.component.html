@@ -24,15 +24,14 @@
     </div>
 
     <form
-      [formGroup]="searchForm"
       id="search_destination"
       class="sample-inset-surface flex w-full max-w-xl flex-col gap-3 px-3 py-3 sm:flex-row sm:items-center"
-      (ngSubmit)="onSubmit()"
+      (submit)="$event.preventDefault(); onSubmit()"
     >
       <input
         hlmInput
         id="searchTerm"
-        formControlName="searchTerm"
+        [formField]="searchForm.searchTerm"
         type="search"
         class="w-full bg-white"
         placeholder="Search destinations..."
@@ -43,7 +42,7 @@
         hlmBtn
         type="submit"
         data-testid="search-submit"
-        [disabled]="!searchForm.get('searchTerm')?.value"
+        [disabled]="!searchForm.searchTerm().value()"
       >
         <ng-icon name="lucideSearch" />
         Search

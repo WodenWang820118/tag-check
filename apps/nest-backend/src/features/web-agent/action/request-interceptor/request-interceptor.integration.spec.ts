@@ -46,13 +46,9 @@ type FixtureWindow = typeof globalThis & {
   sendBatch(): Promise<number>;
 };
 
-const chromeAvailable = (() => {
-  try {
-    return existsSync(puppeteer.executablePath());
-  } catch {
-    return false;
-  }
-})();
+const chromeAvailable = await puppeteer
+  .executablePath()
+  .then(existsSync, () => false);
 
 /** Generous because CI runs this next to other suites; matches production's default. */
 const CAPTURE_TIMEOUT_MS = 15_000;

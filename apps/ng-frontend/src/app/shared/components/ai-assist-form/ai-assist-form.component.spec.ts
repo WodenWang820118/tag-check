@@ -52,7 +52,7 @@ describe('AiAssistFormComponent', () => {
   it('fills the form with the saved settings and shows they are ready', async () => {
     const { component, find } = await render({ get: () => of(READY) });
 
-    expect(component.form.getRawValue()).toEqual(READY.settings);
+    expect(component.model()).toEqual(READY.settings);
     expect(find('ai-assist-status')?.textContent).toContain(
       'Connected · Ollama 0.40.8 · qwen3.5:9b is downloaded'
     );
@@ -62,7 +62,7 @@ describe('AiAssistFormComponent', () => {
   it('offers the models Ollama has that match what is typed', async () => {
     const { component } = await render({ get: () => of(READY) });
 
-    component.form.controls.model.setValue('4B');
+    component.f.model().value.set('4B');
 
     expect(component.modelOptions()).toEqual(['qwen3.5:4b']);
   });
@@ -70,7 +70,7 @@ describe('AiAssistFormComponent', () => {
   it('offers every model while Model names one', async () => {
     const { component } = await render({ get: () => of(READY) });
 
-    expect(component.form.controls.model.value).toBe('qwen3.5:9b');
+    expect(component.f.model().value()).toBe('qwen3.5:9b');
     expect(component.modelOptions()).toEqual(['qwen3.5:9b', 'qwen3.5:4b']);
   });
 
@@ -106,8 +106,8 @@ describe('AiAssistFormComponent', () => {
       update
     });
 
-    component.form.controls.enabled.setValue(true);
-    component.form.controls.model.setValue(' qwen3.5:9b ');
+    component.f.enabled().value.set(true);
+    component.f.model().value.set(' qwen3.5:9b ');
     await component.save();
 
     expect(update).toHaveBeenCalledWith({
@@ -116,7 +116,7 @@ describe('AiAssistFormComponent', () => {
       model: 'qwen3.5:9b'
     });
     expect(component.state()).toEqual(saved);
-    expect(component.form.dirty).toBe(false);
+    expect(component.f().dirty()).toBe(false);
     expect(snackBar.open).toHaveBeenCalledWith(
       'AI assist settings saved.',
       'Close',
@@ -128,11 +128,11 @@ describe('AiAssistFormComponent', () => {
     const update = vi.fn();
     const { component } = await render({ get: () => of(READY), update });
 
-    component.form.controls.ollamaUrl.setValue('http://10.0.0.2:11434');
+    component.f.ollamaUrl().value.set('http://10.0.0.2:11434');
     await component.save();
 
     expect(update).not.toHaveBeenCalled();
-    expect(component.form.controls.ollamaUrl.hasError('ollamaUrl')).toBe(true);
+    expect(component.f.ollamaUrl().getError('ollamaUrl')).toBeDefined();
   });
 
   it('shows why the backend refused the settings', async () => {
@@ -174,15 +174,15 @@ describe('AiAssistFormComponent', () => {
       .mockReturnValueOnce(of(response({ kind: 'runtimeUnavailable' })))
       .mockReturnValueOnce(of(READY));
     const { component, fixture, find } = await render({ get });
-    component.form.controls.model.setValue('qwen3.5:4b');
-    component.form.markAsDirty();
+    component.f.model().value.set('qwen3.5:4b');
+    component.f().markAsDirty();
 
     find('ai-notice-recheck')?.click();
     await fixture.whenStable();
     fixture.detectChanges();
 
     expect(get).toHaveBeenCalledTimes(2);
-    expect(component.form.controls.model.value).toBe('qwen3.5:4b');
+    expect(component.f.model().value()).toBe('qwen3.5:4b');
     expect(find('ai-assist-status')).not.toBeNull();
   });
 });

@@ -15,6 +15,12 @@ export type IReportDetails = {
 export type TestEventDetail = {
   passed: boolean;
   requestPassed: boolean;
+  /**
+   * Whether the run made the GA4 request check (Request Check on in the
+   * project's GTM settings). Missing for runs saved before it was recorded:
+   * read missing as true.
+   */
+  requestChecked?: boolean;
   rawRequest?: string;
   destinationUrl: string;
   dataLayer?: StrictDataLayerEvent[] | BaseDataLayerEvent[];

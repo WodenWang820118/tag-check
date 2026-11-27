@@ -242,7 +242,8 @@ export function specValueToRule(
 }
 
 /**
- * Converts a {@link ParameterRule} to its spec value representation.
+ * Use one encoding so measurement plans and imported tag notes express
+ * identical validation expectations.
  */
 export function ruleToSpecValue(rule: ParameterRule): unknown {
   if (rule.kind === 'equals') {

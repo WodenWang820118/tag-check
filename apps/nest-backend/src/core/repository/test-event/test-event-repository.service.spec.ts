@@ -1,5 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
-import { REPORT_DETAIL_SAMPLE, REPORT_LIST_ITEM_SAMPLE, shapeOf } from '@utils';
+import {
+  REPORT_DETAIL_SAMPLE,
+  REPORT_LIST_ITEM_SAMPLE,
+  shapeOf
+} from '@utils/testing';
 import { TestEventRepositoryService } from './test-event-repository.service';
 
 function build() {

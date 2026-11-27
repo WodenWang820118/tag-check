@@ -21,11 +21,11 @@ import { BehaviorSubject, of, Subject, throwError } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   DataLayerSpec,
-  REPORT_DETAIL_SAMPLE,
   ReportDetailResponse,
   Recording,
   VariableConfig
 } from '@utils';
+import { REPORT_DETAIL_SAMPLE } from '@utils/testing';
 import {
   buildReportPage,
   ReportDetailRouteContext
@@ -93,6 +93,7 @@ class ComparisonStub {
 class RequestStub {
   rawRequest = input<unknown>();
   requestPassed = input<unknown>();
+  requestChecked = input<unknown>();
   eventName = input<unknown>();
 }
 @Component({
@@ -343,12 +344,13 @@ describe('DetailViewComponent', () => {
       );
     });
 
-    it('opens the side panel for the shown run, then shows its trial run', () => {
+    it('opens the side panel for the shown run, then shows its trial run', async () => {
       routeData$.next({ page: failedPage() });
       dialogResult$.next({ runId: 42 });
       const fixture = render();
 
       byTestId(fixture, 'detail-find-replacement')?.click();
+      await fixture.whenStable();
 
       expect(dialog.open).toHaveBeenCalledWith(
         SelectorHealDialogComponent,
@@ -369,12 +371,13 @@ describe('DetailViewComponent', () => {
       });
     });
 
-    it('stays on the run when the panel closes without a trial', () => {
+    it('stays on the run when the panel closes without a trial', async () => {
       routeData$.next({ page: failedPage() });
       dialogResult$.next(undefined);
       const fixture = render();
 
       byTestId(fixture, 'detail-find-replacement')?.click();
+      await fixture.whenStable();
 
       expect(dialog.open).toHaveBeenCalled();
       expect(router.navigate).not.toHaveBeenCalled();
@@ -437,7 +440,7 @@ describe('DetailViewComponent', () => {
       expect(byTestId(fixture, 'detail-save-fallback-0')).not.toBeNull();
     });
 
-    it('opens the save dialog, then marks the step saved', () => {
+    it('opens the save dialog, then marks the step saved', async () => {
       routeData$.next({ page: fallbackPage() });
       dialog.open.mockReturnValueOnce({
         afterClosed: () => of(true) as never
@@ -445,6 +448,7 @@ describe('DetailViewComponent', () => {
       const fixture = render();
 
       byTestId(fixture, 'detail-save-fallback-0')?.click();
+      await fixture.whenStable();
       fixture.detectChanges();
 
       expect(dialog.open).toHaveBeenCalledWith(
@@ -470,13 +474,14 @@ describe('DetailViewComponent', () => {
       ).toEqual([['[data-testid="add"]']]);
     });
 
-    it('does not mark another test or a reloaded run saved by its step index', () => {
+    it('does not mark another test or a reloaded run saved by its step index', async () => {
       routeData$.next({ page: fallbackPage() });
       dialog.open.mockReturnValueOnce({
         afterClosed: () => of(true) as never
       });
       const fixture = render();
       byTestId(fixture, 'detail-save-fallback-0')?.click();
+      await fixture.whenStable();
       fixture.detectChanges();
 
       routeData$.next({ page: { ...fallbackPage(), eventId: 'evt-2' } });
@@ -489,7 +494,7 @@ describe('DetailViewComponent', () => {
       expect(byTestId(fixture, 'detail-fallback-saved-0')).toBeNull();
     });
 
-    it('uses the refreshed recording when the saved selector differs from the fallback', () => {
+    it('uses the refreshed recording when the saved selector differs from the fallback', async () => {
       routeData$.next({ page: fallbackPage() });
       recordingService.getRecordingDetails.mockReturnValueOnce(
         of({
@@ -502,12 +507,13 @@ describe('DetailViewComponent', () => {
       });
       const fixture = render();
       byTestId(fixture, 'detail-save-fallback-0')?.click();
+      await fixture.whenStable();
       fixture.detectChanges();
 
       expect(byTestId(fixture, 'detail-fallback-saved-0')).toBeNull();
     });
 
-    it('does not apply a late recording refresh to another test', () => {
+    it('does not apply a late recording refresh to another test', async () => {
       const refreshed = new Subject<Recording>();
       routeData$.next({ page: fallbackPage() });
       recordingService.getRecordingDetails.mockReturnValueOnce(refreshed);
@@ -516,6 +522,7 @@ describe('DetailViewComponent', () => {
       });
       const fixture = render();
       byTestId(fixture, 'detail-save-fallback-0')?.click();
+      await fixture.whenStable();
 
       const otherPage = { ...fallbackPage(), eventId: 'evt-2' };
       routeData$.next({ page: otherPage });
@@ -524,6 +531,7 @@ describe('DetailViewComponent', () => {
         steps: [{ type: 'click', selectors: [['[data-testid="add"]']] }]
       });
       refreshed.complete();
+      await fixture.whenStable();
       fixture.detectChanges();
 
       expect(fixture.componentInstance.routeContext()?.recording).toBe(
@@ -564,10 +572,11 @@ describe('DetailViewComponent', () => {
     });
   });
 
-  it('runs the test again and shows its new run', () => {
+  it('runs the test again and shows its new run', async () => {
     const fixture = render();
 
     byTestId(fixture, 'detail-run-again')?.click();
+    await fixture.whenStable();
 
     expect(testRunning.runTestForReport).toHaveBeenCalledWith('evt-1', 'demo');
     expect(router.navigate).toHaveBeenCalledWith(
@@ -576,9 +585,9 @@ describe('DetailViewComponent', () => {
     );
   });
 
-  it('stays on the shown run when a stopped run returns no report', () => {
+  it('stays on the shown run when a stopped run returns no report', async () => {
     testRunning.runTestForReport.mockReturnValueOnce(of(undefined));
-    render().componentInstance.runAgain();
+    await render().componentInstance.runAgain();
     expect(router.navigate).not.toHaveBeenCalled();
   });
 
@@ -611,13 +620,13 @@ describe('DetailViewComponent', () => {
     expect(byTestId(fixture, 'detail-current-spec-notice')).toBeNull();
   });
 
-  it('says so when the run does not finish, and stays on the run', () => {
+  it('says so when the run does not finish, and stays on the run', async () => {
     testRunning.runTestForReport.mockReturnValueOnce(
       throwError(() => new Error('browser crashed'))
     );
     const fixture = render();
 
-    fixture.componentInstance.runAgain();
+    await fixture.componentInstance.runAgain();
 
     expect(snackBar.openFromComponent).toHaveBeenCalledWith(
       SnackBarComponent,
@@ -628,11 +637,32 @@ describe('DetailViewComponent', () => {
     expect(router.navigate).not.toHaveBeenCalled();
   });
 
-  it('does not start a run while another one runs', () => {
+  it('does not move to the new run once the page has been left', async () => {
+    const run$ = new Subject<ReportDetailResponse | undefined>();
+    testRunning.runTestForReport.mockReturnValueOnce(run$);
+    const fixture = render();
+
+    const running = fixture.componentInstance.runAgain();
+    fixture.destroy();
+    run$.next(
+      JSON.parse(
+        JSON.stringify({
+          ...REPORT_DETAIL_SAMPLE,
+          testEventDetails: { ...REPORT_DETAIL_SAMPLE.testEventDetails, id: 43 }
+        })
+      ) as ReportDetailResponse
+    );
+    run$.complete();
+    await running;
+
+    expect(router.navigate).not.toHaveBeenCalled();
+  });
+
+  it('does not start a run while another one runs', async () => {
     testRunning.isRunningTest$.mockReturnValue(true);
     const fixture = render();
 
-    fixture.componentInstance.runAgain();
+    await fixture.componentInstance.runAgain();
 
     expect(testRunning.runTestForReport).not.toHaveBeenCalled();
     expect(
@@ -671,12 +701,13 @@ describe('DetailViewComponent', () => {
     expect(reportFacade.copyEventName).toHaveBeenCalledWith('add_to_cart');
   });
 
-  it('shows the missing recording snackbar and strips the query param from the url', () => {
+  it('shows the missing recording snackbar and strips the query param from the url', async () => {
     routeSnapshot.queryParams = { snackbar: 'missingRecording', run: '5' };
     queryParamMap$.next(
       convertToParamMap({ snackbar: 'missingRecording', run: '5' })
     );
-    render();
+    const fixture = render();
+    await fixture.whenStable();
 
     expect(snackBar.openFromComponent).toHaveBeenCalledWith(SnackBarComponent, {
       duration: 5000,

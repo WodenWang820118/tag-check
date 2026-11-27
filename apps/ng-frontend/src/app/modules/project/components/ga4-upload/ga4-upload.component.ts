@@ -1,9 +1,5 @@
-import {
-  Component,
-  OnInit,
-  signal,
-  ChangeDetectionStrategy
-} from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -12,8 +8,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
 import { MatChipsModule } from '@angular/material/chips';
 import { ActivatedRoute } from '@angular/router';
+import { firstValueFrom, map } from 'rxjs';
 import { Ga4UploadFacadeService } from './ga4-upload-facade.service';
-import { take } from 'rxjs';
 
 /** The "Import GA4 events" tab; Ga4UploadFacadeService parses and saves. */
 @Component({
@@ -31,32 +27,30 @@ import { take } from 'rxjs';
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './ga4-upload.component.html'
 })
-export class Ga4UploadComponent implements OnInit {
-  projectSlug = signal<string>('');
-  events = this.facade.events$;
-  parseError = this.facade.parseError$;
-  isSaving = this.facade.isSaving$;
+export class Ga4UploadComponent {
+  private readonly route = inject(ActivatedRoute);
+  private readonly facade = inject(Ga4UploadFacadeService);
+
+  readonly projectSlug = toSignal(
+    this.route.params.pipe(map((params) => params['projectSlug'] ?? '')),
+    {
+      initialValue: this.route.snapshot?.params?.['projectSlug'] ?? ''
+    }
+  );
+  readonly events = this.facade.events$;
+  readonly parseError = this.facade.parseError$;
+  readonly isSaving = this.facade.isSaving$;
 
   /** The JSON in the text box, typed, pasted or read from a file. */
-  text = this.facade.rawJson.asReadonly();
+  readonly text = this.facade.rawJson.asReadonly();
 
-  constructor(
-    private readonly route: ActivatedRoute,
-    private readonly facade: Ga4UploadFacadeService
-  ) {
+  constructor() {
     // The facade outlives the tab, so each opening starts empty.
     this.facade.setRawJson('');
   }
 
-  ngOnInit(): void {
-    this.route.params.subscribe((params) => {
-      const projectSlug = params['projectSlug'];
-      if (projectSlug) this.projectSlug.set(projectSlug);
-    });
-  }
-
   onFileSelected(event: Event) {
-    this.facade.onFileSelected(event);
+    void this.facade.onFileSelected(event);
   }
 
   onTextChange(text: string) {
@@ -100,10 +94,10 @@ export class Ga4UploadComponent implements OnInit {
     this.facade.setRawJson(sample);
   }
 
-  save() {
+  async save(): Promise<void> {
     const slug = this.projectSlug();
     if (!slug) return;
     // The facade reloads the tests table once the tests are created.
-    this.facade.save(slug).pipe(take(1)).subscribe();
+    await firstValueFrom(this.facade.save(slug));
   }
 }

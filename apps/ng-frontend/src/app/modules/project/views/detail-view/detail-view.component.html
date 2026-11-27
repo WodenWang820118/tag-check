@@ -229,6 +229,7 @@
           <app-ga4-request
             [rawRequest]="context.run.rawRequest"
             [requestPassed]="context.run.requestPassed"
+            [requestChecked]="context.run.requestChecked !== false"
             [eventName]="eventName()"
           ></app-ga4-request>
         </div>

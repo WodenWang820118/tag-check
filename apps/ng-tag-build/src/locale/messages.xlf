@@ -818,6 +818,83 @@
           <context context-type="linenumber">15,20</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="writePlanActionComponentButton" datatype="html">
+        <source> Write plan </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/plan-editor-action/plan-editor-action.component.html</context>
+          <context context-type="linenumber">1,8</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="planEditorDialogTitle" datatype="html">
+        <source> Measurement plan </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/plan-editor-dialog/plan-editor-dialog.component.html</context>
+          <context context-type="linenumber">1,8</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="planEditorDialogHint" datatype="html">
+        <source> Rule forms: currency (any value), currency=TWD (exact value), transaction_id=/^T\d+$/ (regex pattern). Comma separated. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/plan-editor-dialog/plan-editor-dialog.component.html</context>
+          <context context-type="linenumber">10,15</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="planEditorDialogHeaderEventName" datatype="html">
+        <source> event_name </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/plan-editor-dialog/plan-editor-dialog.component.html</context>
+          <context context-type="linenumber">18,22</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="planEditorDialogHeaderEventParameters" datatype="html">
+        <source> event_parameters </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/plan-editor-dialog/plan-editor-dialog.component.html</context>
+          <context context-type="linenumber">23,27</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="planEditorDialogHeaderItemParameters" datatype="html">
+        <source> item_parameters </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/plan-editor-dialog/plan-editor-dialog.component.html</context>
+          <context context-type="linenumber">28,32</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="planEditorDialogDeleteRow" datatype="html">
+        <source> Delete </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/plan-editor-dialog/plan-editor-dialog.component.html</context>
+          <context context-type="linenumber">65,72</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="planEditorDialogAddEvent" datatype="html">
+        <source> Add event </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/plan-editor-dialog/plan-editor-dialog.component.html</context>
+          <context context-type="linenumber">75,82</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="planEditorDialogDownloadCsv" datatype="html">
+        <source> Download CSV </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/plan-editor-dialog/plan-editor-dialog.component.html</context>
+          <context context-type="linenumber">100,106</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="planEditorDialogClose" datatype="html">
+        <source> Close </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/plan-editor-dialog/plan-editor-dialog.component.html</context>
+          <context context-type="linenumber">108,114</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="planEditorDialogUsePlan" datatype="html">
+        <source> Use plan </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/plan-editor-dialog/plan-editor-dialog.component.html</context>
+          <context context-type="linenumber">116,124</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="docs.sidebar.introduction" datatype="html">
         <source>Introduction</source>
         <context-group purpose="location">

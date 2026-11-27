@@ -251,6 +251,8 @@ export class EventInspectionPipelineService {
     return {
       passed: result.dataLayerResult.passed || false,
       requestPassed: result.requestCheckResult?.passed || false,
+      // Request Check off: the run made no request check.
+      requestChecked: result.requestCheckResult !== null,
       rawRequest: result.rawRequest,
       destinationUrl: result.destinationUrl,
       dataLayer: result.dataLayerResult.dataLayer,

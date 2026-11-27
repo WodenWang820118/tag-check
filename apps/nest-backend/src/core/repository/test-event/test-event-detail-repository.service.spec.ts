@@ -1,6 +1,6 @@
 import { HttpStatus } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
-import { RUN_SUMMARY_SAMPLE, shapeOf } from '@utils';
+import { RUN_SUMMARY_SAMPLE, shapeOf } from '@utils/testing';
 import { TestEventDetailRepositoryService } from './test-event-detail-repository.service';
 
 function build() {
@@ -25,6 +25,7 @@ describe('TestEventDetailRepositoryService', () => {
         id: true,
         passed: true,
         requestPassed: true,
+        requestChecked: true,
         createdAt: true,
         testEvent: { id: true, eventId: true, eventName: true, testName: true }
       },
@@ -41,6 +42,7 @@ describe('TestEventDetailRepositoryService', () => {
         id: RUN_SUMMARY_SAMPLE.runId,
         passed: RUN_SUMMARY_SAMPLE.passed,
         requestPassed: RUN_SUMMARY_SAMPLE.requestPassed,
+        requestChecked: RUN_SUMMARY_SAMPLE.requestChecked,
         createdAt: new Date(RUN_SUMMARY_SAMPLE.runAt),
         testEvent: {
           id: 3,

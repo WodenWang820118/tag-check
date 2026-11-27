@@ -10,6 +10,7 @@
     "build": {
       "executor": "@angular-devkit/build-angular:application",
       "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
       "options": {
         "outputPath": "dist/apps/ng-gtm-sample",
         "index": "apps/ng-gtm-sample/src/index.html",
@@ -61,12 +62,12 @@
           "extractLicenses": false,
           "sourceMap": true
         }
-      },
-      "defaultConfiguration": "production"
+      }
     },
     "serve": {
       "continuous": true,
       "executor": "@angular-devkit/build-angular:dev-server",
+      "defaultConfiguration": "development",
       "configurations": {
         "production": {
           "buildTarget": "ng-gtm-sample:build:production"
@@ -75,7 +76,9 @@
           "buildTarget": "ng-gtm-sample:build:development"
         }
       },
-      "defaultConfiguration": "development"
+      "readyWhen": {
+        "signal": true
+      }
     },
     "extract-i18n": {
       "executor": "@angular-devkit/build-angular:extract-i18n",
@@ -131,9 +134,49 @@
         "command": "pnpm exec cross-env NG_GTM_SAMPLE_OUTPUT_PATH=../../dist/apps/ng-gtm-sample/browser vitest --config vitest.seo.config.ts run tests/seo/seo-prerender.spec.ts"
       }
     },
+    "build-static": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "production",
+        "^production",
+        "{workspaceRoot}/tools/scripts/csp/*.ts",
+        "!{workspaceRoot}/tools/scripts/csp/*.spec.ts"
+      ],
+      "outputs": ["{workspaceRoot}/dist/apps/ng-gtm-sample/browser"],
+      "options": {
+        "commands": [
+          {
+            "command": "pnpm nx build ng-gtm-sample --configuration production --optimization --source-map",
+            "description": "Build the prerendered sample site."
+          },
+          {
+            "command": "node tools/scripts/csp/apply-site-csp.ts --site ng-gtm-sample --dir dist/apps/ng-gtm-sample/browser",
+            "description": "Inject the Content Security Policy meta tag into built HTML pages."
+          },
+          {
+            "command": "pnpm exec ngsw-config dist/apps/ng-gtm-sample/browser apps/ng-gtm-sample/ngsw-config.json /",
+            "description": "Regenerate ngsw.json: the service worker refuses pages whose hash no longer matches."
+          }
+        ],
+        "parallel": false
+      }
+    },
+    "csp-check": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "dependsOn": ["build-static"],
+      "options": {
+        "command": "node tools/scripts/csp-check/check-site-csp.ts --dir dist/apps/ng-gtm-sample/browser --block-external"
+      }
+    },
     "serve-static": {
       "continuous": true,
       "executor": "@nx/web:file-server",
+      "readyWhen": {
+        "signal": true
+      },
+      "dependsOn": ["build"],
       "options": {
         "buildTarget": "ng-gtm-sample:build",
         "port": 4200,

@@ -1,29 +1,27 @@
 import {
+  ChangeDetectionStrategy,
   Component,
-  DestroyRef,
-  OnInit,
-  signal,
-  ViewEncapsulation,
-  ChangeDetectionStrategy
+  inject,
+  linkedSignal,
+  ViewEncapsulation
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { catchError, EMPTY, switchMap, take, tap } from 'rxjs';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import {
-  FormArray,
-  FormBuilder,
-  FormGroup,
-  FormsModule,
-  ReactiveFormsModule
-} from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
-import { SettingsService } from '../../services/api/settings/settings.service';
-import { ActivatedRoute } from '@angular/router';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ActivatedRoute } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { firstValueFrom } from 'rxjs';
+import { form, FormField } from '@angular/forms/signals';
 import { BrowserSetting, ProjectSetting } from '@utils';
+import { SettingsService } from '../../services/api/settings/settings.service';
+
+interface BrowserFormModel {
+  headless: boolean;
+  settings: { value: string }[];
+}
 
 /** Settings > Browser settings: headless mode and the browser arguments. */
 @Component({
@@ -35,116 +33,67 @@ import { BrowserSetting, ProjectSetting } from '@utils';
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
-    ReactiveFormsModule,
-    FormsModule,
-    MatCheckboxModule
+    MatCheckboxModule,
+    FormField
   ],
-  templateUrl: `./browser-form.component.html`,
+  templateUrl: './browser-form.component.html',
   styleUrls: ['./browser-form.component.scss'],
   changeDetection: ChangeDetectionStrategy.Eager,
   encapsulation: ViewEncapsulation.None
 })
-export class BrowserFormComponent implements OnInit {
-  browserSettingsForm = this.fb.group({
-    headless: [false],
-    settings: this.fb.array([])
+export class BrowserFormComponent {
+  private readonly settingsService = inject(SettingsService);
+  private readonly route = inject(ActivatedRoute);
+
+  private readonly routeData = toSignal(this.route.data);
+
+  readonly model = linkedSignal<BrowserFormModel>(() => {
+    const settings = this.routeData()?.['projectInfo'] as
+      | ProjectSetting
+      | undefined;
+    return {
+      headless: settings?.browserSettings?.headless ?? false,
+      settings: (settings?.browserSettings?.browser ?? []).map((val) => ({
+        value: val
+      }))
+    };
   });
 
-  browserSettings = signal<string[]>([]);
-
-  constructor(
-    private readonly fb: FormBuilder,
-    private readonly settingsService: SettingsService,
-    private readonly route: ActivatedRoute,
-    private readonly destroyRef: DestroyRef
-  ) {}
-
-  ngOnInit() {
-    this.route.data
-      .pipe(
-        takeUntilDestroyed(this.destroyRef),
-        tap((data) => {
-          const settings: ProjectSetting = data['projectInfo'];
-          if (settings) {
-            this.browserSettings.set(settings.browserSettings.browser);
-            this.browserSettingsForm.controls['headless'].setValue(
-              settings.browserSettings.headless
-            );
-            this.loadInitialData();
-          }
-        })
-      )
-      .subscribe();
-  }
-
-  get browserSettingsFormFormArray() {
-    return this.browserSettingsForm.get('settings') as FormArray;
-  }
-
-  get localStorageFormArrayValue() {
-    return Object.keys(this.browserSettingsFormFormArray.controls).map(
-      (value) => {
-        return {
-          value
-        };
-      }
-    );
-  }
-
-  loadInitialData() {
-    const allSettings = this.getAllBrowserSettings();
-    for (const value of allSettings) {
-      this.browserSettingsFormFormArray.push(
-        this.createSettingFormGroup(value)
-      );
-    }
-  }
-
-  getAllBrowserSettings(): string[] {
-    return this.browserSettings();
-  }
+  readonly f = form(this.model);
 
   addBrowserSetting() {
-    this.browserSettingsFormFormArray.push(this.createSettingFormGroup(''));
+    this.model.update((m) => ({
+      ...m,
+      settings: [...m.settings, { value: '' }]
+    }));
   }
 
   removeBrowserSetting(index: number) {
-    this.browserSettingsFormFormArray.removeAt(index);
+    this.model.update((m) => ({
+      ...m,
+      settings: m.settings.filter((_, i) => i !== index)
+    }));
   }
 
-  createSettingFormGroup(value: string): FormGroup {
-    return this.fb.group({
-      value: [value]
-    });
-  }
+  async onFormSubmit(): Promise<void> {
+    const params = this.route.parent?.params
+      ? await firstValueFrom(this.route.parent.params)
+      : undefined;
+    const projectSlug = params?.['projectSlug'];
+    if (!projectSlug) return;
 
-  onFormSubmit() {
-    const settingsArray = this.browserSettingsFormFormArray.value as {
-      value: string;
-    }[];
-    const headless = this.browserSettingsForm.controls.headless.value || false;
-    const browser = settingsArray.map((setting) => setting.value);
+    const current = this.model();
+    const browserSettings: Partial<BrowserSetting> = {
+      headless: current.headless,
+      browser: current.settings.map((setting) => setting.value)
+    };
 
-    this.route.parent?.params
-      .pipe(
-        take(1),
-        switchMap((params) => {
-          const projectSlug = params['projectSlug'];
-          const browserSettings: Partial<BrowserSetting> = {
-            headless,
-            browser
-          };
-          return this.settingsService.updateBrowserSetting(
-            projectSlug,
-            browserSettings
-          );
-        }),
-        // SettingsService has shown the failure in a snackbar.
-        catchError((error: unknown) => {
-          console.error('Error: ', error);
-          return EMPTY;
-        })
-      )
-      .subscribe();
+    try {
+      await firstValueFrom(
+        this.settingsService.updateBrowserSetting(projectSlug, browserSettings)
+      );
+    } catch (error) {
+      console.error('Error: ', error);
+    }
   }
 }

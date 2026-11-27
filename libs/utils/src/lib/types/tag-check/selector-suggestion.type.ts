@@ -36,4 +36,6 @@ export type SelectorTrialResponse = {
   runId: number;
   passed: boolean;
   requestPassed: boolean;
+  /** Whether the trial made the request check; missing reads as true. */
+  requestChecked?: boolean;
 };

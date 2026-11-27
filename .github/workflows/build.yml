@@ -42,8 +42,19 @@ jobs:
       - name: Format check
         run: pnpm run format:check
         shell: bash
+      - name: Lint (affected)
+        if: github.event_name == 'pull_request'
+        env:
+          NX_BASE: origin/${{ github.base_ref }}
+          NX_HEAD: HEAD
+        run: pnpm nx affected -t lint
+        shell: bash
       - name: Lint
+        if: github.event_name != 'pull_request'
         run: pnpm run lint
+        shell: bash
+      - name: Dead-code gate (knip ratchet)
+        run: node tools/scripts/dead-code-gate/dead-code-gate.ts --ci
         shell: bash
       - name: Update sitemap lastmod
         run: node tools/scripts/update-sitemap-lastmod.ts
@@ -60,10 +71,26 @@ jobs:
       - name: Test and coverage
         run: pnpm run test:cov
         shell: bash
+      - name: Type-check specs (affected)
+        if: github.event_name == 'pull_request'
+        env:
+          NX_BASE: origin/${{ github.base_ref }}
+          NX_HEAD: HEAD
+        run: pnpm nx affected -t typecheck-spec
+        shell: bash
       - name: Type-check specs
+        if: github.event_name != 'pull_request'
         run: pnpm nx run-many -t typecheck-spec
         shell: bash
+      - name: Type-check tools (affected)
+        if: github.event_name == 'pull_request'
+        env:
+          NX_BASE: origin/${{ github.base_ref }}
+          NX_HEAD: HEAD
+        run: pnpm nx affected -t typecheck-tools
+        shell: bash
       - name: Type-check tools
+        if: github.event_name != 'pull_request'
         run: pnpm run typecheck:tools
         shell: bash
       - name: Backend e2e tests with coverage

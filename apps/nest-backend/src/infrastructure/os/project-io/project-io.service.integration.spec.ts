@@ -13,7 +13,7 @@ import {
 } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import archiver from 'archiver';
+import { ZipArchive } from 'archiver';
 
 // Helper to build a zip with optional fixture file
 async function createZip(
@@ -24,7 +24,7 @@ async function createZip(
   const zipPath = join(baseDir, `${name}.zip`);
   await new Promise<void>((resolve, reject) => {
     const output = createWriteStream(zipPath);
-    const archive = archiver('zip', { zlib: { level: 9 } });
+    const archive = new ZipArchive({ zlib: { level: 9 } });
     output.on('close', () => resolve());
     output.on('error', (e) => reject(e));
     archive.on('error', (e) => reject(e));

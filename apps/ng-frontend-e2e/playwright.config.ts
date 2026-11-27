@@ -12,55 +12,34 @@ const baseURL = process.env['BASE_URL'] || 'http://localhost:4200';
 export default defineConfig({
   ...nxE2EPreset(fileURLToPath(import.meta.url), { testDir: './src' }),
   testMatch: '**/*.e2e-spec.ts',
-  testIgnore: ['**/*.spec.ts', '!**/*.e2e-spec.ts'], // Ignore all .spec.ts files except .e2e-spec.ts
-  // rest of your config...
+  testIgnore: ['**/*.spec.ts', '!**/*.e2e-spec.ts'],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     baseURL,
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: 'on-first-retry'
+    trace: 'on-first-retry',
+    video: 'retain-on-failure'
   },
   /* Run your local dev server before starting the tests */
-  webServer: {
-    command: 'pnpm exec nx run ng-frontend:serve --port 4200',
-    url: 'http://localhost:4200',
-    reuseExistingServer: !process.env['CI'],
-    cwd: workspaceRoot
-  },
+  webServer: [
+    {
+      command: 'node apps/ng-frontend-e2e/src/support/start-backend.ts',
+      port: 7070,
+      reuseExistingServer: false,
+      cwd: workspaceRoot,
+      timeout: 240_000
+    },
+    {
+      command: 'pnpm exec nx run ng-frontend:serve --port 4200',
+      url: 'http://localhost:4200',
+      reuseExistingServer: !process.env['CI'],
+      cwd: workspaceRoot
+    }
+  ],
   projects: [
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] }
     }
-
-    // {
-    //   name: 'firefox',
-    //   use: { ...devices['Desktop Firefox'] },
-    // },
-
-    // {
-    //   name: 'webkit',
-    //   use: { ...devices['Desktop Safari'] },
-    // },
-
-    // Uncomment for mobile browsers support
-    /* {
-      name: 'Mobile Chrome',
-      use: { ...devices['Pixel 5'] },
-    },
-    {
-      name: 'Mobile Safari',
-      use: { ...devices['iPhone 12'] },
-    }, */
-
-    // Uncomment for branded browsers
-    /* {
-      name: 'Microsoft Edge',
-      use: { ...devices['Desktop Edge'], channel: 'msedge' },
-    },
-    {
-      name: 'Google Chrome',
-      use: { ...devices['Desktop Chrome'], channel: 'chrome' },
-    } */
   ]
 });

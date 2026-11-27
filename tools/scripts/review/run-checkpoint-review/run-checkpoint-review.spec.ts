@@ -1,4 +1,8 @@
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { describe, test } from 'node:test';
 
 import {
@@ -8,6 +12,7 @@ import {
   executeReviewFlow,
   getReviewExecutionPlan,
   inferAutoReviewRisk,
+  main,
   parseCliArgs,
   parseChangedFilesFromContext,
   type ReviewExecution
@@ -1180,5 +1185,342 @@ describe('review flow execution', () => {
         /Attempted providers:[\s\S]*copilot:claude-sonnet-4\.6: copilot down[\s\S]*gemini:gemini-3\.5-flash-high: gemini down[\s\S]*codex: codex down/
       );
     });
+  });
+});
+
+// ── Characterization: pinned providers, errors, paths, prompt, entrypoint ────
+
+describe('pinned provider plans', () => {
+  test('copilot without --model uses only the default Claude model', () => {
+    assert.deepEqual(
+      getReviewExecutionPlan({
+        checkpoint: 'plan',
+        focus: 'general',
+        provider: 'copilot'
+      }),
+      [execution('plan', 'copilot', 'general', 'claude-sonnet-4.6')]
+    );
+  });
+
+  test('copilot, gemini and codex honour --model with no fallback', () => {
+    assert.deepEqual(
+      getReviewExecutionPlan({
+        checkpoint: 'test',
+        focus: 'tests',
+        model: 'custom-model',
+        provider: 'copilot'
+      }),
+      [execution('test', 'copilot', 'tests', 'custom-model')]
+    );
+    assert.deepEqual(
+      getReviewExecutionPlan({
+        checkpoint: 'test',
+        focus: 'tests',
+        provider: 'gemini'
+      }),
+      [execution('test', 'gemini', 'tests', 'gemini-3.5-flash-high')]
+    );
+    assert.deepEqual(
+      getReviewExecutionPlan({
+        checkpoint: 'test',
+        focus: 'tests',
+        model: 'gpt-5.4',
+        provider: 'codex'
+      }),
+      [execution('test', 'codex', 'tests', 'gpt-5.4')]
+    );
+  });
+
+  test('auto ignores --model', () => {
+    assert.deepEqual(
+      getReviewExecutionPlan({
+        checkpoint: 'plan',
+        focus: 'general',
+        model: 'ignored',
+        provider: 'auto'
+      }).map((entry) => entry.model),
+      ['claude-sonnet-4.6', 'gemini-3.5-flash-high', undefined]
+    );
+  });
+});
+
+describe('CLI arg errors', () => {
+  test('uses the documented error messages', () => {
+    assert.deepEqual(parseCliArgs([]), { provider: 'auto', focus: 'general' });
+    assert.throws(
+      () => parseCliArgs(['--bogus']),
+      /^Error: Unknown review flag: --bogus$/
+    );
+    assert.throws(
+      () => parseCliArgs(['--focus']),
+      /^Error: Missing value for --focus\.$/
+    );
+    assert.throws(
+      () => parseCliArgs(['--model']),
+      /^Error: Missing value for --model\.$/
+    );
+    assert.throws(
+      () => parseCliArgs(['--context-file']),
+      /^Error: Missing value for --context-file\.$/
+    );
+    assert.throws(
+      () => parseCliArgs(['--checkpoint', 'nope']),
+      /^Error: Unsupported checkpoint "nope"\. Expected one of: plan, implementation, test, pre-merge\.$/
+    );
+    assert.throws(
+      () => parseCliArgs(['--checkpoint']),
+      /^Error: Unsupported checkpoint "". Expected one of: plan, implementation, test, pre-merge\.$/
+    );
+    assert.throws(
+      () => parseCliArgs(['--provider', 'x']),
+      /^Error: Unsupported provider "x"\. Expected one of: auto, copilot, gemini, codex\.$/
+    );
+  });
+});
+
+describe('changed-file path normalization', () => {
+  test('anchors absolute and Windows paths at the workspace folders', () => {
+    const parse = (path: string) =>
+      parseChangedFilesFromContext(`Changed files:\n- ${path}\n`);
+    assert.deepEqual(parse('C:\\work\\repo\\apps\\web\\a.html'), [
+      'apps/web/a.html'
+    ]);
+    assert.deepEqual(parse('/home/me/repo/tools/scripts/x.ts'), [
+      'tools/scripts/x.ts'
+    ]);
+    assert.deepEqual(parse('/home/me/repo/AGENTS.md'), ['AGENTS.md']);
+    assert.deepEqual(parse('/home/me/repo/.github/ci.yml'), ['.github/ci.yml']);
+    assert.deepEqual(parse('some/where/docs/a.md'), ['docs/a.md']);
+    // Bare (non-slash) anchors match anywhere in the path.
+    assert.deepEqual(parse('pkg/myscripts/a.ts'), ['scripts/a.ts']);
+    assert.deepEqual(parse('src/other/a.ts'), ['src/other/a.ts']);
+  });
+
+  test('stops at the first non-bullet line and ignores other sections', () => {
+    assert.deepEqual(
+      parseChangedFilesFromContext(
+        'Changed files:\n- a.md\n* b.md\nnot a bullet\n- c.md'
+      ),
+      ['a.md', 'b.md']
+    );
+    assert.deepEqual(parseChangedFilesFromContext('- a.md'), []);
+  });
+});
+
+describe('review prompt variants', () => {
+  const base = { provider: 'codex', focus: 'general' } as const;
+
+  test('builds the exact prompt without a shared contract', () => {
+    assert.equal(
+      buildReviewPrompt({ ...base, checkpoint: 'plan' }, '  body  ', {
+        commonReviewContract: '   '
+      }),
+      [
+        'You are the second-opinion reviewer for this repository.',
+        'Checkpoint: plan',
+        'Primary focus: general',
+        'Review rules:',
+        '- Apply the shared review contract for severity labels, findings, verdict, and residual-risk format',
+        '- Call out correctness, security risk, workflow violations, contract drift, and missing tests',
+        'Context to review:',
+        'body'
+      ].join('\n')
+    );
+  });
+
+  test('adds checkpoint-specific rules and the requested model', () => {
+    const testPrompt = buildReviewPrompt(
+      { ...base, checkpoint: 'test', model: 'm1' },
+      'ctx',
+      { commonReviewContract: 'C' }
+    );
+    assert.match(testPrompt, /Requested model: m1/);
+    assert.match(testPrompt, /Shared review contract:\nC\n/);
+    assert.match(testPrompt, /- Focus on missing scenarios/);
+    assert.doesNotMatch(testPrompt, /escalated to Copilot/);
+    const implementationPrompt = buildReviewPrompt(
+      { ...base, checkpoint: 'implementation' },
+      'ctx',
+      { commonReviewContract: 'C' }
+    );
+    assert.match(implementationPrompt, /escalated to Copilot/);
+    assert.doesNotMatch(implementationPrompt, /Requested model/);
+  });
+});
+
+describe('review flow error handling', () => {
+  const deps = (
+    overrides: Partial<Parameters<typeof executeReviewFlow>[1]> = {}
+  ): Parameters<typeof executeReviewFlow>[1] => ({
+    cacheUnavailable() {
+      return undefined;
+    },
+    log() {
+      return undefined;
+    },
+    async probe() {
+      return { available: true };
+    },
+    async run(e) {
+      return e.provider;
+    },
+    ...overrides
+  });
+
+  test('rethrows non-retryable errors without trying the next provider', async () => {
+    const ran: string[] = [];
+    await assert.rejects(
+      executeReviewFlow(
+        { checkpoint: 'plan', context: 'c', focus: 'g', provider: 'auto' },
+        deps({
+          async run(e) {
+            ran.push(e.provider);
+            throw new Error('boom');
+          }
+        })
+      ),
+      /^Error: boom$/
+    );
+    assert.deepEqual(ran, ['copilot']);
+  });
+
+  test('a pinned provider never falls back, even on a retryable error', async () => {
+    const cached: string[] = [];
+    await assert.rejects(
+      executeReviewFlow(
+        { checkpoint: 'plan', context: 'c', focus: 'g', provider: 'gemini' },
+        deps({
+          cacheUnavailable(e) {
+            cached.push(e.provider);
+          },
+          async run() {
+            throw new Error('MODEL_CAPACITY_EXHAUSTED');
+          }
+        })
+      ),
+      /MODEL_CAPACITY_EXHAUSTED/
+    );
+    assert.deepEqual(cached, []);
+  });
+
+  test('uses the default unavailable reason for a pinned provider', async () => {
+    const unavailable = deps({
+      async probe() {
+        return { available: false };
+      }
+    });
+    await assert.rejects(
+      executeReviewFlow(
+        { checkpoint: 'plan', context: 'c', focus: 'g', provider: 'codex' },
+        unavailable
+      ),
+      /^Error: Codex reviewer review is unavailable: health check failed\.$/
+    );
+    await assert.rejects(
+      executeReviewFlow(
+        { checkpoint: 'plan', context: 'c', focus: 'g', provider: 'copilot' },
+        unavailable
+      ),
+      /^Error: Copilot CLI review is unavailable: health check failed\.$/
+    );
+  });
+
+  test('logs and records each skipped auto provider', async () => {
+    const logs: string[] = [];
+    await assert.rejects(
+      executeReviewFlow(
+        { checkpoint: 'test', context: 'c', focus: 'g', provider: 'auto' },
+        deps({
+          log(message) {
+            logs.push(message);
+          },
+          async probe() {
+            return { available: false };
+          }
+        })
+      ),
+      /No review provider was available for this checkpoint\.\nAttempted providers:\n- copilot:claude-sonnet-4\.6: unavailable\n- gemini:gemini-3\.5-flash-high: unavailable\n- codex: unavailable$/
+    );
+    assert.deepEqual(logs, [
+      'Copilot CLI (claude-sonnet-4.6) review is unavailable: health check failed.',
+      'Antigravity CLI (gemini-3.5-flash-high) review is unavailable: health check failed.',
+      'Codex reviewer review is unavailable: health check failed.'
+    ]);
+  });
+
+  test('logs when a provider becomes unavailable during execution', async () => {
+    const logs: string[] = [];
+    await executeReviewFlow(
+      { checkpoint: 'plan', context: 'c', focus: 'g', provider: 'auto' },
+      deps({
+        log(message) {
+          logs.push(message);
+        },
+        async run(e) {
+          if (e.provider === 'copilot') throw new Error('rate limit exceeded');
+          return e.provider;
+        }
+      })
+    );
+    assert.deepEqual(logs, [
+      'Copilot CLI (claude-sonnet-4.6) review became unavailable during execution. Trying the next fallback.'
+    ]);
+  });
+});
+
+describe('main input handling', () => {
+  test('requires --checkpoint', async () => {
+    await assert.rejects(
+      main([]),
+      /^Error: Missing --checkpoint\. Expected one of: plan, implementation, test, pre-merge\.$/
+    );
+  });
+
+  test('reports a missing context file by its resolved path', async () => {
+    await assert.rejects(
+      main(['--checkpoint', 'plan', '--context-file', 'no-such-context.md']),
+      /^Error: Context file not found: .*no-such-context\.md$/
+    );
+  });
+
+  test('rejects a blank context file', async () => {
+    const dir = mkdtempSync(join(process.cwd(), '.tmp-checkpoint-review-'));
+    try {
+      const file = join(dir, 'blank.md');
+      writeFileSync(file, '  \n');
+      await assert.rejects(
+        main(['--checkpoint', 'plan', '--context-file', file]),
+        /^Error: Review context is required\. Pass --context-file <path> or pipe the review context via stdin\.$/
+      );
+    } finally {
+      rmSync(dir, { force: true, recursive: true });
+    }
+  });
+});
+
+describe('entrypoint process', () => {
+  const entrypoint = fileURLToPath(
+    new URL('./run-checkpoint-review.ts', import.meta.url)
+  );
+  const run = (args: string[], input?: string) =>
+    spawnSync(process.execPath, [entrypoint, ...args], {
+      encoding: 'utf8',
+      input
+    });
+
+  test('exits 1 and prints only the message for a bad flag', () => {
+    const result = run(['--bogus']);
+    assert.equal(result.status, 1);
+    assert.equal(result.stderr, 'Unknown review flag: --bogus\n');
+    assert.equal(result.stdout, '');
+  });
+
+  test('reads the review context from stdin and rejects blank input', () => {
+    const result = run(['--checkpoint', 'plan'], '   \n');
+    assert.equal(result.status, 1);
+    assert.equal(
+      result.stderr,
+      'Review context is required. Pass --context-file <path> or pipe the review context via stdin.\n'
+    );
   });
 });

@@ -7,7 +7,7 @@ import {
 import { ApplicationFormComponent } from './application-form.component';
 
 import { provideHttpClient, withXhr } from '@angular/common/http';
-import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { FormField } from '@angular/forms/signals';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -24,7 +24,6 @@ const meta: Meta<ApplicationFormComponent> = {
   title: 'Shared/Components/ApplicationFormComponent',
   decorators: [
     moduleMetadata({
-      //👇 Imports both components to allow component composition with Storybook
       imports: [
         MatIconModule,
         MatButtonModule,
@@ -32,9 +31,8 @@ const meta: Meta<ApplicationFormComponent> = {
         MatFormFieldModule,
         MatInputModule,
         MatTooltipModule,
-        ReactiveFormsModule,
-        FormsModule,
-        MatBadgeModule
+        MatBadgeModule,
+        FormField
       ],
       providers: [SettingsService]
     }),

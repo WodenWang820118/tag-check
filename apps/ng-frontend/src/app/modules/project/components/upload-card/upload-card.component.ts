@@ -1,12 +1,12 @@
 import {
   Component,
-  OnInit,
   computed,
   inject,
-  signal,
   ChangeDetectionStrategy
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
+import { map } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -20,10 +20,15 @@ import { UploadCardFacadeService } from './upload-card-facade.service';
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './upload-card.component.html'
 })
-export class UploadCardComponent implements OnInit {
+export class UploadCardComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly uploadCardFacadeService = inject(UploadCardFacadeService);
-  private readonly projectSlug = signal<string>('');
+  private readonly projectSlug = toSignal(
+    this.route.params.pipe(map((params) => params['projectSlug'] ?? '')),
+    {
+      initialValue: this.route.snapshot?.params?.['projectSlug'] ?? ''
+    }
+  );
   private readonly state = this.uploadCardFacadeService.state;
 
   readonly uploadingFileName = computed(() => {
@@ -39,16 +44,7 @@ export class UploadCardComponent implements OnInit {
     return state.status === 'error' ? state.message : null;
   });
 
-  ngOnInit(): void {
-    this.route.params.subscribe((params) => {
-      const projectSlug = params['projectSlug'];
-      if (projectSlug) {
-        this.projectSlug.set(projectSlug);
-      }
-    });
-  }
-
   onFileSelected(event: Event) {
-    this.uploadCardFacadeService.onFileSelected(this.projectSlug(), event);
+    void this.uploadCardFacadeService.onFileSelected(this.projectSlug(), event);
   }
 }

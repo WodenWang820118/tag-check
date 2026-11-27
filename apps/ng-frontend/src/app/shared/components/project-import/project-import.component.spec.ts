@@ -6,6 +6,7 @@ import {
 } from '@angular/common/http/testing';
 import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { environment } from '../../../../environments/environment';
 import { ProjectImportComponent } from './project-import.component';
 
@@ -50,7 +51,7 @@ describe('ProjectImportComponent', () => {
     // The upload finishes before the server has imported anything.
     request.event({ type: HttpEventType.UploadProgress, loaded: 5, total: 5 });
     request.event({ type: HttpEventType.UploadProgress, loaded: 5, total: 5 });
-    expect(component.uploadProgress).toBe(100);
+    expect(component.uploadProgress()).toBe(100);
     expect(navigate).not.toHaveBeenCalled();
 
     // POST /projects/import answers with the imported project's slug.
@@ -58,7 +59,7 @@ describe('ProjectImportComponent', () => {
 
     expect(navigate).toHaveBeenCalledTimes(1);
     expect(navigate).toHaveBeenCalledWith(['./']);
-    expect(component.uploading).toBe(false);
+    expect(component.uploading()).toBe(false);
     expect(openSnackBar).not.toHaveBeenCalled();
   });
 
@@ -73,7 +74,7 @@ describe('ProjectImportComponent', () => {
     );
 
     expect(navigate).not.toHaveBeenCalled();
-    expect(component.uploading).toBe(false);
+    expect(component.uploading()).toBe(false);
     expect(openSnackBar).toHaveBeenCalledWith(
       expect.stringContaining('Could not import the project'),
       'Dismiss',

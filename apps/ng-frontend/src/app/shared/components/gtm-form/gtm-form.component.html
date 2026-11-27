@@ -6,7 +6,10 @@
     </mat-card-header>
     <br />
     <mat-card-content>
-      <form [formGroup]="previewModeForm" class="gtm-preview-mode-form">
+      <form
+        class="gtm-preview-mode-form"
+        (submit)="$event.preventDefault(); onSubmit()"
+      >
         <!-- users can use the accompany mode and the request check at the same time -->
         <div
           class="gtm-preview-mode-form__field"
@@ -17,7 +20,7 @@
             style="display: flex; align-items: center; gap: 0.25rem"
           >
             <mat-checkbox
-              formControlName="isAccompanyMode"
+              [formField]="f.isAccompanyMode"
               data-testid="gtm-accompanied-mode"
               >Activate Accompanied Mode</mat-checkbox
             >
@@ -41,7 +44,7 @@
             style="display: flex; align-items: center; gap: 0.25rem"
           >
             <mat-checkbox
-              formControlName="isRequestCheck"
+              [formField]="f.isRequestCheck"
               data-testid="gtm-request-check"
               >Activate Request Check</mat-checkbox
             >
@@ -52,10 +55,7 @@
               aria-label="Request check information"
               [matTooltip]="requestCheckTooltip"
               [matTooltipShowDelay]="200"
-              (click)="
-                previewModeForm.controls.isRequestCheck.disabled &&
-                  goToProjectInfo()
-              "
+              (click)="f.isRequestCheck().disabled() && goToProjectInfo()"
             >
               <mat-icon>info_outline</mat-icon>
             </button>
@@ -72,17 +72,17 @@
           appearance="outline"
         >
           <mat-label>GTM URL</mat-label>
-          <input matInput formControlName="tagManagerUrl" />
+          <input matInput [formField]="f.tagManagerUrl" />
         </mat-form-field>
         <div class="gtm-preview-mode-form__field gtm-preview-mode-form__row">
           <mat-form-field appearance="outline" style="width: 100%">
             <mat-label>Preview Mode URL</mat-label>
             <input
               matInput
-              formControlName="gtmPreviewModeUrl"
+              [formField]="f.gtmPreviewModeUrl"
               data-testid="gtm-preview-url"
             />
-            @if (previewModeForm.controls.gtmPreviewModeUrl.value) {
+            @if (f.gtmPreviewModeUrl().value()) {
               <button
                 matSuffix
                 mat-icon-button

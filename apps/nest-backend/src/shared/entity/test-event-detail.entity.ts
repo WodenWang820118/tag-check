@@ -44,6 +44,18 @@ export class TestEventDetailEntity
   })
   requestPassed!: boolean;
 
+  /**
+   * Whether the run made the GA4 request check: Request Check was on in the
+   * project's GTM settings. Runs saved before this was recorded read as
+   * true. A run without it is judged by its data layer check alone.
+   */
+  @Column({
+    name: 'request_checked',
+    type: 'boolean',
+    default: true
+  })
+  requestChecked!: boolean;
+
   @Column({
     name: 'raw_request',
     type: 'text',

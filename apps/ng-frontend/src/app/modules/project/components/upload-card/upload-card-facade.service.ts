@@ -7,7 +7,7 @@ import {
   GtmImportConflict,
   GtmImportSummary
 } from '@utils';
-import { from, map, Observable, of, switchMap, take } from 'rxjs';
+import { firstValueFrom, map, Observable, of, switchMap } from 'rxjs';
 import { ReportService } from '../../../../shared/services/api/report/report.service';
 import { GtmJsonParserService } from '../../../../shared/services/api/gtm-json-parser/gtm-json-parser.service';
 import { ReportTableDataSourceModelService } from '../../services/report-table-data-source-model/report-table-data-source-model.service';
@@ -46,7 +46,7 @@ export class UploadCardFacadeService {
   readonly state = signal<UploadState>({ status: 'idle' });
 
   /** Imports the chosen Tag Manager container export into the project, then reloads the report table. */
-  onFileSelected(projectSlug: string, event: Event) {
+  async onFileSelected(projectSlug: string, event: Event): Promise<void> {
     const input = event.target as HTMLInputElement | null;
     const file = input?.files?.[0];
     if (input) {
@@ -58,28 +58,23 @@ export class UploadCardFacadeService {
     }
 
     this.state.set({ status: 'uploading', fileName: file.name });
-    from(file.text())
-      .pipe(
-        map((text) => this.gtmJsonParserService.parseGtmJson(text)),
-        switchMap((container) =>
-          this.importContainerIntoProject(projectSlug, container)
-        ),
-        take(1)
-      )
-      .subscribe({
-        next: (summary) => {
-          if (!summary) {
-            this.state.set({ status: 'idle' });
-            return;
-          }
-          this.state.set({ status: 'done', summary });
-        },
-        error: (error: unknown) =>
-          this.state.set({
-            status: 'error',
-            message: gtmImportErrorMessage(error)
-          })
+    try {
+      const text = await file.text();
+      const container = this.gtmJsonParserService.parseGtmJson(text);
+      const summary = await firstValueFrom(
+        this.importContainerIntoProject(projectSlug, container)
+      );
+      if (!summary) {
+        this.state.set({ status: 'idle' });
+        return;
+      }
+      this.state.set({ status: 'done', summary });
+    } catch (error: unknown) {
+      this.state.set({
+        status: 'error',
+        message: gtmImportErrorMessage(error)
       });
+    }
   }
 
   /**

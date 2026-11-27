@@ -23,6 +23,11 @@ export default defineConfig({
     include: ['**/*.{test,spec,e2e-spec}.?(c|m)[jt]s?(x)'],
     ...reporterConfig,
     testTimeout: 30000,
+    // Chromium integration specs close the browser in afterAll. Under the
+    // pre-commit run's parallel load that can exceed vitest's 10 s default
+    // hook timeout (it failed there twice while passing alone), so hooks
+    // get the same budget as tests.
+    hookTimeout: 30000,
     coverage: {
       reportsDirectory: '../../coverage/apps/nest-backend',
       provider: 'v8',

@@ -1,6 +1,6 @@
 import { plainToInstance } from 'class-transformer';
 import { describe, expect, it, vi } from 'vitest';
-import { REPORT_DETAIL_SAMPLE, shapeOf } from '@utils';
+import { REPORT_DETAIL_SAMPLE, shapeOf } from '@utils/testing';
 import {
   AbstractTestEventResponseDto,
   TestEventDetailResponseDto
