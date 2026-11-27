@@ -66,6 +66,26 @@ describe('inlineScriptHashes', () => {
       expectedSha256(jsMimeBody)
     ]);
   });
+
+  it('ends the script text at </script/> as the browser does', () => {
+    expect(inlineScriptHashes('<script>window.x = 1;</script/><p>')).toEqual([
+      expectedSha256('window.x = 1;')
+    ]);
+  });
+
+  it('sees a script after a comment the tokenizer ends at once', () => {
+    for (const comment of ['<!-->', '<!--->', '<!-- a --!>']) {
+      expect(
+        inlineScriptHashes(`${comment}<script>window.x = 1;</script><!-- b -->`)
+      ).toEqual([expectedSha256('window.x = 1;')]);
+    }
+  });
+
+  it('ignores a script inside a comment', () => {
+    expect(
+      inlineScriptHashes('<!-- <script>window.x = 1;</script> -->')
+    ).toEqual([]);
+  });
 });
 
 describe('serializePolicy', () => {
@@ -200,6 +220,15 @@ describe('applyPolicyToHtml', () => {
     expect(() =>
       applyPolicyToHtml(html, policy, 'dist/browser/about.html')
     ).toThrow(/href.*dist\/browser\/about\.html/);
+  });
+
+  it('rejects a script before <head>, which would run before the policy applies', () => {
+    const html =
+      '<html><script>window.x = 1;</script><head><meta charset="utf-8"></head><body></body></html>';
+
+    expect(() =>
+      applyPolicyToHtml(html, policy, 'dist/browser/about.html')
+    ).toThrow(/<script> before <head>.*dist\/browser\/about\.html/);
   });
 });
 

@@ -22,6 +22,8 @@ const JAVASCRIPT_MIME_TYPES = new Set([
   'text/x-javascript'
 ]);
 
+const LOADS_BEFORE_POLICY = new Set(['script', 'style', 'link', 'base']);
+
 interface ParsedAttribute {
   readonly name: string;
   readonly value: string;
@@ -145,7 +147,8 @@ function scanRawTextEnd(
   contentStart: number,
   tagName: 'script' | 'style'
 ): { contentEnd: number; tagEnd: number } {
-  const closePattern = new RegExp(`</${tagName}(?=[\\s>])`, 'gi');
+  // `</script/>` also ends the element: the tokenizer accepts `/` after the name.
+  const closePattern = new RegExp(`</${tagName}(?=[\\s/>])`, 'gi');
   closePattern.lastIndex = contentStart;
   const match = closePattern.exec(html);
 
@@ -160,6 +163,23 @@ function scanRawTextEnd(
   };
 }
 
+/**
+ * Index after the comment that starts at `commentStart`. The HTML tokenizer
+ * ends `<!-->` and `<!--->` at once and accepts `--!>` as an end; a scanner
+ * that waits for a later `-->` would skip the real markup in between.
+ */
+function scanCommentEnd(html: string, commentStart: number): number {
+  const abruptEnd = /^<!---?>/.exec(html.slice(commentStart, commentStart + 6));
+  if (abruptEnd) {
+    return commentStart + abruptEnd[0].length;
+  }
+
+  const endPattern = /--!?>/g;
+  endPattern.lastIndex = commentStart + 4;
+  const end = endPattern.exec(html);
+  return end ? end.index + end[0].length : html.length;
+}
+
 function scanHtmlTags(html: string): ParsedTag[] {
   const tags: ParsedTag[] = [];
   let i = 0;
@@ -171,8 +191,7 @@ function scanHtmlTags(html: string): ParsedTag[] {
     }
 
     if (html.startsWith('<!--', lt)) {
-      const commentEnd = html.indexOf('-->', lt + 4);
-      i = commentEnd === -1 ? html.length : commentEnd + 3;
+      i = scanCommentEnd(html, lt);
       continue;
     }
 
@@ -450,6 +469,17 @@ export function applyPolicyToHtml(
   const headOpen = cleanedTags.find((tag) => tag.tagName === 'head');
   if (!headOpen) {
     throw new Error(`Missing <head> element in ${sourceLabel}.`);
+  }
+
+  // The parser opens a head for such an element, so it would load or run
+  // before the policy, which is written inside <head>.
+  const beforeHead = cleanedTags.find(
+    (tag) => tag.start < headOpen.start && LOADS_BEFORE_POLICY.has(tag.tagName)
+  );
+  if (beforeHead) {
+    throw new Error(
+      `<${beforeHead.tagName}> before <head> in ${sourceLabel}: it would take effect before the policy applies.`
+    );
   }
 
   const headClose = cleanedTags.find(

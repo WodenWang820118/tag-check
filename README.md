@@ -286,22 +286,31 @@ access token in the `VERCEL_TOKEN` repository secret and skips without one.
 
 #### Content Security Policy
 
-Static sites enforce a Content Security Policy delivered as a
-`<meta http-equiv="Content-Security-Policy">` tag in each built HTML page, so
-the same policy applies on Vercel, preview URLs, and local static servers.
-Policies are defined in
-[tools/scripts/csp/site-policies.ts](./tools/scripts/csp/site-policies.ts).
-After `ng-product-doc:build-static` builds the site (with
-`styles.inlineCritical` disabled so Angular does not emit `onload` handlers on
-stylesheets), `tools/scripts/csp/apply-site-csp.ts` hashes every inline
-`<script>` and writes the `<meta>` tag into each HTML page.
+The documentation site and Tag Build enforce a strict Content Security Policy,
+and the sample site a light one (`object-src`, `base-uri`) that leaves
+scripts unrestricted for the tag manager container under test. The policy is
+a `<meta http-equiv="Content-Security-Policy">` tag in each built HTML page,
+so it is the same on Vercel, on preview URLs and on a local static server.
 
-To allow a new origin (for example an image, font, or script host), add it to
-the relevant directive in `SITE_POLICIES` in
-[tools/scripts/csp/site-policies.ts](./tools/scripts/csp/site-policies.ts)
-alongside a comment naming the file that requires it. Directives that `<meta>`
-ignores (`frame-ancestors`, `report-uri`, `report-to`, `sandbox`) must be
-configured in host headers rather than `SITE_POLICIES`.
+- Policies are defined per site in
+  [tools/scripts/csp/site-policies.ts](./tools/scripts/csp/site-policies.ts).
+- Each site's `build-static` target builds the site and then runs
+  `tools/scripts/csp/apply-site-csp.ts`, which hashes every inline
+  `<script>` and writes the tag. The Vercel build scripts
+  (`build-product-doc`, `build-tag-build`, `build-ng-sample-site`) run
+  those targets.
+- The root [vercel.json](./vercel.json) sends the headers all four sites
+  share: `frame-ancestors 'self'`, `X-Content-Type-Options`,
+  `Referrer-Policy` and `Permissions-Policy`. Its policy header holds
+  `frame-ancestors` only; fetch directives belong in the page policies.
+- `pnpm nx run <site>:csp-check` builds a site and fails on any policy
+  violation in its pages.
+
+To allow a new origin (an image, font or script host), add it to the
+directive in `SITE_POLICIES` with a comment naming the file that needs it,
+then run the site's `csp-check` target. The decisions and their reasons are
+in
+[docs/specs/web-content-security-policy.md](./docs/specs/web-content-security-policy.md).
 
 ## Review Workflow
 
