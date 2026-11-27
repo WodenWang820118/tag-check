@@ -31,7 +31,7 @@
     "build": "pnpm run build-front && pnpm run build-back",
     "build-back": "nx build nest-backend",
     "build-front": "nx build ng-frontend --configuration=development --base-href ./",
-    "build-ng-sample-site": "nx build ng-gtm-sample --configuration production --optimization --source-map",
+    "build-ng-sample-site": "nx run ng-gtm-sample:build-static",
     "build-prod": "pnpm run build-prod-front && pnpm run build-prod-back",
     "build-prod-back": "cross-env-shell NODE_ENV=prod \"nx build nest-backend\"",
     "build-prod-front": "nx build ng-frontend --configuration production --optimization --base-href ./",

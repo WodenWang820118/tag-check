@@ -111,6 +111,15 @@ export const SITE_POLICIES = {
       'base-uri': ["'self'"],
       'form-action': ["'self'"]
     }
+  },
+  // The sample shop hosts whatever GTM container is under test, including
+  // Custom HTML tags and Tag Assistant, so scripts stay unrestricted.
+  'ng-gtm-sample': {
+    hashInlineScripts: false,
+    directives: {
+      'object-src': ["'none'"],
+      'base-uri': ["'self'"]
+    }
   }
 } as const satisfies Record<string, SiteCspPolicy>;
 

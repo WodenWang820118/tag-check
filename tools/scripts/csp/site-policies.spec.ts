@@ -21,6 +21,16 @@ describe('SITE_POLICIES', () => {
   it('enables inline script hashing for ng-product-doc', () => {
     expect(SITE_POLICIES['ng-product-doc'].hashInlineScripts).toBe(true);
   });
+
+  it('leaves scripts unrestricted on ng-gtm-sample, which hosts any GTM container', () => {
+    const policy = SITE_POLICIES['ng-gtm-sample'];
+
+    expect(policy.hashInlineScripts).toBe(false);
+    expect(Object.keys(policy.directives).sort()).toEqual([
+      'base-uri',
+      'object-src'
+    ]);
+  });
 });
 
 describe('every site policy', () => {

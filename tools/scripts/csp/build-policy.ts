@@ -322,6 +322,22 @@ export function serializePolicy(
   return parts.join('; ');
 }
 
+/**
+ * Whether the policy blocks inline event handlers and `javascript:` URLs.
+ * Both fall back to `script-src`, then `default-src`; with neither, or with
+ * `'unsafe-inline'` and no hashes (browsers ignore `'unsafe-inline'` next to
+ * a hash), the browser runs them.
+ */
+function restrictsInlineScript(policy: SiteCspPolicy): boolean {
+  const sources: readonly string[] | undefined =
+    policy.directives['script-src'] ?? policy.directives['default-src'];
+  if (sources === undefined) {
+    return false;
+  }
+
+  return policy.hashInlineScripts || !sources.includes("'unsafe-inline'");
+}
+
 function assertNoDisallowedConstructs(
   tags: readonly ParsedTag[],
   sourceLabel: string
@@ -419,7 +435,9 @@ export function applyPolicyToHtml(
 ): string {
   const sourceLabel = filePath ?? 'HTML input';
   const initialTags = scanHtmlTags(html);
-  assertNoDisallowedConstructs(initialTags, sourceLabel);
+  if (restrictsInlineScript(policy)) {
+    assertNoDisallowedConstructs(initialTags, sourceLabel);
+  }
 
   const hashes = policy.hashInlineScripts ? inlineScriptHashes(html) : [];
   const policyContent = escapeMetaContent(serializePolicy(policy, hashes));

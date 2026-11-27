@@ -202,3 +202,55 @@ describe('applyPolicyToHtml', () => {
     ).toThrow(/href.*dist\/browser\/about\.html/);
   });
 });
+
+describe('applyPolicyToHtml inline script checks', () => {
+  const handlerHtml =
+    '<html><head><meta charset="utf-8"><link rel="stylesheet" href="a.css" media="print" onload="this.media=\'all\'"></head><body><a href="javascript:void(0)">x</a></body></html>';
+
+  it('keeps inline handlers and javascript: URLs when the policy leaves scripts unrestricted', () => {
+    const result = applyPolicyToHtml(
+      handlerHtml,
+      SITE_POLICIES['ng-gtm-sample'],
+      'index.html'
+    );
+
+    expect(result).toContain(
+      `<meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'">`
+    );
+    expect(result).toContain('onload=');
+    expect(result).toContain('href="javascript:void(0)"');
+  });
+
+  it('keeps inline handlers when script-src allows unsafe-inline without hashes', () => {
+    const policy = {
+      hashInlineScripts: false,
+      directives: { 'script-src': ["'self'", "'unsafe-inline'"] }
+    } as const;
+
+    expect(() =>
+      applyPolicyToHtml(handlerHtml, policy, 'index.html')
+    ).not.toThrow();
+  });
+
+  it('rejects inline handlers when default-src alone restricts scripts', () => {
+    const policy = {
+      hashInlineScripts: false,
+      directives: { 'default-src': ["'self'"] }
+    } as const;
+
+    expect(() => applyPolicyToHtml(handlerHtml, policy, 'index.html')).toThrow(
+      /onload.*index\.html/
+    );
+  });
+
+  it('rejects inline handlers when hashes make the browser ignore unsafe-inline', () => {
+    const policy = {
+      hashInlineScripts: true,
+      directives: { 'script-src': ["'self'", "'unsafe-inline'"] }
+    } as const;
+
+    expect(() => applyPolicyToHtml(handlerHtml, policy, 'index.html')).toThrow(
+      /onload/
+    );
+  });
+});
