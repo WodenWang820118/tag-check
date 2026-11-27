@@ -186,6 +186,15 @@ module that provides any other: a second provider creates a second instance.
   `.github/workflows/vercel-previews.yaml`, which deploys the sites whose Nx
   project is affected. Register a new Vercel site in
   `tools/scripts/vercel/preview-targets`.
+- The Vercel sites' Content Security Policy is written into the built pages
+  after the build (`tools/scripts/csp`; decisions in
+  [docs/specs/web-content-security-policy.md](docs/specs/web-content-security-policy.md)).
+  On the strict sites (`ng-product-doc`, `ng-tag-build`) the build refuses a
+  page with an inline event handler, and a request to a new outside origin is
+  blocked until the origin is in `SITE_POLICIES`. After such a change run
+  `pnpm nx run <site>:csp-check`. The policy header in the root `vercel.json`
+  holds `frame-ancestors` only: a fetch directive there would also restrict
+  the sample site and Storybook.
 - ng-tag-build's initial bundle is about 686 kB against its 750 kB warning
   budget, and `libs/shared-styles` counts against it. Its global styles
   (`tag-build-indigo-pink.scss`, `tag-build.scss`) theme only the Material

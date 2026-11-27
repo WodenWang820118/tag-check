@@ -74,6 +74,15 @@
               "maximumError": "4kb"
             }
           ],
+          "optimization": {
+            "scripts": true,
+            "styles": {
+              "minify": true,
+              "removeSpecialComments": true,
+              "inlineCritical": false
+            },
+            "fonts": true
+          },
           "localize": true,
           "i18nMissingTranslation": "error",
           "outputHashing": "all"
@@ -132,6 +141,42 @@
       "executor": "@angular-devkit/build-angular:extract-i18n",
       "options": {
         "buildTarget": "ng-tag-build:build"
+      }
+    },
+    "build-static": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "production",
+        "^production",
+        "{workspaceRoot}/tools/scripts/csp/*.ts",
+        "!{workspaceRoot}/tools/scripts/csp/*.spec.ts"
+      ],
+      "outputs": ["{workspaceRoot}/dist/apps/ng-tag-build/browser"],
+      "options": {
+        "commands": [
+          {
+            "command": "node tools/scripts/update-sitemap-lastmod.ts",
+            "description": "Stamp sitemaps with today's lastmod date before building."
+          },
+          {
+            "command": "pnpm nx build ng-tag-build --configuration production --source-map",
+            "description": "Build the localized static site output."
+          },
+          {
+            "command": "node tools/scripts/csp/apply-site-csp.ts --site ng-tag-build --dir dist/apps/ng-tag-build/browser",
+            "description": "Compute inline script hashes and inject the Content Security Policy meta tag into built HTML pages."
+          }
+        ],
+        "parallel": false
+      }
+    },
+    "csp-check": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "dependsOn": ["build-static"],
+      "options": {
+        "command": "node tools/scripts/csp-check/check-site-csp.ts --dir dist/apps/ng-tag-build/browser --block-external"
       }
     }
   }

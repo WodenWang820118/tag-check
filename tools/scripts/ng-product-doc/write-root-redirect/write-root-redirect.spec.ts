@@ -106,7 +106,9 @@ test('writeProductDocRedirects emits root and locale app redirect entrypoints', 
 
   assert.match(rootHtml, /url=\/en\//);
   assert.match(rootHtml, /window\.location\.replace\("\/en\/"\)/);
+  assert.match(rootHtml, /<meta http-equiv="Content-Security-Policy"/);
   assert.match(appHtml, /\/en\/documentation\/introduction/);
+  assert.match(appHtml, /<meta http-equiv="Content-Security-Policy"/);
 
   for (const localeSubpath of DEFAULT_PRODUCT_DOC_LOCALE_SUBPATHS) {
     const html = readFileSync(

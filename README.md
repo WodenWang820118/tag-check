@@ -284,6 +284,34 @@ preview of each site whose Nx project it affects, from the
 workflow comments the preview URLs on the pull request. It needs a Vercel
 access token in the `VERCEL_TOKEN` repository secret and skips without one.
 
+#### Content Security Policy
+
+The documentation site and Tag Build enforce a strict Content Security Policy,
+and the sample site a light one (`object-src`, `base-uri`) that leaves
+scripts unrestricted for the tag manager container under test. The policy is
+a `<meta http-equiv="Content-Security-Policy">` tag in each built HTML page,
+so it is the same on Vercel, on preview URLs and on a local static server.
+
+- Policies are defined per site in
+  [tools/scripts/csp/site-policies.ts](./tools/scripts/csp/site-policies.ts).
+- Each site's `build-static` target builds the site and then runs
+  `tools/scripts/csp/apply-site-csp.ts`, which hashes every inline
+  `<script>` and writes the tag. The Vercel build scripts
+  (`build-product-doc`, `build-tag-build`, `build-ng-sample-site`) run
+  those targets.
+- The root [vercel.json](./vercel.json) sends the headers all four sites
+  share: `frame-ancestors 'self'`, `X-Content-Type-Options`,
+  `Referrer-Policy` and `Permissions-Policy`. Its policy header holds
+  `frame-ancestors` only; fetch directives belong in the page policies.
+- `pnpm nx run <site>:csp-check` builds a site and fails on any policy
+  violation in its pages.
+
+To allow a new origin (an image, font or script host), add it to the
+directive in `SITE_POLICIES` with a comment naming the file that needs it,
+then run the site's `csp-check` target. The decisions and their reasons are
+in
+[docs/specs/web-content-security-policy.md](./docs/specs/web-content-security-policy.md).
+
 ## Review Workflow
 
 This repo uses review gates for non-trivial work. The most common commands are:

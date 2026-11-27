@@ -13,7 +13,9 @@
     "apps/*/playwright.config.{ts,mjs}",
     "libs/*/src/test-setup.ts",
     "libs/*/{vite,vitest}.config.{ts,mts}",
-    "apps/*-e2e/src/support/*.ts"
+    "apps/*-e2e/src/support/*.ts",
+    "tools/scripts/csp/apply-site-csp.ts",
+    "tools/scripts/csp-check/check-site-csp.ts"
   ],
   "project": [
     "apps/**/*.{ts,mts,cjs,mjs}!",
